@@ -1,8 +1,8 @@
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
-import isEqual from 'lodash/isEqual';
 import { forkJoin } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { JsonSchemaFormatNames, jsonSchemaFormatTests } from './format-regex.constants';
+import { deepEqual } from './native.functions';
 import { forEachCopy } from './utility.functions';
 import {
   _executeAsyncValidators,
@@ -206,7 +206,7 @@ export class JsonValidators {
         (isBoolean(enumValue, 'strict') &&
           toJavaScriptType(inputValue, 'boolean') === enumValue) ||
         (enumValue === null && !hasValue(inputValue)) ||
-        isEqual(enumValue, inputValue);
+        deepEqual(enumValue, inputValue);
       const isValid = isArray(currentValue) ?
         currentValue.every(inputValue => allowedValues.some(enumValue =>
           isEqualVal(enumValue, inputValue)

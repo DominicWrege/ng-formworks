@@ -5,9 +5,7 @@ import {
   UntypedFormGroup,
   ValidatorFn
 } from '@angular/forms';
-import cloneDeep from 'lodash/cloneDeep';
-import filter from 'lodash/filter';
-import map from 'lodash/map';
+import { cloneDeep } from './native.functions';
 import { getControlValidators, removeRecursiveReferences } from './json-schema.functions';
 import { JsonValidators } from './json.validators';
 import { JsonPointer, Pointer } from './jsonpointer.functions';
@@ -600,9 +598,9 @@ export function buildFormGroup(template: any): AbstractControl {
         });
         return new UntypedFormGroup(groupControls, validatorFn);
       case 'FormArray':
-        return new UntypedFormArray(filter(map(template.controls,
-          controls => buildFormGroup(controls)
-        )), validatorFn);
+        return new UntypedFormArray(template.controls
+          .map(controls => buildFormGroup(controls))
+          .filter(Boolean), validatorFn);
       case 'FormControl':
         return new UntypedFormControl(template.value, validatorFns);
     }

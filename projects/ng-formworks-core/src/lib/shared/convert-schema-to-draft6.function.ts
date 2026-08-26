@@ -1,4 +1,4 @@
-import cloneDeep from 'lodash/cloneDeep';
+import { cloneDeep } from './native.functions';
 
 /**
  * 'convertSchemaToDraft6' function

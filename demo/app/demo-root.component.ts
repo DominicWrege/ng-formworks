@@ -4,8 +4,11 @@ import { environment } from '../environments/environment';
 @Component({
     // tslint:disable-next-line:component-selector
     selector: 'demo-root',
-    template: `<router-outlet></router-outlet>
-  <div>build:{{build}}, ver:{{env?.version}}, angular:{{env?.angularVersion}}, material:{{env?.materialVersion}}</div>
+    template: `
+  <demo></demo>
+  <footer class="pb-4 text-center text-xs text-gray-400">
+    ng-formworks v{{env?.version}} &middot; Angular {{env?.angularVersion}} &middot; {{build}}
+  </footer>
   `,
     standalone: false
 })
@@ -13,5 +16,5 @@ export class DemoRootComponent {
 
   env=environment;
   build=this.env.production?"prd":"dev";
-  
+
  }

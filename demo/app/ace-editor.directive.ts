@@ -8,6 +8,7 @@ import 'brace/theme/sqlserver';
 @Directive({
     // tslint:disable-next-line:directive-selector
     selector: '[ace-editor]',
+    exportAs: 'aceEditor',
     standalone: false
 })
 export class AceEditorDirective {
@@ -18,6 +19,7 @@ export class AceEditorDirective {
   _theme = 'sqlserver';
   _mode = 'json';
   _autoUpdateContent = true;
+  _suppressChange = false;
   editor: any;
   oldText: any;
   readonly textChanged = output({ alias: 'textChanged' });
@@ -44,11 +46,8 @@ export class AceEditorDirective {
 
   initEvents() {
     this.editor.on('change', () => {
-      const newVal = this.editor.getValue();
-      if (this.oldText) {
-        this.textChanged.emit(newVal);
-      }
-      this.oldText = newVal;
+      if (this._suppressChange) { return; }
+      this.textChanged.emit(this.editor.getValue());
     });
   }
 
@@ -72,14 +71,25 @@ export class AceEditorDirective {
     this.editor.getSession().setMode(`ace/mode/${mode}`);
   }
 
-  @Input() set text(text: any) {
-    if (!text) { text = ''; }
+  private _initialApplied = false;
 
-    if (this._autoUpdateContent === true) {
+  @Input() set text(text: any) {
+    // One-shot initial content; later syncs go through setText() imperatively
+    if (this._initialApplied) { return; }
+    this._initialApplied = true;
+    if (!text) { text = ''; }
+    this.setText(text);
+  }
+
+  setText(text: any) {
+    if (!text) { text = ''; }
+    this._suppressChange = true;
+    try {
       this.editor.setValue(text);
       this.editor.clearSelection();
-      this.editor.focus();
       this.editor.moveCursorTo(0, 0);
+    } finally {
+      queueMicrotask(() => { this._suppressChange = false; });
     }
   }
 

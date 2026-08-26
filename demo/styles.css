@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+.ace_active-line {
+    background: none !important;
+}
+
+[ace-editor] {
+    background-color: #fdfdfd !important;
+}
+
+.ace_editor {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}

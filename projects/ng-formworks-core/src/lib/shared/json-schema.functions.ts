@@ -1,6 +1,4 @@
-import { isEmpty } from 'lodash';
-import cloneDeep from 'lodash/cloneDeep';
-import omit from 'lodash/omit';
+import { cloneDeep, omit } from './native.functions';
 import { JsonPointer } from './jsonpointer.functions';
 import { mergeSchemas } from './merge-schemas.function';
 import { forEach, hasOwn, mergeFilteredObject } from './utility.functions';
@@ -8,6 +6,7 @@ import {
   getType,
   hasValue,
   inArray,
+  isEmpty,
   isArray,
   isNumber,
   isObject,
@@ -752,7 +751,7 @@ export function getSubSchema(
 }
 
 
-export function omitKeys<T extends object>(objects: T[], keysToOmit: (keyof T)[]): Omit<T, keyof T>[] {
+export function omitKeys<T extends object>(objects: T[], keysToOmit: (keyof T)[]): T[] {
   return objects.map((obj) => omit(obj, keysToOmit));
 }
 

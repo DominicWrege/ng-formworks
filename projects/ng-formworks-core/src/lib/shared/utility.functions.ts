@@ -1,4 +1,3 @@
-import { isNil, some } from 'lodash';
 import { hasValue, inArray, isArray, isDefined, isEmpty, isMap, isObject, isSet, isString, PlainObject } from './validator.functions';
 
 /**
@@ -394,14 +393,14 @@ export function hasNonNullValue(obj: Record<string, any>): boolean {
     return false;
   }
 
-  // _.some checks if at least one element passes the given condition.
-  return some(obj, (value: any): boolean => {
+  // Checks if at least one property passes the given condition.
+  return Object.values(obj).some((value: any): boolean => {
     // If value is an object, recurse deeper into the object.
     if (isObject(value)) {
       return hasNonNullValue(value);
     }
     // Check if value is neither null nor undefined.
-    return !isNil(value);
+    return value != null;
   });
 }
 /**

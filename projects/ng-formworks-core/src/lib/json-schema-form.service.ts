@@ -5,9 +5,6 @@ import addFormats from "ajv-formats";
 import Ajv2019, { ErrorObject, Options, ValidateFunction } from 'ajv/dist/2019';
 import jsonDraft6 from 'ajv/lib/refs/json-schema-draft-06.json';
 import jsonDraft7 from 'ajv/lib/refs/json-schema-draft-07.json';
-import cloneDeep from 'lodash/cloneDeep';
-import _isArray from 'lodash/isArray';
-import _template from 'lodash/template';
 import { BehaviorSubject, debounceTime, distinctUntilChanged, Observable, of, Subject, Subscription } from 'rxjs';
 import {
   deValidationMessages,
@@ -24,6 +21,8 @@ import {
   buildLayout,
   buildSchemaFromData,
   buildSchemaFromLayout,
+  cloneDeep,
+  deepEqual,
   fixTitle,
   forEach,
   formatFormData,
@@ -40,7 +39,6 @@ import {
   toTitleCase
 } from './shared';
 
-import { default as _isEqual, default as isEqual } from 'lodash/isEqual';
 import { setControl } from './shared/form-group.functions';
 
 import { Eta } from 'eta/core';
@@ -188,11 +186,6 @@ export class JsonSchemaFormService implements OnDestroy {
   fcStatusChangesSubs:Subscription;
 
   private readonly templateCache = new Map<string, Function>();
-  private readonly lodashConfig = { 
-    "interpolate": /{{([\s\S]+?)}}/g,
-    // Add the 'variable' option here if you want to use data.v syntax instead of useWith
-    // variable: 'data' 
-  };
   private readonly etaConfig:any={ 
     tags: ["{{", "}}"],
     cache:true,
@@ -449,7 +442,7 @@ this.ajv.addFormat("duration", {
           //doesn't throw errors when not in place
           debounceTime(debounceMs),
           // optional deep-equality check to avoid redundant validation
-          distinctUntilChanged((prev, curr) => isEqual(prev, curr))
+          distinctUntilChanged((prev, curr) => deepEqual(prev, curr))
         )
         .subscribe(() => {
           // run heavy validation outside angular to avoid triggering CD on every keystroke
@@ -544,7 +537,7 @@ this.ajv.addFormat("duration", {
   }
 
    /**
-   * Parses text templates using Lodash, utilizing a cache.
+   * Parses text templates using the Eta engine, utilizing a cache.
    */
    parseText(
     text: string = '',
@@ -564,7 +557,6 @@ this.ajv.addFormat("duration", {
       try {
         let etaTpl=text.replace(/{{/g,'{{=');
         compiledTemplate = this.eta.compile(etaTpl,this.etaConfig)
-        //_template(text, this.lodashConfig);
         // Store the newly compiled function in the cache
         this.templateCache.set(text, compiledTemplate);
       } catch (error) {
@@ -642,7 +634,8 @@ this.ajv.addFormat("duration", {
       if (!compiledTemplate) {
         // If not in cache, compile it
         try {
-          compiledTemplate = _template(templateWrapper, this.lodashConfig);
+          let etaTpl=templateWrapper.replace(/{{/g,'{{=');
+          compiledTemplate = this.eta.compile(etaTpl, this.etaConfig);
           // Store the newly compiled function in the cache
           this.templateCache.set(templateWrapper, compiledTemplate);
         } catch (error) {
@@ -894,7 +887,7 @@ this.ajv.addFormat("duration", {
               ))
       );
       this.fcValueChangesSubs=ctx.formControl.valueChanges.subscribe(value => {
-        if (!_isEqual(ctx.controlValue, value)) { 
+        if (!deepEqual(ctx.controlValue, value)) { 
           ctx.controlValue = value 
         }
 
@@ -929,8 +922,8 @@ this.ajv.addFormat("duration", {
       
       //if no formValues was supplied and controlValue matches schemaDefault then likely
       //control was initially created with the default then set value to data value
-      const value=this.formValues && isEqual(formValue,controlValue)?dataValue
-      :!this.formValues && isEqual(schemaDefault,controlValue)?dataValue
+      const value=this.formValues && deepEqual(formValue,controlValue)?dataValue
+      :!this.formValues && deepEqual(schemaDefault,controlValue)?dataValue
       :schemaDefault;
       ctx.formControl?.patchValue(value)
     }
@@ -1296,7 +1289,7 @@ this.ajv.addFormat("duration", {
         }
       }
       // console.log(`adjustLayout currLayoutIndex:${currLayoutIndex}`);
-      if(layout.items && _isArray(newData)){
+      if(layout.items && isArray(newData)){
         let ctx=createWidgetCtx(
           {//add a ref node to be that of first items datapointer
 
@@ -1339,7 +1332,7 @@ this.ajv.addFormat("duration", {
         }
         return 
       }
-      if(_isArray(layout) ){
+      if(isArray(layout) ){
         layout.forEach((layoutNode,ind)=>{
           //if(layoutNode.items){
             let layoutMappedData=layoutNode.dataPointer?JsonPointer.get(newData,layoutNode.dataPointer)

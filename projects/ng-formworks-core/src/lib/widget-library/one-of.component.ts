@@ -1,9 +1,9 @@
 import { Component, inject, input, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
 
-import { isEqual, isObject, pick } from 'lodash';
+import { deepEqual, pick } from '../shared/native.functions';
 import { JsonSchemaFormService } from '../json-schema-form.service';
-import { hasNonNullValue, hasOwn, JsonPointer, path2ControlKey } from '../shared';
+import { hasNonNullValue, hasOwn, isObject, JsonPointer, path2ControlKey } from '../shared';
 
 // TODO: Add this control
 
@@ -54,7 +54,7 @@ export class OneOfComponent implements OnInit,OnDestroy {
                   (formValue || hasNonNullValue(this.jsf.formGroup.controls[controlKey].value))
                   //hasOwn(formValue,fname) && hasOwn(this.jsf.formGroup.controls,controlKey) 
                 // && (formValue[fname] || this.jsf.formGroup.controls[controlKey].value)
-                  //&&isEqual(formValue[fname],this.jsf.formGroup.controls[controlKey].value)
+                  //&&deepEqual(formValue[fname],this.jsf.formGroup.controls[controlKey].value)
                 ){
                     foundInd=ind;
                 }
@@ -85,15 +85,15 @@ export class OneOfComponent implements OnInit,OnDestroy {
                     }
                     /*
                     if(isObject(compareVal) && hasOwn(compareVal,fieldName) && 
-                    isEqual(compareVal[fieldName],controlValue)
+                    deepEqual(compareVal[fieldName],controlValue)
                   ){
                       foundInd=ind;
                     }else //if(formValue || controlValue){
-                    if(isEqual(compareVal,controlValue)){
+                    if(deepEqual(compareVal,controlValue)){
                       foundInd=ind;
                     }
                     */
-                    if(isEqual(compareVal,controlValue)){
+                    if(deepEqual(compareVal,controlValue)){
                       foundInd=ind;
                     }
                   })

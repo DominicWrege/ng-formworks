@@ -26,7 +26,7 @@
                             "demo/assets"
                         ],
                         "styles": [
-                            "demo/styles.scss"
+                            "demo/styles.css"
                         ],
                         "scripts": [],
                         "extractLicenses": false,
@@ -70,41 +70,6 @@
                     "options": {
                         "buildTarget": "demo:build"
                     }
-                },
-                "test": {
-                    "builder": "@angular-devkit/build-angular:karma",
-                    "options": {
-                        "main": "demo/test.ts",
-                        "polyfills": "demo/polyfills.ts",
-                        "tsConfig": "demo/tsconfig.spec.json",
-                        "karmaConfig": "demo/karma.conf.js",
-                        "styles": [
-                            "demo/styles.scss"
-                        ],
-                        "scripts": [],
-                        "assets": [
-                            "demo/favicon.ico",
-                            "demo/assets"
-                        ]
-                    }
-                }
-            }
-        },
-        "demo-e2e": {
-            "root": "e2e/",
-            "projectType": "application",
-            "architect": {
-                "e2e": {
-                    "builder": "@angular-devkit/build-angular:protractor",
-                    "options": {
-                        "protractorConfig": "e2e/protractor.conf.js",
-                        "devServerTarget": "demo:serve"
-                    },
-                    "configurations": {
-                        "production": {
-                            "devServerTarget": "demo:serve:production"
-                        }
-                    }
                 }
             }
         },
@@ -125,211 +90,13 @@
                             "tsConfig": "projects/ng-formworks-core/tsconfig.lib.prod.json"
                         }
                     }
-                },
-                "test": {
-                    "builder": "@angular-devkit/build-angular:karma",
-                    "options": {
-                        "main": "projects/ng-formworks-core/src/test.ts",
-                        "tsConfig": "projects/ng-formworks-core/tsconfig.spec.json",
-                        "karmaConfig": "projects/ng-formworks-core/karma.conf.js"
-                    }
-                }
-            }
-        },
-        "@ng-formworks/bootstrap4": {
-            "projectType": "library",
-            "root": "projects/ng-formworks-bootstrap4",
-            "sourceRoot": "projects/ng-formworks-bootstrap4/src",
-            "prefix": "",
-            "architect": {
-
-                "build": {
-                    "builder": "@angular-devkit/build-angular:ng-packagr",
-                    "options": {
-                        "tsConfig": "projects/ng-formworks-bootstrap4/tsconfig.lib.json",
-                        "project": "projects/ng-formworks-bootstrap4/ng-package.json"
-                    },
-                    "configurations": {
-                        "production": {
-                            "tsConfig": "projects/ng-formworks-bootstrap4/tsconfig.lib.prod.json"
-                        }
-                    }
-                },
-                "test": {
-                    "builder": "@angular-devkit/build-angular:karma",
-                    "options": {
-                        "main": "projects/ng-formworks-bootstrap4/src/test.ts",
-                        "tsConfig": "projects/ng-formworks-bootstrap4/tsconfig.spec.json",
-                        "karmaConfig": "projects/ng-formworks-bootstrap4/karma.conf.js"
-                    }
-                }
-            }
-        },
-        "@ng-formworks/bootstrap3": {
-            "projectType": "library",
-            "root": "projects/ng-formworks-bootstrap3",
-            "sourceRoot": "projects/ng-formworks-bootstrap3/src",
-            "prefix": "",
-            "architect": {
-                "build": {
-                    "builder": "@angular-devkit/build-angular:ng-packagr",
-                    "options": {
-                        "tsConfig": "projects/ng-formworks-bootstrap3/tsconfig.lib.json",
-                        "project": "projects/ng-formworks-bootstrap3/ng-package.json"
-                    },
-                    "configurations": {
-                        "production": {
-                            "tsConfig": "projects/ng-formworks-bootstrap3/tsconfig.lib.prod.json"
-                        }
-                    }
-                },
-                "test": {
-                    "builder": "@angular-devkit/build-angular:karma",
-                    "options": {
-                        "main": "projects/ng-formworks-bootstrap3/src/test.ts",
-                        "tsConfig": "projects/ng-formworks-bootstrap3/tsconfig.spec.json",
-                        "karmaConfig": "projects/ng-formworks-bootstrap3/karma.conf.js"
-                    }
-                }
-            }
-        },
-        "@ng-formworks/material": {
-            "projectType": "library",
-            "root": "projects/ng-formworks-material",
-            "sourceRoot": "projects/ng-formworks-material/src",
-            "prefix": "",
-            "architect": {
-                "build": {
-                    "builder": "@angular-devkit/build-angular:ng-packagr",
-                    "options": {
-                        "tsConfig": "projects/ng-formworks-material/tsconfig.lib.json",
-                        "project": "projects/ng-formworks-material/ng-package.json"
-                    },
-                    "configurations": {
-                        "production": {
-                            "tsConfig": "projects/ng-formworks-material/tsconfig.lib.prod.json"
-                        }
-                    }
-                },
-                "test": {
-                    "builder": "@angular-devkit/build-angular:karma",
-                    "options": {
-                        "main": "projects/ng-formworks-material/src/test.ts",
-                        "tsConfig": "projects/ng-formworks-material/tsconfig.spec.json",
-                        "karmaConfig": "projects/ng-formworks-material/karma.conf.js"
-                    }
-                }
-            }
-        },
-        "@ng-formworks/daisyui": {
-            "projectType": "library",
-            "root": "projects/ng-formworks-daisyui",
-            "sourceRoot": "projects/ng-formworks-daisyui/src",
-            "prefix": "lib",
-            "architect": {
-                "build": {
-                    "builder": "@angular-devkit/build-angular:ng-packagr",
-                    "options": {
-                        "project": "projects/ng-formworks-daisyui/ng-package.json"
-                    },
-                    "configurations": {
-                        "production": {
-                            "tsConfig": "projects/ng-formworks-daisyui/tsconfig.lib.prod.json"
-                        },
-                        "development": {
-                            "tsConfig": "projects/ng-formworks-daisyui/tsconfig.lib.json"
-                        }
-                    },
-                    "defaultConfiguration": "production"
-                },
-                "test": {
-                    "builder": "@angular-devkit/build-angular:karma",
-                    "options": {
-                        "main": "projects/ng-formworks-daisyui/src/test.ts",
-                        "tsConfig": "projects/ng-formworks-daisyui/tsconfig.spec.json",
-                        "karmaConfig": "projects/ng-formworks-daisyui/karma.conf.js",
-                        "polyfills": [
-                            "zone.js",
-                            "zone.js/testing"
-                        ]
-                    }
-                }
-            }
-        },
-        "@ng-formworks/cssframework": {
-            "projectType": "library",
-            "root": "projects/ng-formworks-cssframework",
-            "sourceRoot": "projects/ng-formworks-cssframework/src",
-            "prefix": "lib",
-            "architect": {
-                "build": {
-                    "builder": "@angular-devkit/build-angular:ng-packagr",
-                    "options": {
-                        "project": "projects/ng-formworks-cssframework/ng-package.json"
-                    },
-                    "configurations": {
-                        "production": {
-                            "tsConfig": "projects/ng-formworks-cssframework/tsconfig.lib.prod.json"
-                        },
-                        "development": {
-                            "tsConfig": "projects/ng-formworks-cssframework/tsconfig.lib.json"
-                        }
-                    },
-                    "defaultConfiguration": "production"
-                },
-                "test": {
-                    "builder": "@angular-devkit/build-angular:karma",
-                    "options": {
-                        "main": "projects/ng-formworks-cssframework/src/test.ts",
-                        "tsConfig": "projects/ng-formworks-cssframework/tsconfig.spec.json",
-                        "karmaConfig": "projects/ng-formworks-cssframework/karma.conf.js",
-                        "polyfills": [
-                            "zone.js",
-                            "zone.js/testing"
-                        ]
-                    }
-                }
-            }
-        },
-        "@ng-formworks/bootstrap5": {
-            "projectType": "library",
-            "root": "projects/ng-formworks-bootstrap5",
-            "sourceRoot": "projects/ng-formworks-bootstrap5/src",
-            "prefix": "lib",
-            "architect": {
-                "build": {
-                    "builder": "@angular-devkit/build-angular:ng-packagr",
-                    "options": {
-                        "project": "projects/ng-formworks-bootstrap5/ng-package.json"
-                    },
-                    "configurations": {
-                        "production": {
-                            "tsConfig": "projects/ng-formworks-bootstrap5/tsconfig.lib.prod.json"
-                        },
-                        "development": {
-                            "tsConfig": "projects/ng-formworks-bootstrap5/tsconfig.lib.json"
-                        }
-                    },
-                    "defaultConfiguration": "production"
-                },
-                "test": {
-                    "builder": "@angular-devkit/build-angular:karma",
-                    "options": {
-                        "main": "projects/ng-formworks-bootstrap5/src/test.ts",
-                        "tsConfig": "projects/ng-formworks-bootstrap5/tsconfig.spec.json",
-                        "karmaConfig": "projects/ng-formworks-bootstrap5/karma.conf.js",
-                        "polyfills": [
-                            "zone.js",
-                            "zone.js/testing"
-                        ]
-                    }
                 }
             }
         }
     },
     "schematics": {
         "@schematics/angular:component": {
-            "style": "scss",
+            "style": "css",
             "type": "component"
         },
         "@schematics/angular:directive": {
@@ -353,5 +120,8 @@
         "@schematics/angular:resolver": {
           "typeSeparator": "."
         }
+    },
+    "cli": {
+      "analytics": false
     }
 }

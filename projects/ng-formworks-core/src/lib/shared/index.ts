@@ -7,6 +7,10 @@ export {
 } from './validator.functions';
 
 export {
+  cloneDeep, deepEqual, isPlainObject, memoize, omit, pick, uniqueId
+} from './native.functions';
+
+export {
   addClasses, commonItems, copy, fixTitle, forEach, forEachCopy, hasNonNullValue, hasOwn, mergeFilteredObject, toTitleCase, uniqueItems
 } from './utility.functions';
 

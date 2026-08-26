@@ -20,27 +20,3 @@ updates:
     open-pull-requests-limit: 5
     commit-message:
       prefix: "build"
-  - package-ecosystem: "npm"
-    directory: "/projects/ng-formworks-material"
-    schedule:
-      interval: "weekly"
-      day: "sunday"
-    open-pull-requests-limit: 5
-    commit-message:
-      prefix: "build"
-  - package-ecosystem: "npm"
-    directory: "/projects/ng-formworks-bootstrap3"
-    schedule:
-      interval: "weekly"
-      day: "sunday"
-    open-pull-requests-limit: 5
-    commit-message:
-      prefix: "build"
-  - package-ecosystem: "npm"
-    directory: "/projects/ng-formworks-bootstrap4"
-    schedule:
-      interval: "weekly"
-      day: "sunday"
-    open-pull-requests-limit: 5
-    commit-message:
-      prefix: "build"

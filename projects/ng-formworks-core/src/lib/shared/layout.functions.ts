@@ -1,8 +1,5 @@
-import cloneDeep from 'lodash/cloneDeep';
-import _isArray from 'lodash/isArray';
-import _isPlainObject from 'lodash/isPlainObject';
-import uniqueId from 'lodash/uniqueId';
 import { TitleMapItem } from '../json-schema-form.service';
+import { cloneDeep, isPlainObject, uniqueId } from './native.functions';
 import {
   checkInlineType,
   convertJSONSchemaIfToCondition,
@@ -505,7 +502,7 @@ export function fixNestedArrayLayout(options: any) {
   let { builtLayout, formData } = options;
   let arrLengths = {};
   let traverseObj = function (obj, path, onValue?) {
-    if (_isArray(obj)) {
+    if (isArray(obj)) {
       onValue && onValue(obj, path);
       obj.forEach((item, ind) => {
         onValue && onValue(item, path + "/" + ind);
@@ -513,7 +510,7 @@ export function fixNestedArrayLayout(options: any) {
       });
       return;
     }
-    if (_isPlainObject(obj)) {
+    if (isPlainObject(obj)) {
       onValue && onValue(obj, path);
       Object.keys(obj).forEach(key => {
         onValue && onValue(obj[key], path + "/" + key);
@@ -523,7 +520,7 @@ export function fixNestedArrayLayout(options: any) {
     }
   }
   traverseObj(formData, "", (value, path) => {
-    if (_isArray(value)) {
+    if (isArray(value)) {
       arrLengths[path] = arrLengths[path] || value.length;
     }
   });
@@ -559,7 +556,7 @@ export function fixNestedArrayLayout(options: any) {
     let { builtLayout, indices, parentDataPointer, indexPos } = options;
     indices = indices || [];
     indexPos = indexPos == undefined ? indexPos = -1 : indexPos;
-    if (_isArray(builtLayout)) {
+    if (isArray(builtLayout)) {
       builtLayout.forEach((item, index) => {
         rebuildLayout({
           builtLayout: item,

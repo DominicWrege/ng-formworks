@@ -1,5 +1,4 @@
-import cloneDeep from 'lodash/cloneDeep';
-import isEqual from 'lodash/isEqual';
+import { cloneDeep, deepEqual } from './shared/native.functions';
 
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, forwardRef, inject, input, output } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
@@ -279,7 +278,7 @@ export class JsonSchemaFormComponent implements ControlValueAccessor, OnChanges,
       ) {
         // If only 'form' input changed, get names of changed keys
         changedInput = Object.keys(this.previousInputs.form || {})
-          .filter(key => !isEqual(this.previousInputs.form[key], this.form()[key]))
+          .filter(key => !deepEqual(this.previousInputs.form[key], this.form()[key]))
           .map(key => `form.${key}`);
         resetFirst = false;
       }

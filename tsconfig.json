@@ -17,53 +17,11 @@
       "manual_typings"
     ],
     "paths": {
-      "@angular/*": [
-        "./node_modules/@angular/*"
-      ],
-      "lodash/*": [
-        "node_modules/@types/lodash-es/*"
-      ],
       "@ng-formworks/core": [
         "dist/@ng-formworks/core"
       ],
       "@ng-formworks/core/*": [
         "dist/@ng-formworks/core/*"
-      ],
-      "@ng-formworks/bootstrap3": [
-        "dist/@ng-formworks/bootstrap3"
-      ],
-      "@ng-formworks/bootstrap3/*": [
-        "dist/@ng-formworks/bootstrap3/*"
-      ],
-      "@ng-formworks/bootstrap4": [
-        "dist/@ng-formworks/bootstrap4"
-      ],
-      "@ng-formworks/bootstrap4/*": [
-        "dist/@ng-formworks/bootstrap4/*"
-      ],
-      "@ng-formworks/bootstrap5": [
-        "dist/@ng-formworks/bootstrap5"
-      ],
-      "@ng-formworks/bootstrap5/*": [
-        "dist/@ng-formworks/bootstrap5/*"
-      ],
-      "@ng-formworks/material": [
-        "dist/@ng-formworks/material"
-      ],
-      "@ng-formworks/material/*": [
-        "dist/@ng-formworks/material/*"
-      ],
-      "@ng-formworks/daisyui": [
-        "dist/@ng-formworks/daisyui"
-      ],
-      "@ng-formworks/daisyui/*": [
-        "dist/@ng-formworks/daisyui/*"
-      ],
-      "@ng-formworks/cssframework": [
-        "dist/@ng-formworks/cssframework"
-      ],
-      "@ng-formworks/cssframework/*": [
-        "dist/@ng-formworks/cssframework/*"
       ]
     },
     "useDefineForClassFields": false

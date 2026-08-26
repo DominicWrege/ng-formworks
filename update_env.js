@@ -3,7 +3,6 @@
 var fs = require("fs");
 var pakjson = require('./package.json');
 var pakjsonAng = require('./node_modules/@angular/core/package.json');
-var pakjsonMat = require('./node_modules/@angular/material/package.json');
 console.log(`updating environment files with v${pakjson.version}...`);
 const envFiles = [
     './demo/environments/environment.ts',
@@ -29,10 +28,7 @@ function renameFiles() {
 function getPackageInfo() {
     return {
         version: pakjson.version,
-        angularVersion: pakjsonAng.version,
-        //pakjson.dependencies && pakjson.dependencies["@angular/core"],
-        materialVersion: pakjsonMat.version
-            //pakjson.dependencies && pakjson.dependencies["@angular/material"]
+        angularVersion: pakjsonAng.version
     }
 }
 
