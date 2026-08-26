@@ -1,5 +1,14 @@
 import { HttpClient } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal, viewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  linkedSignal,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { environment } from '../environments/environment';
 import { Examples } from './example-schemas.model';
 import { AceEditorDirective } from './ace-editor.directive';
@@ -16,6 +25,18 @@ const DEFAULT_SCHEMA = `{
   "required": ["firstName", "lastName"]
 }`;
 
+type ParseResult = { ok: true; schema: object } | { ok: false; error: string };
+
+/** Matches the shape of `(validationErrors)` emissions from <json-schema-form>. */
+type ValidationIssue = string | { message?: string | null };
+
+interface DemoFormOptions {
+  addSubmit: boolean;
+  setSchemaDefaults: boolean;
+  returnEmptyFields: boolean;
+  defaultWidgetOptions: { feedback: boolean };
+}
+
 @Component({
     // tslint:disable-next-line:component-selector
     selector: 'demo',
@@ -23,41 +44,73 @@ const DEFAULT_SCHEMA = `{
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: false
 })
-export class DemoComponent implements OnInit {
+export class DemoComponent {
   private http = inject(HttpClient);
-  private aceHost = viewChild.required('aceHost', { read: AceEditorDirective });
+  private aceHost = viewChild('aceHost', { read: AceEditorDirective });
 
   envVersion = environment.version;
   examples = Examples;
   exampleGroups = Object.keys(Examples);
-  selectedExample = signal('');
 
-  schemaText = signal<string>(DEFAULT_SCHEMA);
-  parseError = signal('');
-  formActive = signal(false);
-  formIsValid = signal<boolean | null>(null);
-  prettyValidationErrors = signal('');
-  validationErrorList = signal<any[]>([]);
-  liveFormData = signal<any>({});
-  submittedFormData = signal<any>(null);
-  jsonFormObject = signal<any>(undefined);
+  readonly selectedExample = signal('');
+  readonly loadedSchema = signal<string | null>(null);
 
-  jsonFormOptions: any = {
+  // Editor text: locally writable, auto-resyncs when a new example loads
+  readonly schemaText = linkedSignal<string | null, string>({
+    source: () => this.loadedSchema(),
+    computation: (src, prev) => (src === null ? (prev?.value ?? DEFAULT_SCHEMA) : src),
+  });
+
+  readonly parsedSchema = computed<ParseResult>(() => {
+    try {
+      return { ok: true, schema: JSON.parse(this.schemaText()) as object };
+    } catch (e) {
+      return { ok: false, error: (e as Error).message };
+    }
+  });
+  readonly parseError = computed(() => {
+    const p = this.parsedSchema();
+    return p.ok ? '' : p.error;
+  });
+  readonly jsonFormObject = computed<object | undefined>(() => {
+    const p = this.parsedSchema();
+    return p.ok ? p.schema : undefined;
+  });
+
+  readonly formIsValid = signal<boolean | null>(null);
+  readonly validationErrorList = signal<ValidationIssue[]>([]);
+  readonly prettyValidationErrors = computed(() =>
+    this.validationErrorList()
+      .map(error => typeof error === 'string' ? error : error?.message ?? '')
+      .filter(Boolean)
+      .join(', '));
+
+  readonly liveFormData = signal<unknown>({});
+  readonly submittedFormData = signal<unknown>(null);
+  readonly prettyLiveFormData = computed(() => JSON.stringify(this.liveFormData(), null, 2));
+  readonly prettySubmittedFormData = computed(() => JSON.stringify(this.submittedFormData(), null, 2));
+
+  jsonFormOptions: DemoFormOptions = {
     addSubmit: true,
     setSchemaDefaults: true,
     returnEmptyFields: false,
     defaultWidgetOptions: { feedback: true }
   };
 
-  readonly prettyLiveFormData = computed(() => JSON.stringify(this.liveFormData(), null, 2));
-  readonly prettySubmittedFormData = computed(() => JSON.stringify(this.submittedFormData(), null, 2));
-
-  ngOnInit() {
-    this.generateForm(this.schemaText());
+  constructor() {
+    // Ace <-> signal bridge: push schemaText into the editor whenever they diverge
+    // (linkedSignal resync on example load). User typing never diverges, so this is a no-op then.
+    effect(() => {
+      const text = this.schemaText();
+      const ace = this.aceHost();
+      if (ace?.editor && ace.editor.getValue() !== text) {
+        ace.setText(text);
+      }
+    });
   }
 
-  onExampleSelect(event) {
-    const file = event.target.value;
+  onExampleSelect(event: Event) {
+    const file = (event.target as HTMLSelectElement).value;
     if (!file || file === this.selectedExample()) {
       return;
     }
@@ -65,64 +118,19 @@ export class DemoComponent implements OnInit {
     this.http
       .get(`assets/example-schemas/${file}.json`, { responseType: 'text' })
       .subscribe({
-        next: schema => {
-          this.formActive.set(false);
-          setTimeout(() => {
-            this.aceHost().setText(schema);
-            this.generateForm(schema);
-          });
-        },
+        next: schema => this.loadedSchema.set(schema),
         error: () => { }
       });
   }
 
-  resetExampleSelect() {
-    this.selectedExample.set('');
-  }
-
   onEditorChange(text: string) {
-    this.generateForm(text);
+    this.schemaText.set(text);
   }
 
-  generateForm(text?: string) {
-    if (typeof text === 'string' && text !== this.schemaText()) {
-      this.schemaText.set(text);
-    }
-    let parsed;
-    try {
-      parsed = JSON.parse(this.schemaText());
-    } catch (e) {
-      this.parseError.set((e as Error).message);
-      return;
-    }
-    this.parseError.set('');
-    this.liveFormData.set({});
-    this.submittedFormData.set(null);
-    this.formIsValid.set(null);
-    this.prettyValidationErrors.set('');
-    this.validationErrorList.set([]);
-    this.jsonFormObject.set(parsed);
-    this.formActive.set(true);
-  }
-
-  onChanges(event) {
-    this.liveFormData.set(event);
-  }
-
-  onSubmit(event) {
-    this.submittedFormData.set(event);
-  }
-
-  isValid(event) {
-    this.formIsValid.set(event === true);
-  }
-
-  validationErrors(event) {
-    const errors = Array.isArray(event) ? event : Object.values(event || {});
-    this.validationErrorList.set(errors);
-    this.prettyValidationErrors.set(errors
-      .map(error => typeof error === 'string' ? error : error?.message)
-      .filter(Boolean)
-      .join(', '));
+  onValidationErrors(event: unknown) {
+    const issues = Array.isArray(event)
+      ? event as ValidationIssue[]
+      : Object.values(event ?? {}) as ValidationIssue[];
+    this.validationErrorList.set(issues);
   }
 }
