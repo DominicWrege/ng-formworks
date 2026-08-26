@@ -21,6 +21,18 @@
         </optgroup>
       }
     </select>
+
+    <fieldset class="flex items-center gap-1 rounded-full bg-gray-100 p-0.5 text-xs">
+      @for (f of frameworks; track f.value) {
+        <button type="button"
+                (click)="framework.set(f.value)"
+                [class]="f.value === framework()
+                  ? 'rounded-full bg-white px-2.5 py-1 font-medium text-orange-600 shadow-sm'
+                  : 'rounded-full px-2.5 py-1 text-gray-500 hover:text-gray-800'">
+          {{ f.label }}
+        </button>
+      }
+    </fieldset>
   </header>
 
   <main class="flex-1 w-full max-w-[1440px] mx-auto grid grid-cols-1 xl:grid-cols-2 gap-4 p-4">
@@ -58,7 +70,7 @@
               loadExternalAssets="true"
               [form]="jsonFormObject()"
               [options]="jsonFormOptions"
-              framework="no-framework"
+              [framework]="framework()"
               (onChanges)="liveFormData.set($event)"
               (onSubmit)="submittedFormData.set($event)"
               (isValid)="formIsValid.set($event === true)"

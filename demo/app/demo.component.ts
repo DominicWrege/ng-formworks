@@ -53,6 +53,11 @@ export class DemoComponent {
   exampleGroups = Object.keys(Examples);
 
   readonly selectedExample = signal('');
+  readonly framework = signal<'tailwindcss' | 'no-framework'>('tailwindcss');
+  readonly frameworks: { value: 'tailwindcss' | 'no-framework'; label: string }[] = [
+    { value: 'tailwindcss', label: 'Tailwind' },
+    { value: 'no-framework', label: 'Plain' },
+  ];
   readonly loadedSchema = signal<string | null>(null);
 
   // Editor text: locally writable, auto-resyncs when a new example loads

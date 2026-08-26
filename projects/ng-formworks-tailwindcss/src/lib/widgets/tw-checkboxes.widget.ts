@@ -1,0 +1,64 @@
+import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { CheckboxesComponent } from '@ng-formworks/core';
+import { injectTw } from '../tw-base';
+
+@Component({
+    // tslint:disable-next-line:component-selector
+    selector: 'tw-checkboxes-widget',
+    template: `
+    @if (options?.title) {
+      <label
+        [class]="tw.label + ' ' + (options?.labelHtmlClass || '')"
+        [style.display]="options?.notitle ? 'none' : ''"
+      [innerHTML]="$safeNavigationMigration(options?.title)"></label>
+    }
+
+    @if (layoutOrientation === 'horizontal') {
+      <div [class]="options?.htmlClass || tw.groupHorizontal">
+        @for (checkboxItem of checkboxList; track checkboxItem) {
+          <label
+            [attr.for]="'control' + layoutNode()?._id + '/' + checkboxItem.value"
+        [class]="tw.checkRow + ' ' + (options?.itemLabelHtmlClass || '')">
+            <input type="checkbox"
+              [attr.required]="options?.required"
+              [checked]="checkboxItem.checked"
+              [class]="tw.checkInput + ' ' + (options?.fieldHtmlClass || '')"
+              [disabled]="controlDisabled"
+              [id]="'control' + $safeNavigationMigration(layoutNode()?._id) + '/' + checkboxItem.value"
+              [name]="$safeNavigationMigration(checkboxItem?.name)"
+              [readonly]="options?.readonly ? 'readonly' : null"
+              [value]="checkboxItem.value"
+              (change)="updateValue($event)">
+              <span class="text-sm" [innerHTML]="checkboxItem.name"></span>
+            </label>
+          }
+        </div>
+      }
+
+      @if (layoutOrientation === 'vertical') {
+        <div [class]="options?.htmlClass || tw.groupVertical">
+          @for (checkboxItem of checkboxList; track checkboxItem) {
+            <label
+              [attr.for]="'control' + layoutNode()?._id + '/' + checkboxItem.value"
+          [class]="tw.checkRow + ' ' + (options?.itemLabelHtmlClass || '')">
+              <input type="checkbox"
+                [attr.required]="options?.required"
+                [checked]="checkboxItem.checked"
+                [class]="tw.checkInput + ' ' + (options?.fieldHtmlClass || '')"
+                [disabled]="controlDisabled"
+                [id]="$safeNavigationMigration(options?.name) + '/' + checkboxItem.value"
+                [name]="$safeNavigationMigration(checkboxItem?.name)"
+                [readonly]="options?.readonly ? 'readonly' : null"
+                [value]="checkboxItem.value"
+                (change)="updateValue($event)">
+                <span class="text-sm" [innerHTML]="$safeNavigationMigration(checkboxItem?.name)"></span>
+              </label>
+            }
+          </div>
+        }`,
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
+})
+export class TwCheckboxesComponent extends CheckboxesComponent {
+  readonly tw = injectTw();
+}

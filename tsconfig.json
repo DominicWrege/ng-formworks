@@ -24,6 +24,12 @@
       ],
       "@ng-formworks/core/*": [
         "dist/@ng-formworks/core/*"
+      ],
+      "@ng-formworks/tailwindcss": [
+        "dist/@ng-formworks/tailwindcss"
+      ],
+      "@ng-formworks/tailwindcss/*": [
+        "dist/@ng-formworks/tailwindcss/*"
       ]
     },
     "useDefineForClassFields": false

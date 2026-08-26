@@ -11,3 +11,6 @@
 .ace_editor {
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
+
+/* Let Tailwind's JIT scanner see class strings inside the tailwindcss package */
+@source "../../dist/@ng-formworks/tailwindcss";

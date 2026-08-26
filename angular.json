@@ -35,14 +35,18 @@
                     },
                     "configurations": {
                         "production": {
-                            "budgets": [{
-                                "type": "anyComponentStyle",
-                                "maximumWarning": "6kb"
-                            }],
-                            "fileReplacements": [{
-                                "replace": "demo/environments/environment.ts",
-                                "with": "demo/environments/environment.prod.ts"
-                            }],
+                            "budgets": [
+                                {
+                                    "type": "anyComponentStyle",
+                                    "maximumWarning": "6kb"
+                                }
+                            ],
+                            "fileReplacements": [
+                                {
+                                    "replace": "demo/environments/environment.ts",
+                                    "with": "demo/environments/environment.prod.ts"
+                                }
+                            ],
                             "optimization": true,
                             "outputHashing": "all",
                             "sourceMap": false,
@@ -90,6 +94,26 @@
                     }
                 }
             }
+        },
+        "@ng-formworks/tailwindcss": {
+            "projectType": "library",
+            "root": "projects/ng-formworks-tailwindcss",
+            "sourceRoot": "projects/ng-formworks-tailwindcss/src",
+            "prefix": "lib",
+            "architect": {
+                "build": {
+                    "builder": "@angular/build:ng-packagr",
+                    "options": {
+                        "project": "projects/ng-formworks-tailwindcss/ng-package.json"
+                    },
+                    "configurations": {
+                        "production": {
+                            "tsConfig": "projects/ng-formworks-tailwindcss/tsconfig.lib.prod.json"
+                        }
+                    },
+                    "defaultConfiguration": "production"
+                }
+            }
         }
     },
     "schematics": {
@@ -98,28 +122,28 @@
             "type": "component"
         },
         "@schematics/angular:directive": {
-          "type": "directive"
+            "type": "directive"
         },
         "@schematics/angular:service": {
-          "type": "service"
+            "type": "service"
         },
         "@schematics/angular:guard": {
-          "typeSeparator": "."
+            "typeSeparator": "."
         },
         "@schematics/angular:interceptor": {
-          "typeSeparator": "."
+            "typeSeparator": "."
         },
         "@schematics/angular:module": {
-          "typeSeparator": "."
+            "typeSeparator": "."
         },
         "@schematics/angular:pipe": {
-          "typeSeparator": "."
+            "typeSeparator": "."
         },
         "@schematics/angular:resolver": {
-          "typeSeparator": "."
+            "typeSeparator": "."
         }
     },
     "cli": {
-      "analytics": false
+        "analytics": false
     }
 }
