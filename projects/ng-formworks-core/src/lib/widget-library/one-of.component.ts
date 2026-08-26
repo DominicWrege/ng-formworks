@@ -1,4 +1,4 @@
-import { Component, inject, input, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, input, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
 
 import { deepEqual, pick } from '../shared/native.functions';
@@ -15,6 +15,7 @@ import { hasNonNullValue, hasOwn, isObject, JsonPointer, path2ControlKey } from 
     [layoutIndex]="layoutIndex()" 
     [dataIndex]="dataIndex()" >
     </tabs-widget>`,
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class OneOfComponent implements OnInit,OnDestroy {

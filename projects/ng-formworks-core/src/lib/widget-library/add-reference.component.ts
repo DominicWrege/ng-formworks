@@ -10,7 +10,7 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
       @if (showAddButton) {
         <button
           [class]="options?.fieldHtmlClass || ''"
-          [disabled]="options?.readonly"
+          [disabled]="$safeNavigationMigration(options?.readonly)"
           (click)="addItem($event)"
           [appStopPropagation]="['mousedown', 'touchstart']"
           >
@@ -23,7 +23,7 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
         </button>
       }
     </section>`,
-    changeDetection: ChangeDetectionStrategy.Default,
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class AddReferenceComponent implements OnInit {

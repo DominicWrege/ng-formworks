@@ -1,4 +1,4 @@
-import { Component, inject, input, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, input, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
 import { FrameworkLibraryService } from '../framework-library/framework-library.service';
 import { JsonSchemaFormService } from '../json-schema-form.service';
@@ -19,24 +19,24 @@ import { buildTitleMap, isArray } from '../shared';
           [attr.required]="options?.required"
           [class]=" frameworkStyles[activeFramework].selectClass"
           [multiple]="true"
-          [id]="'control' + layoutNode()?._id"
+          [id]="'control' + $safeNavigationMigration(layoutNode()?._id)"
           [name]="controlName"
           [ngModel]="selectValue"
           >
           @for (selectItem of selectList; track selectItem) {
-            @if (!isArray(selectItem?.items)) {
+            @if (!isArray($safeNavigationMigration(selectItem?.items))) {
               <option
                 [class]="frameworkStyles[activeFramework].optionClass"
                 [class.active]="selectItem?.value === controlValue"
                 [class.unchecked-notusing]="selectItem?.value != controlValue"
-                [value]="selectItem?.value"
+                [value]="$safeNavigationMigration(selectItem?.value)"
                 (click)="onSelectClicked($event)"
                 type="checkbox"
                 >
               </option>
             }
             <!--NB the text is out of the option element to display besides the checkbox-->
-            <span [innerHTML]="selectItem?.name"></span>
+            <span [innerHTML]="$safeNavigationMigration(selectItem?.name)"></span>
           }
         </select>
       }
@@ -48,22 +48,22 @@ import { buildTitleMap, isArray } from '../shared';
           [class]="frameworkStyles[activeFramework].selectClass +' select-box'"
           [multiple]="true"
           [disabled]="controlDisabled"
-          [id]="'control' + layoutNode()?._id"
+          [id]="'control' + $safeNavigationMigration(layoutNode()?._id)"
           [name]="controlName"
           (change)="updateValue($event)">
           @for (selectItem of selectList; track selectItem) {
-            @if (!isArray(selectItem?.items)) {
+            @if (!isArray($safeNavigationMigration(selectItem?.items))) {
               <option
                 [selected]="selectItem?.value === controlValue"
                 [class]="frameworkStyles[activeFramework].optionClass"
                 [class.checked-notusing]="selectItem?.value === controlValue"
                 [class.unchecked-notusing]]="selectItem?.value != controlValue"
-                [value]="selectItem?.value"
+                [value]="$safeNavigationMigration(selectItem?.value)"
                 type="checkbox">
               </option>
             }
             <!--NB the text is out of the option element to display besides the checkbox-->
-            <span [innerHTML]="selectItem?.name"></span>
+            <span [innerHTML]="$safeNavigationMigration(selectItem?.name)"></span>
           }
         </select>
       }
@@ -156,6 +156,7 @@ import { buildTitleMap, isArray } from '../shared';
         }
       
       `],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 export class SelectCheckboxComponent implements OnInit, OnDestroy {

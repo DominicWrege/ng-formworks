@@ -1,4 +1,4 @@
-import { Component, inject, input, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, input, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
 import { JsonSchemaFormService } from '../json-schema-form.service';
 
@@ -21,7 +21,7 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
         [class]="(options?.fieldHtmlClass || '') + (isChecked ?
           (' ' + (options?.activeClass || '') + ' ' + (options?.style?.selected || '')) :
           (' ' + (options?.style?.unselected || '')))"
-          [id]="'control' + layoutNode()?._id"
+          [id]="'control' + $safeNavigationMigration(layoutNode()?._id)"
           [name]="controlName"
           [readonly]="options?.readonly ? 'readonly' : null"
           type="checkbox">
@@ -34,7 +34,7 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
           (' ' + (options?.activeClass || '') + ' ' + (options?.style?.selected || '')) :
           (' ' + (options?.style?.unselected || '')))"
           [disabled]="controlDisabled"
-          [id]="'control' + layoutNode()?._id"
+          [id]="'control' + $safeNavigationMigration(layoutNode()?._id)"
           [name]="controlName"
           [readonly]="options?.readonly ? 'readonly' : null"
           [value]="controlValue"
@@ -44,9 +44,10 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
       @if (options?.title) {
         <span
           [style.display]="options?.notitle ? 'none' : ''"
-        [innerHTML]="options?.title"></span>
+        [innerHTML]="$safeNavigationMigration(options?.title)"></span>
       }
     </label>`,
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class CheckboxComponent implements OnInit,OnDestroy {

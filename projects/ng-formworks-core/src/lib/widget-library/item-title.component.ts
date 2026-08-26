@@ -1,11 +1,12 @@
 // item-title.component.ts
-import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { JsonSchemaFormService } from '../json-schema-form.service';
 
 @Component({
     selector: 'item-title',
     template: `<div>{{ title }}</div>`,
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone:false
     // Consider using ChangeDetectionStrategy.OnPush here for maximum efficiency
 

@@ -1,4 +1,4 @@
-import { Component, inject, input, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, input, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
 import { JsonSchemaFormService } from '../json-schema-form.service';
 
@@ -15,7 +15,7 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
         [class]="options?.fieldHtmlClass || ''"
         [disabled]="controlDisabled"
         [name]="controlName"
-        [type]="layoutNode()?.type"
+        [type]="$safeNavigationMigration(layoutNode()?.type)"
         [value]="controlValue"
         (click)="updateValue($event)"
         [appStopPropagation]="['mousedown', 'touchstart']"
@@ -23,10 +23,11 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
         @if (options?.icon || options?.title) {
           <span
             [class]="options?.icon"
-          [innerHTML]="options?.title"></span>
+          [innerHTML]="$safeNavigationMigration(options?.title)"></span>
         }
       </button>
     </div>`,
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ButtonComponent implements OnInit,OnDestroy {

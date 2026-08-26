@@ -1,4 +1,4 @@
-import { Component, ComponentRef, OnChanges, OnInit, ViewContainerRef, inject, input, viewChild } from '@angular/core';
+import { Component, ComponentRef, OnChanges, OnInit, ViewContainerRef, inject, input, viewChild, ChangeDetectionStrategy } from '@angular/core';
 import { JsonSchemaFormService } from '../json-schema-form.service';
 
 
@@ -6,6 +6,7 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
     // tslint:disable-next-line:component-selector
     selector: 'template-widget',
     template: `<div #widgetContainer></div>`,
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class TemplateComponent implements OnInit, OnChanges {

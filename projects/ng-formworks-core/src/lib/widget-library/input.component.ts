@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, inject, input } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, input, ChangeDetectionStrategy } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
 import { JsonSchemaFormService } from '../json-schema-form.service';
 
@@ -13,7 +13,7 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
           [attr.for]="'control' + layoutNode()?._id"
           [class]="options?.labelHtmlClass || ''"
           [style.display]="options?.notitle ? 'none' : ''"
-        [innerHTML]="options?.title"></label>
+        [innerHTML]="$safeNavigationMigration(options?.title)"></label>
       }
       @if (boundControl) {
         <input
@@ -26,10 +26,10 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
           [attr.placeholder]="options?.placeholder"
           [attr.required]="options?.required"
           [class]="options?.fieldHtmlClass || ''"
-          [id]="'control' + layoutNode()?._id"
+          [id]="'control' + $safeNavigationMigration(layoutNode()?._id)"
           [name]="controlName"
           [readonly]="options?.readonly ? 'readonly' : null"
-          [type]="layoutNode()?.type"
+          [type]="$safeNavigationMigration(layoutNode()?.type)"
           [attributes]="inputAttributes"
           [appStopPropagation]="['mousedown', 'touchstart']"
           >
@@ -45,10 +45,10 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
           [attr.required]="options?.required"
           [class]="options?.fieldHtmlClass || ''"
           [disabled]="controlDisabled"
-          [id]="'control' + layoutNode()?._id"
+          [id]="'control' + $safeNavigationMigration(layoutNode()?._id)"
           [name]="controlName"
           [readonly]="options?.readonly ? 'readonly' : null"
-          [type]="layoutNode()?.type"
+          [type]="$safeNavigationMigration(layoutNode()?.type)"
           [value]="controlValue"
           (input)="updateValue($event)"
           [attributes]="inputAttributes"
@@ -57,13 +57,14 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
       }
       @if (options?.typeahead?.source) {
         <datalist
-          [id]="'control' + layoutNode()?._id + 'Autocomplete'">
+          [id]="'control' + $safeNavigationMigration(layoutNode()?._id) + 'Autocomplete'">
           @for (word of options?.typeahead?.source; track word) {
             <option [value]="word">
             }
           </datalist>
         }
       </div>`,
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class InputComponent implements OnInit, OnDestroy {

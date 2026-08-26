@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, OnInit, inject, viewChild } from '@angular/core';
+import { Component, OnInit, inject, viewChild, ChangeDetectionStrategy } from '@angular/core';
 import { environment } from '../environments/environment';
 import { Examples } from './example-schemas.model';
 import { AceEditorDirective } from './ace-editor.directive';
@@ -20,6 +20,7 @@ const DEFAULT_SCHEMA = `{
     // tslint:disable-next-line:component-selector
     selector: 'demo',
     templateUrl: 'demo.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class DemoComponent implements OnInit {

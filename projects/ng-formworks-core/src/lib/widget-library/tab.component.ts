@@ -1,4 +1,4 @@
-import { Component, OnInit, input, inject } from '@angular/core';
+import { Component, OnInit, input, inject, ChangeDetectionStrategy } from '@angular/core';
 import { JsonSchemaFormService } from '../json-schema-form.service';
 
 
@@ -12,6 +12,7 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
         [layoutIndex]="layoutIndex()"
         [layout]="layoutNode().items"></root-widget>
     </div>`,
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class TabComponent implements OnInit {

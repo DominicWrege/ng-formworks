@@ -1,4 +1,4 @@
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 import { NgModule, provideZoneChangeDetection } from '@angular/core';
 import { BrowserModule, REMOVE_STYLES_ON_COMPONENT_DESTROY } from '@angular/platform-browser';
 import { JsonSchemaFormModule } from '@ng-formworks/core';
@@ -13,7 +13,7 @@ import { DemoComponent } from './demo.component';
         JsonSchemaFormModule],
     providers: [
         { provide: REMOVE_STYLES_ON_COMPONENT_DESTROY, useValue: true },
-        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClient(withXhr(), withInterceptorsFromDi()),
         provideZoneChangeDetection()
     ]
 })
