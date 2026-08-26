@@ -89,14 +89,12 @@
     "@tailwindcss/postcss": "^4.1.11",
     "@types/node": "^20.16.5",
     "autoprefixer": "^10.4.20",
-    "codelyzer": "^6.0.2",
     "minimist": "^1.2.8",
     "ng-packagr": "^21.0.0",
     "postcss": "^8.4.47",
     "simple-git": "^3.30.0",
     "tailwindcss": "^4.1.11",
     "tslib": "^2.7.0",
-    "tslint": "~6.1.0",
     "typescript": "5.9.3",
     "webpack-bundle-analyzer": "^4.10.2"
   }
