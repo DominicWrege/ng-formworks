@@ -11,7 +11,7 @@
     <label for="example-select" class="text-sm text-gray-500">Load example:</label>
     <select id="example-select"
             class="rounded-md border border-gray-300 bg-white px-2 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            [value]="selectedExample" (change)="onExampleSelect($event)">
+            [value]="selectedExample()" (change)="onExampleSelect($event)">
       <option value="">— start from scratch —</option>
       @for (group of exampleGroups; track group) {
         <optgroup [label]="examples[group].name">
@@ -28,13 +28,13 @@
     <section class="flex flex-col bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden min-h-[420px] xl:min-h-0">
       <div class="px-4 py-2.5 border-b border-gray-100 flex items-center gap-3 flex-wrap">
         <h2 class="font-medium">JSON Schema</h2>
-        @if (parseError) {
+        @if (parseError()) {
           <span class="text-xs rounded-full bg-red-100 text-red-700 px-2 py-0.5 break-all">Invalid JSON</span>
         } @else {
           <span class="text-xs rounded-full bg-green-100 text-green-700 px-2 py-0.5">Valid JSON</span>
         }
         <div class="flex-1"></div>
-        @if (selectedExample) {
+        @if (selectedExample()) {
           <button type="button" (click)="resetExampleSelect()"
                   class="text-xs text-gray-500 hover:text-gray-800 hover:underline">
             detach example
@@ -42,7 +42,7 @@
         }
       </div>
       <div #aceHost ace-editor
-           [text]="schemaText"
+           [text]="schemaText()"
            [options]="{ printMargin: false }"
            [readOnly]="false"
            (textChanged)="onEditorChange($event)"
@@ -54,15 +54,15 @@
       <div class="flex flex-col bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
         <h2 class="px-4 py-2.5 border-b border-gray-100 font-medium">Generated Form</h2>
         <div class="p-4">
-          @if (!formActive) {
+          @if (!formActive()) {
             <p class="text-sm text-gray-400 italic">
-              {{ parseError ? 'Fix the JSON error to render the form.' : 'Edit the schema to render a form.' }}
+              {{ parseError() ? 'Fix the JSON error to render the form.' : 'Edit the schema to render a form.' }}
             </p>
           }
-          @if (formActive) {
+          @if (formActive()) {
             <json-schema-form
               loadExternalAssets="true"
-              [form]="jsonFormObject"
+              [form]="jsonFormObject()"
               [options]="jsonFormOptions"
               framework="no-framework"
               (onChanges)="onChanges($event)"
@@ -77,30 +77,30 @@
       <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
         <div class="px-4 py-2.5 border-b border-gray-100 flex items-center gap-2">
           <h2 class="font-medium">Output</h2>
-          @if (formIsValid === true) {
+          @if (formIsValid() === true) {
             <span class="text-xs rounded-full bg-green-100 text-green-700 px-2 py-0.5">valid</span>
-          } @else if (formIsValid === false) {
+          } @else if (formIsValid() === false) {
             <span class="text-xs rounded-full bg-red-100 text-red-700 px-2 py-0.5">invalid</span>
           } @else {
             <span class="text-xs rounded-full bg-gray-100 text-gray-500 px-2 py-0.5">n/a</span>
           }
         </div>
         <div class="p-4 space-y-3 text-sm">
-          @if (prettyValidationErrors) {
+          @if (prettyValidationErrors()) {
             <div class="text-red-700 bg-red-50 border border-red-200 rounded-md px-3 py-2 break-words">
-              {{ prettyValidationErrors }}
+              {{ prettyValidationErrors() }}
             </div>
           }
           <div>
             <p class="text-gray-500 mb-1">Live data — onChanges():</p>
             <pre class="rounded-md bg-gray-50 border border-gray-200 p-3 overflow-auto max-h-56 font-mono text-xs"
-                 [class.text-green-700]="!prettyValidationErrors && prettyLiveFormData !== '{}'"
-                 [class.text-red-700]="!!prettyValidationErrors">{{ prettyLiveFormData }}</pre>
+                 [class.text-green-700]="!prettyValidationErrors() && prettyLiveFormData() !== '{}'"
+                 [class.text-red-700]="!!prettyValidationErrors()">{{ prettyLiveFormData() }}</pre>
           </div>
           <div>
             <p class="text-gray-500 mb-1">Submitted data — onSubmit():</p>
             <pre class="rounded-md bg-gray-50 border border-gray-200 p-3 overflow-auto max-h-56 font-mono text-xs"
-                 [class.text-green-700]="prettySubmittedFormData !== 'null'">{{ prettySubmittedFormData }}</pre>
+                 [class.text-green-700]="prettySubmittedFormData() !== 'null'">{{ prettySubmittedFormData() }}</pre>
           </div>
         </div>
       </div>

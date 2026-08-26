@@ -17,9 +17,7 @@
                             "base": "dist/demo"
                         },
                         "index": "demo/index.html",
-                        "polyfills": [
-                            "demo/polyfills.ts"
-                        ],
+                        "polyfills": [],
                         "tsConfig": "demo/tsconfig.app.json",
                         "assets": [
                             "demo/favicon.ico",

@@ -8,6 +8,6 @@ import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 })
 export class NoFrameworkComponent {
   readonly layoutNode = input<any>(undefined);
-  readonly layoutIndex = input<number[]>(undefined);
-  readonly dataIndex = input<number[]>(undefined);
+  readonly layoutIndex = input<number[] | undefined>(undefined);
+  readonly dataIndex = input<number[] | undefined>(undefined);
 }

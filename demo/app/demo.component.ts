@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, OnInit, inject, viewChild, ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal, viewChild } from '@angular/core';
 import { environment } from '../environments/environment';
 import { Examples } from './example-schemas.model';
 import { AceEditorDirective } from './ace-editor.directive';
@@ -20,7 +20,7 @@ const DEFAULT_SCHEMA = `{
     // tslint:disable-next-line:component-selector
     selector: 'demo',
     templateUrl: 'demo.component.html',
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: false
 })
 export class DemoComponent implements OnInit {
@@ -30,19 +30,17 @@ export class DemoComponent implements OnInit {
   envVersion = environment.version;
   examples = Examples;
   exampleGroups = Object.keys(Examples);
-  selectedExample = '';
+  selectedExample = signal('');
 
-  schemaText: string = DEFAULT_SCHEMA;
-  parseError = '';
-
-  formActive = false;
-  formIsValid: boolean = null;
-  prettyValidationErrors = '';
-  validationErrorList: any[] = [];
-  liveFormData: any = {};
-  submittedFormData: any = null;
-
-  jsonFormObject: any;
+  schemaText = signal<string>(DEFAULT_SCHEMA);
+  parseError = signal('');
+  formActive = signal(false);
+  formIsValid = signal<boolean | null>(null);
+  prettyValidationErrors = signal('');
+  validationErrorList = signal<any[]>([]);
+  liveFormData = signal<any>({});
+  submittedFormData = signal<any>(null);
+  jsonFormObject = signal<any>(undefined);
 
   jsonFormOptions: any = {
     addSubmit: true,
@@ -51,30 +49,24 @@ export class DemoComponent implements OnInit {
     defaultWidgetOptions: { feedback: true }
   };
 
-  get prettyLiveFormData() {
-    return JSON.stringify(this.liveFormData, null, 2);
-  }
-
-  get prettySubmittedFormData() {
-    return JSON.stringify(this.submittedFormData, null, 2);
-  }
+  readonly prettyLiveFormData = computed(() => JSON.stringify(this.liveFormData(), null, 2));
+  readonly prettySubmittedFormData = computed(() => JSON.stringify(this.submittedFormData(), null, 2));
 
   ngOnInit() {
-    this.generateForm(this.schemaText);
+    this.generateForm(this.schemaText());
   }
 
   onExampleSelect(event) {
     const file = event.target.value;
-    if (!file || file === this.selectedExample) {
+    if (!file || file === this.selectedExample()) {
       return;
     }
-    this.selectedExample = file;
+    this.selectedExample.set(file);
     this.http
       .get(`assets/example-schemas/${file}.json`, { responseType: 'text' })
       .subscribe({
         next: schema => {
-          this.formActive = false;
-          this.schemaText = schema;
+          this.formActive.set(false);
           setTimeout(() => {
             this.aceHost().setText(schema);
             this.generateForm(schema);
@@ -85,58 +77,52 @@ export class DemoComponent implements OnInit {
   }
 
   resetExampleSelect() {
-    this.selectedExample = '';
+    this.selectedExample.set('');
   }
 
   onEditorChange(text: string) {
-    setTimeout(() => this.generateForm(text));
+    this.generateForm(text);
   }
 
   generateForm(text?: string) {
-    if (typeof text === 'string' && text !== this.schemaText) {
-      this.schemaText = text;
+    if (typeof text === 'string' && text !== this.schemaText()) {
+      this.schemaText.set(text);
     }
     let parsed;
     try {
-      parsed = JSON.parse(this.schemaText);
+      parsed = JSON.parse(this.schemaText());
     } catch (e) {
-      this.parseError = (e as Error).message;
+      this.parseError.set((e as Error).message);
       return;
     }
-    this.parseError = '';
-    this.liveFormData = {};
-    this.submittedFormData = null;
-    this.formIsValid = null;
-    this.prettyValidationErrors = '';
-    this.validationErrorList = [];
-    this.jsonFormObject = parsed;
-    this.formActive = true;
-  }
-
-  private defer(fn: () => void) {
-    setTimeout(fn, 0);
+    this.parseError.set('');
+    this.liveFormData.set({});
+    this.submittedFormData.set(null);
+    this.formIsValid.set(null);
+    this.prettyValidationErrors.set('');
+    this.validationErrorList.set([]);
+    this.jsonFormObject.set(parsed);
+    this.formActive.set(true);
   }
 
   onChanges(event) {
-    this.defer(() => { this.liveFormData = event; });
+    this.liveFormData.set(event);
   }
 
   onSubmit(event) {
-    this.defer(() => { this.submittedFormData = event; });
+    this.submittedFormData.set(event);
   }
 
   isValid(event) {
-    this.defer(() => { this.formIsValid = event === true; });
+    this.formIsValid.set(event === true);
   }
 
   validationErrors(event) {
-    this.defer(() => {
-      const errors = Array.isArray(event) ? event : Object.values(event || {});
-      this.validationErrorList = errors;
-      this.prettyValidationErrors = errors
-        .map(error => typeof error === 'string' ? error : error?.message)
-        .filter(Boolean)
-        .join(', ');
-    });
+    const errors = Array.isArray(event) ? event : Object.values(event || {});
+    this.validationErrorList.set(errors);
+    this.prettyValidationErrors.set(errors
+      .map(error => typeof error === 'string' ? error : error?.message)
+      .filter(Boolean)
+      .join(', '));
   }
 }

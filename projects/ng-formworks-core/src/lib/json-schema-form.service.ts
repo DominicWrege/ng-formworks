@@ -1,4 +1,4 @@
-import { inject, Injectable, NgZone, OnDestroy, Signal } from '@angular/core';
+import { inject, Injectable, OnDestroy, Signal } from '@angular/core';
 import { AbstractControl, UntypedFormArray, UntypedFormGroup } from '@angular/forms';
 //import Ajv, { ErrorObject, Options } from 'ajv';
 import addFormats from "ajv-formats";
@@ -180,8 +180,6 @@ export class JsonSchemaFormService implements OnDestroy {
     },
     validationDebounceMs: 50
   };
-  // --- Add a zone field and set it in constructor (use inject to avoid changing constructor signature) ---
-  private zone = inject(NgZone);
   fcValueChangesSubs:Subscription;
   fcStatusChangesSubs:Subscription;
 
@@ -445,21 +443,6 @@ this.ajv.addFormat("duration", {
           distinctUntilChanged((prev, curr) => deepEqual(prev, curr))
         )
         .subscribe(() => {
-          // run heavy validation outside angular to avoid triggering CD on every keystroke
-         
-          /*
-          this.zone.runOutsideAngular(() => {
-            // perform validation but do NOT have validateData emit Subjects (updateSubscriptions=false)
-            this.validateData(this.formGroup.getRawValue(), false, ajvInstanceName);
-
-            // re-enter angular to emit Subjects/notifications and let UI react once
-            this.zone.run(() => {
-              this.dataChanges.next(this.data);
-              this.isValidChanges.next(this.isValid);
-              this.validationErrorChanges.next(this.ajvErrors);
-            });
-          });
-          */
           this.validateData(this.formGroup.getRawValue(), true, ajvInstanceName);
         });
     }
