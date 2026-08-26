@@ -34,46 +34,59 @@ import { injectTw } from '../tw-base';
            cdkDropListOrientation="vertical"
            (cdkDropListDropped)="drop($event)">
         @for (row of layoutNode().items; track row; let i = $index) {
-          <div
-            [cdkDrag]
-            [cdkDragDisabled]="!isDraggable(row)"
-            [cdkDragStartDelay]="{ touch: 400, mouse: 0 }"
-            [class]="tw.arrayRow">
+          @if (row.type === '$ref') {
             @if (showWidget(row)) {
-              @if (isDraggable(row)) {
-                <button type="button"
-                        cdkDragHandle
-                        aria-label="Drag to reorder"
-                        [class]="tw.dragGrip"
-                        [attr.title]="'Drag to reorder'">
-                  <svg width="10" height="16" viewBox="0 0 10 16" fill="currentColor" aria-hidden="true">
-                    <circle cx="2.5" cy="3" r="1.4"/><circle cx="7.5" cy="3" r="1.4"/>
-                    <circle cx="2.5" cy="8" r="1.4"/><circle cx="7.5" cy="8" r="1.4"/>
-                    <circle cx="2.5" cy="13" r="1.4"/><circle cx="7.5" cy="13" r="1.4"/>
-                  </svg>
-                </button>
-              }
-               <div class="flex-1 min-w-0">
-                <select-framework-widget
-                  [dataIndex]="rowCtx(row, i).dataIndex()"
-                  [layoutIndex]="rowCtx(row, i).layoutIndex()"
-                  [layoutNode]="row"></select-framework-widget>
-              </div>
-              @if (canRemove(row, i)) {
-                <button type="button"
-                        (click)="removeRow(row, i)"
-                        aria-label="Remove item"
-                        [class]="tw.removeItemBtn">
-                  <svg width="10" height="10" viewBox="0 0 10 10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
-                    <path d="M1 1 L9 9 M9 1 L1 9"/>
-                  </svg>
-                </button>
-              }
+              <select-framework-widget
+                [dataIndex]="rowCtx(row, i).dataIndex()"
+                [layoutIndex]="rowCtx(row, i).layoutIndex()"
+                [layoutNode]="row"></select-framework-widget>
             }
-          </div>
+          } @else {
+            <div
+              [cdkDrag]
+              [cdkDragDisabled]="!isDraggable(row)"
+              [cdkDragStartDelay]="{ touch: 400, mouse: 0 }"
+              [class]="tw.arrayRow">
+              @if (showWidget(row)) {
+                @if (isDraggable(row)) {
+                  <button type="button"
+                          cdkDragHandle
+                          aria-label="Drag to reorder"
+                          [class]="tw.dragGrip"
+                          [attr.title]="'Drag to reorder'">
+                    <svg width="10" height="16" viewBox="0 0 10 16" fill="currentColor" aria-hidden="true">
+                      <circle cx="2.5" cy="3" r="1.4"/><circle cx="7.5" cy="3" r="1.4"/>
+                      <circle cx="2.5" cy="8" r="1.4"/><circle cx="7.5" cy="8" r="1.4"/>
+                      <circle cx="2.5" cy="13" r="1.4"/><circle cx="7.5" cy="13" r="1.4"/>
+                    </svg>
+                  </button>
+                }
+                 <div class="flex-1 min-w-0 jsf-array-cell">
+                  <select-framework-widget
+                    [dataIndex]="rowCtx(row, i).dataIndex()"
+                    [layoutIndex]="rowCtx(row, i).layoutIndex()"
+                    [layoutNode]="row"></select-framework-widget>
+                </div>
+                @if (canRemove(row, i)) {
+                  <button type="button"
+                          (click)="removeRow(row, i)"
+                          aria-label="Remove item"
+                          [class]="tw.removeItemBtn">
+                    <svg width="12" height="12" viewBox="0 0 12 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
+                      <path d="M2 2 L10 10 M10 2 L2 10"/>
+                    </svg>
+                  </button>
+                }
+              }
+            </div>
+          }
         }
       </div>
     </fieldset>`,
+    styles: [`
+      /* stop the row's own field form-group margin from throwing off vertical centring */
+      ::ng-deep .jsf-array-cell > * { margin-bottom: 0 !important; }
+    `],
     changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })

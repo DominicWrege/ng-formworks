@@ -19,6 +19,14 @@
                         "index": "demo/index.html",
                         "polyfills": [],
                         "tsConfig": "demo/tsconfig.app.json",
+                        "allowedCommonJsDependencies": [
+                            "brace",
+                            "brace/mode/json",
+                            "brace/theme/sqlserver",
+                            "ajv",
+                            "ajv-formats",
+                            "ajv/dist/2019"
+                        ],
                         "assets": [
                             "demo/favicon.ico",
                             "demo/assets"

@@ -1,0 +1,116 @@
+{
+  "schema": {
+    "title": "App Toolbar Configuration",
+    "description": "Configure the application toolbar: its appearance, position and the quick actions it shows.",
+    "type": "object",
+    "properties": {
+      "theme": {
+        "type": "string",
+        "title": "Theme",
+        "enum": ["system", "light", "dark"],
+        "default": "system"
+      },
+      "position": {
+        "type": "string",
+        "title": "Position",
+        "enum": ["top", "bottom", "left", "right"],
+        "default": "top"
+      },
+      "compact": {
+        "type": "boolean",
+        "title": "Compact mode",
+        "description": "Reduce button padding and icon size",
+        "default": false
+      },
+      "searchEnabled": {
+        "type": "boolean",
+        "title": "Show search box",
+        "default": true
+      },
+      "searchPlaceholder": {
+        "type": "string",
+        "title": "Search placeholder",
+        "default": "Search the app..."
+      },
+      "notifications": {
+        "type": "boolean",
+        "title": "Notifications badge",
+        "description": "Show an unread-count badge on the bell icon",
+        "default": true
+      },
+      "quickActions": {
+        "type": "array",
+        "title": "Quick actions",
+        "maxItems": 6,
+        "items": {
+          "type": "object",
+          "title": "Quick action",
+          "properties": {
+            "label": { "type": "string", "title": "Label" },
+            "icon": {
+              "type": "string",
+              "title": "Icon",
+              "enum": ["home", "search", "settings", "user", "bell", "help", "logout"]
+            },
+            "shortcut": { "type": "string", "title": "Shortcut", "description": "e.g. Cmd+K" },
+            "enabled": { "type": "boolean", "title": "Enabled", "default": true }
+          },
+          "required": ["label", "icon"]
+        }
+      }
+    },
+    "required": ["theme", "position"]
+  },
+  "layout": [
+    {
+      "type": "section",
+      "title": "Appearance",
+      "items": [
+        {
+          "type": "flex",
+          "flex-flow": "row wrap",
+          "items": ["theme", "position"]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "title": "Behavior",
+      "items": [
+        "compact",
+        "searchEnabled",
+        "notifications",
+        { "key": "searchPlaceholder" }
+      ]
+    },
+    {
+      "type": "section",
+      "title": "Quick actions",
+      "items": [
+        {
+          "key": "quickActions",
+          "type": "array",
+          "items": [
+            { "key": "quickActions[].label", "flex": "2 2 180px" },
+            { "key": "quickActions[].icon", "flex": "1 1 120px" },
+            { "key": "quickActions[].shortcut", "flex": "1 1 120px" },
+            { "key": "quickActions[].enabled", "flex": "0 0 auto" }
+          ]
+        }
+      ]
+    }
+  ],
+  "data": {
+    "theme": "system",
+    "position": "top",
+    "compact": false,
+    "searchEnabled": true,
+    "searchPlaceholder": "Search the app...",
+    "notifications": true,
+    "quickActions": [
+      { "label": "Home", "icon": "home", "shortcut": "", "enabled": true },
+      { "label": "Search", "icon": "search", "shortcut": "Cmd+K", "enabled": true },
+      { "label": "Settings", "icon": "settings", "shortcut": "Cmd+,", "enabled": true }
+    ]
+  }
+}

@@ -53,7 +53,7 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
             ' ' + (options?.style?.selected || '')"
               [dataIndex]="layoutNode()?.dataType === 'array' ? (dataIndex() || []).concat(i) : dataIndex()"
               [layoutIndex]="(layoutIndex() || []).concat(i)"
-            [layoutNode]="layoutItem"></select-framework-widget>
+            [layoutNode]="panelNode(layoutItem)"></select-framework-widget>
           }
         }
         @if (options?.tabMode !='oneOfMode') {
@@ -63,7 +63,7 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
             ' ' + (options?.style?.selected || '')"
             [dataIndex]="layoutNode()?.dataType === 'array' ? (dataIndex() || []).concat(i) : dataIndex()"
             [layoutIndex]="(layoutIndex() || []).concat(i)"
-          [layoutNode]="layoutItem"></select-framework-widget>
+          [layoutNode]="panelNode(layoutItem)"></select-framework-widget>
         }
       </div>
     }`,
@@ -125,6 +125,20 @@ export class TabsComponent implements OnInit,OnDestroy {
 
   setTabTitle(item: any, index: number): string {
     return this.jsf.setArrayItemTitle(this, item, index);
+  }
+
+  /** Hide a container's own title/legend when rendering a tab/option panel,
+   *  since the tab label already identifies it and otherwise the heading is
+   *  duplicated. Only container nodes are affected; leaf fields keep labels. */
+  panelNode(item: any): any {
+    const isContainer = !!item && (
+      item.dataType === 'object' ||
+      Array.isArray(item.items) ||
+      ['section', 'fieldset', 'div', 'flex', 'tab', 'array'].includes(item.type)
+    );
+    return isContainer
+      ? { ...item, options: { ...(item.options || {}), notitle: true } }
+      : item;
   }
 
   ngOnDestroy(): void {

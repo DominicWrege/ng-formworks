@@ -87,6 +87,7 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
       flex-flow:inherit;
       flex-wrap:inherit;
       flex-direction:inherit;
+      gap: 0.75rem;
       width:100%
     }
   `],

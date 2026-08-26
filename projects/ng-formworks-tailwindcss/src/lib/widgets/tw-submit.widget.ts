@@ -7,7 +7,7 @@ import { injectTw, twFieldCls } from '../tw-base';
     selector: 'tw-submit-widget',
     template: `
     <div
-      [class]="options?.htmlClass || ''">
+      [class]="(tw.formGroup + ' ' + (options?.htmlClass || '')).trim()">
       <input
         [attr.aria-describedby]="'control' + layoutNode()?._id + 'Status'"
         [attr.readonly]="options?.readonly ? 'readonly' : null"

@@ -1,0 +1,106 @@
+import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { SectionComponent } from '@ng-formworks/core';
+import { injectTw } from '../tw-base';
+
+/**
+ * Tailwind replacement for the generic 'section' widget (object containers,
+ * fieldsets, divs, flex groups, tabs). Keeps the layout/behaviour of the core
+ * SectionComponent but applies consistent Tailwind styling to the legend,
+ * description and container so it no longer shows unstyled native chrome.
+ */
+@Component({
+    // tslint:disable-next-line:component-selector
+    selector: 'tw-section-widget',
+    template: `
+    @if (containerType === 'div') {
+      <div
+        [class]="options?.htmlClass || 'mb-4'"
+        [class.expandable]="options?.expandable && !expanded"
+        [class.expanded]="options?.expandable && expanded">
+        @if (!options.notitle) {
+          <label
+            class="mb-1 flex cursor-pointer items-center text-sm font-semibold text-gray-900"
+            [class]="options?.labelHtmlClass || ''"
+            (click)="toggleExpanded()">
+            @if (options?.expandable) {
+              <span class="mr-1 inline-block text-gray-500 transition-transform"
+                    [class.rotate-90]="expanded">▸</span>
+            }
+            <span [innerHTML]="options.title | textTemplate:titleContext"></span>
+          </label>
+        }
+        <root-widget
+          [dataIndex]="dataIndex()"
+          [layout]="layoutNode().items"
+          [layoutIndex]="layoutIndex()"
+          [isFlexItem]="getFlexAttribute('is-flex')"
+          [isOrderable]="$safeNavigationMigration(options?.orderable)"
+          [class.form-flex-column]="getFlexAttribute('flex-direction') === 'column'"
+          [class.form-flex-row]="getFlexAttribute('flex-direction') === 'row'"
+          [style.align-content]="getFlexAttribute('align-content')"
+          [style.align-items]="getFlexAttribute('align-items')"
+          [style.display]="!expanded ? 'none' : getFlexAttribute('display')"
+          [style.flex-direction]="getFlexAttribute('flex-direction')"
+          [style.flex-wrap]="getFlexAttribute('flex-wrap')"
+        [style.justify-content]="getFlexAttribute('justify-content')"></root-widget>
+      </div>
+    }
+    @if (containerType === 'fieldset') {
+      <fieldset
+        [class]="options?.htmlClass || 'mb-4'"
+        [class.expandable]="options?.expandable && !expanded"
+        [class.expanded]="options?.expandable && expanded"
+        [disabled]="$safeNavigationMigration(options?.readonly)"
+        class="border-0 p-0 m-0">
+        @if (!options.notitle) {
+          <legend
+            class="mb-1 flex cursor-pointer items-center text-sm font-semibold text-gray-900"
+            [class]="options?.labelHtmlClass || ''"
+            (click)="toggleExpanded()">
+            @if (options?.expandable) {
+              <span class="mr-1 inline-block text-gray-500 transition-transform"
+                    [class.rotate-90]="expanded">▸</span>
+            }
+            <span [innerHTML]="options.title | textTemplate:titleContext"></span>
+          </legend>
+        }
+        @if (options?.messageLocation !== 'bottom') {
+          <div>
+            @if (options?.description) {
+              <p class="mb-2 text-sm text-gray-500"
+                 [class]="options?.labelHelpBlockClass || ''"
+                 [innerHTML]="$safeNavigationMigration(options?.description)"></p>
+            }
+          </div>
+        }
+        <root-widget
+          [dataIndex]="dataIndex()"
+          [layout]="layoutNode().items"
+          [layoutIndex]="layoutIndex()"
+          [isFlexItem]="getFlexAttribute('is-flex')"
+          [isOrderable]="$safeNavigationMigration(options?.orderable)"
+          [class.form-flex-column]="getFlexAttribute('flex-direction') === 'column'"
+          [class.form-flex-row]="getFlexAttribute('flex-direction') === 'row'"
+          [style.align-content]="getFlexAttribute('align-content')"
+          [style.align-items]="getFlexAttribute('align-items')"
+          [style.display]="!expanded ? 'none' : getFlexAttribute('display')"
+          [style.flex-direction]="getFlexAttribute('flex-direction')"
+          [style.flex-wrap]="getFlexAttribute('flex-wrap')"
+        [style.justify-content]="getFlexAttribute('justify-content')"></root-widget>
+        @if (options?.messageLocation === 'bottom') {
+          <div>
+            @if (options?.description) {
+              <p class="mb-2 text-sm text-gray-500"
+                 [class]="options?.labelHelpBlockClass || ''"
+                 [innerHTML]="$safeNavigationMigration(options?.description)"></p>
+            }
+          </div>
+        }
+      </fieldset>
+    }`,
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
+})
+export class TwSectionComponent extends SectionComponent {
+  readonly tw = injectTw();
+}

@@ -7,7 +7,7 @@ import { injectTw } from '../tw-base';
     selector: 'tw-button-widget',
     template: `
     <div
-      [class]="options?.htmlClass || ''">
+      [class]="(tw.formGroup + ' ' + (options?.htmlClass || '')).trim()">
       <button
         [attr.readonly]="options?.readonly ? 'readonly' : null"
         [attr.aria-describedby]="'control' + layoutNode()?._id + 'Status'"

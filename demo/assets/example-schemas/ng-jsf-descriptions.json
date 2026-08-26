@@ -1,0 +1,57 @@
+{
+  "schema": {
+    "title": "Product Details",
+    "description": "Shows how the description keyword renders as helper text under each field.",
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string",
+        "title": "Product name",
+        "description": "The public-facing name of the product. This is the first field users see."
+      },
+      "sku": {
+        "type": "string",
+        "title": "SKU",
+        "description": "A unique stock keeping unit. Optional—auto-generated if left blank."
+      },
+      "price": {
+        "type": "number",
+        "title": "Price",
+        "description": "Price in USD. Supports two decimal places."
+      },
+      "quantity": {
+        "type": "integer",
+        "title": "Initial stock",
+        "description": "How many units to start with.",
+        "default": 0
+      },
+      "in_stock": {
+        "type": "boolean",
+        "title": "Available for sale",
+        "description": "Toggle off to hide the product from the shop."
+      },
+      "notes": {
+        "type": "string",
+        "title": "Internal notes",
+        "description": "Only visible to staff. Supports multiple lines of text."
+      }
+    },
+    "required": ["name", "price"]
+  },
+  "layout": [
+    "name",
+    "sku",
+    "price",
+    "quantity",
+    {"key": "in_stock", "type": "checkbox", "description": "If unchecked the product is hidden from the shop."},
+    {"key": "notes", "type": "textarea"}
+  ],
+  "data": {
+    "name": "Widget Pro",
+    "sku": "WP-1001",
+    "price": 49.99,
+    "quantity": 120,
+    "in_stock": true,
+    "notes": "Ships with a 12 month warranty."
+  }
+}

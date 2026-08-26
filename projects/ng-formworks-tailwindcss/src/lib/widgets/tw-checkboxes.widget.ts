@@ -6,37 +6,16 @@ import { injectTw } from '../tw-base';
     // tslint:disable-next-line:component-selector
     selector: 'tw-checkboxes-widget',
     template: `
-    @if (options?.title) {
-      <label
-        [class]="tw.label + ' ' + (options?.labelHtmlClass || '')"
-        [style.display]="options?.notitle ? 'none' : ''"
-      [innerHTML]="$safeNavigationMigration(options?.title)"></label>
-    }
-
-    @if (layoutOrientation === 'horizontal') {
-      <div [class]="options?.htmlClass || tw.groupHorizontal">
-        @for (checkboxItem of checkboxList; track checkboxItem) {
-          <label
-            [attr.for]="'control' + layoutNode()?._id + '/' + checkboxItem.value"
-        [class]="tw.checkRow + ' ' + (options?.itemLabelHtmlClass || '')">
-            <input type="checkbox"
-              [attr.required]="options?.required"
-              [checked]="checkboxItem.checked"
-              [class]="tw.checkInput + ' ' + (options?.fieldHtmlClass || '')"
-              [disabled]="controlDisabled"
-              [id]="'control' + $safeNavigationMigration(layoutNode()?._id) + '/' + checkboxItem.value"
-              [name]="$safeNavigationMigration(checkboxItem?.name)"
-              [readonly]="options?.readonly ? 'readonly' : null"
-              [value]="checkboxItem.value"
-              (change)="updateValue($event)">
-              <span class="text-sm" [innerHTML]="checkboxItem.name"></span>
-            </label>
-          }
-        </div>
+    <div [class]="tw.formGroup">
+      @if (options?.title) {
+        <label
+          [class]="tw.label + ' ' + (options?.labelHtmlClass || '')"
+          [style.display]="options?.notitle ? 'none' : ''"
+        [innerHTML]="$safeNavigationMigration(options?.title)"></label>
       }
 
-      @if (layoutOrientation === 'vertical') {
-        <div [class]="options?.htmlClass || tw.groupVertical">
+      @if (layoutOrientation === 'horizontal') {
+        <div [class]="options?.htmlClass || tw.groupHorizontal">
           @for (checkboxItem of checkboxList; track checkboxItem) {
             <label
               [attr.for]="'control' + layoutNode()?._id + '/' + checkboxItem.value"
@@ -46,16 +25,48 @@ import { injectTw } from '../tw-base';
                 [checked]="checkboxItem.checked"
                 [class]="tw.checkInput + ' ' + (options?.fieldHtmlClass || '')"
                 [disabled]="controlDisabled"
-                [id]="$safeNavigationMigration(options?.name) + '/' + checkboxItem.value"
+                [id]="'control' + $safeNavigationMigration(layoutNode()?._id) + '/' + checkboxItem.value"
                 [name]="$safeNavigationMigration(checkboxItem?.name)"
                 [readonly]="options?.readonly ? 'readonly' : null"
                 [value]="checkboxItem.value"
                 (change)="updateValue($event)">
-                <span class="text-sm" [innerHTML]="$safeNavigationMigration(checkboxItem?.name)"></span>
+                <span class="text-sm" [innerHTML]="checkboxItem.name"></span>
               </label>
             }
           </div>
-        }`,
+        }
+
+        @if (layoutOrientation === 'vertical') {
+          <div [class]="options?.htmlClass || tw.groupVertical">
+            @for (checkboxItem of checkboxList; track checkboxItem) {
+              <label
+                [attr.for]="'control' + layoutNode()?._id + '/' + checkboxItem.value"
+            [class]="tw.checkRow + ' ' + (options?.itemLabelHtmlClass || '')">
+                <input type="checkbox"
+                  [attr.required]="options?.required"
+                  [checked]="checkboxItem.checked"
+                  [class]="tw.checkInput + ' ' + (options?.fieldHtmlClass || '')"
+                  [disabled]="controlDisabled"
+                  [id]="$safeNavigationMigration(options?.name) + '/' + checkboxItem.value"
+                  [name]="$safeNavigationMigration(checkboxItem?.name)"
+                  [readonly]="options?.readonly ? 'readonly' : null"
+                  [value]="checkboxItem.value"
+                  (change)="updateValue($event)">
+                  <span class="text-sm" [innerHTML]="$safeNavigationMigration(checkboxItem?.name)"></span>
+                </label>
+              }
+            </div>
+          }
+    </div>`,
+    styles: [`
+      /* custom drawn checkbox: white check on the orange fill */
+      ::ng-deep input[type="checkbox"].jsf-check:checked {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white' stroke-width='3'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M4.5 12.75l6 6 9-13.5'/%3E%3C/svg%3E");
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: 0.875rem;
+      }
+    `],
     changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })

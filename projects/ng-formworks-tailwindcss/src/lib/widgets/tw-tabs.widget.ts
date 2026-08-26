@@ -17,7 +17,7 @@ import { injectTw } from '../tw-base';
                 <input type="radio"
                   name="tabSelection"
                   [(ngModel)]="selectedItem"
-                  class="mr-1.5 h-3.5 w-3.5 accent-orange-600"
+                  class="mr-1.5 h-4 w-4 accent-orange-600"
                   [value]="i"
                   (change)="select(i)"
                   />
@@ -37,14 +37,14 @@ import { injectTw } from '../tw-base';
             <select-framework-widget
               [dataIndex]="layoutNode()?.dataType === 'array' ? (dataIndex() || []).concat(i) : dataIndex()"
               [layoutIndex]="(layoutIndex() || []).concat(i)"
-            [layoutNode]="layoutItem"></select-framework-widget>
+            [layoutNode]="panelNode(layoutItem)"></select-framework-widget>
           }
         }
         @if (options?.tabMode !='oneOfMode') {
           <select-framework-widget
             [dataIndex]="layoutNode()?.dataType === 'array' ? (dataIndex() || []).concat(i) : dataIndex()"
             [layoutIndex]="(layoutIndex() || []).concat(i)"
-          [layoutNode]="layoutItem"></select-framework-widget>
+          [layoutNode]="panelNode(layoutItem)"></select-framework-widget>
         }
       </div>
     }`,
@@ -56,4 +56,18 @@ import { injectTw } from '../tw-base';
 })
 export class TwTabsComponent extends TabsComponent {
   readonly tw = injectTw();
+
+  /** Hide a container's own title/legend when rendering a tab/option panel,
+   *  since the tab/radio label already identifies it and otherwise the heading
+   *  is duplicated. Only container nodes are affected; leaf fields keep labels. */
+  panelNode(item: any): any {
+    const isContainer = !!item && (
+      item.dataType === 'object' ||
+      Array.isArray(item.items) ||
+      ['section', 'fieldset', 'div', 'flex', 'tab', 'array'].includes(item.type)
+    );
+    return isContainer
+      ? { ...item, options: { ...(item.options || {}), notitle: true } }
+      : item;
+  }
 }

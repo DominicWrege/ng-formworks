@@ -6,39 +6,17 @@ import { injectTw } from '../tw-base';
     // tslint:disable-next-line:component-selector
     selector: 'tw-radios-widget',
     template: `
-    @if (options?.title) {
-      <label
-        [attr.for]="'control' + layoutNode()?._id"
-        [class]="tw.label + ' ' + (options?.labelHtmlClass || '')"
-        [style.display]="options?.notitle ? 'none' : ''"
-      [innerHTML]="$safeNavigationMigration(options?.title)"></label>
-    }
-
-    @if (layoutOrientation === 'horizontal') {
-      <div [class]="options?.htmlClass || tw.groupHorizontal">
-        @for (radioItem of radiosList; track radioItem) {
-          <label
-            [attr.for]="'control' + layoutNode()?._id + '/' + radioItem?.value"
-        [class]="tw.checkRow + ' ' + (options?.itemLabelHtmlClass || '')">
-            <input type="radio"
-              [attr.aria-describedby]="'control' + layoutNode()?._id + 'Status'"
-              [attr.readonly]="options?.readonly ? 'readonly' : null"
-              [attr.required]="options?.required"
-              [checked]="radioItem?.value === controlValue"
-              [class]="tw.checkInput + ' ' + (options?.fieldHtmlClass || '')"
-              [disabled]="controlDisabled"
-              [id]="'control' + $safeNavigationMigration(layoutNode()?._id) + '/' + $safeNavigationMigration(radioItem?.value)"
-              [name]="controlName"
-              [value]="$safeNavigationMigration(radioItem?.value)"
-              (change)="updateValue($event)">
-              <span class="text-sm" [innerHTML]="$safeNavigationMigration(radioItem?.name)"></span>
-            </label>
-          }
-        </div>
+    <div [class]="tw.formGroup">
+      @if (options?.title) {
+        <label
+          [attr.for]="'control' + layoutNode()?._id"
+          [class]="tw.label + ' ' + (options?.labelHtmlClass || '')"
+          [style.display]="options?.notitle ? 'none' : ''"
+        [innerHTML]="$safeNavigationMigration(options?.title)"></label>
       }
 
-      @if (layoutOrientation !== 'horizontal') {
-        <div [class]="options?.htmlClass || tw.groupVertical">
+      @if (layoutOrientation === 'horizontal') {
+        <div [class]="options?.htmlClass || tw.groupHorizontal">
           @for (radioItem of radiosList; track radioItem) {
             <label
               [attr.for]="'control' + layoutNode()?._id + '/' + radioItem?.value"
@@ -58,7 +36,31 @@ import { injectTw } from '../tw-base';
               </label>
             }
           </div>
-        }`,
+        }
+
+        @if (layoutOrientation !== 'horizontal') {
+          <div [class]="options?.htmlClass || tw.groupVertical">
+            @for (radioItem of radiosList; track radioItem) {
+              <label
+                [attr.for]="'control' + layoutNode()?._id + '/' + radioItem?.value"
+            [class]="tw.checkRow + ' ' + (options?.itemLabelHtmlClass || '')">
+                <input type="radio"
+                  [attr.aria-describedby]="'control' + layoutNode()?._id + 'Status'"
+                  [attr.readonly]="options?.readonly ? 'readonly' : null"
+                  [attr.required]="options?.required"
+                  [checked]="radioItem?.value === controlValue"
+                  [class]="tw.checkInput + ' ' + (options?.fieldHtmlClass || '')"
+                  [disabled]="controlDisabled"
+                  [id]="'control' + $safeNavigationMigration(layoutNode()?._id) + '/' + $safeNavigationMigration(radioItem?.value)"
+                  [name]="controlName"
+                  [value]="$safeNavigationMigration(radioItem?.value)"
+                  (change)="updateValue($event)">
+                  <span class="text-sm" [innerHTML]="$safeNavigationMigration(radioItem?.name)"></span>
+                </label>
+              }
+            </div>
+          }
+    </div>`,
     changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })

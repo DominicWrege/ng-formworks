@@ -21,6 +21,8 @@ import { TwSubmitComponent } from './widgets/tw-submit.widget';
 import { TwTabsComponent } from './widgets/tw-tabs.widget';
 import { TwOneOfComponent } from './widgets/tw-oneof.widget';
 import { TwArraySectionComponent } from './widgets/tw-array.widget';
+import { TwAddReferenceComponent } from './widgets/tw-add-reference.widget';
+import { TwSectionComponent } from './widgets/tw-section.widget';
 
 /**
  * Registers the `tailwindcss` framework with @ng-formworks/core.
@@ -53,6 +55,8 @@ import { TwArraySectionComponent } from './widgets/tw-array.widget';
         TwTabsComponent,
         TwOneOfComponent,
         TwArraySectionComponent,
+        TwAddReferenceComponent,
+        TwSectionComponent,
     ],
     exports: [JsonSchemaFormModule],
     providers: [

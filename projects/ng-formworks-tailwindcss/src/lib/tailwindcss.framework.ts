@@ -13,6 +13,8 @@ import { TwSubmitComponent } from './widgets/tw-submit.widget';
 import { TwTabsComponent } from './widgets/tw-tabs.widget';
 import { TwOneOfComponent } from './widgets/tw-oneof.widget';
 import { TwArraySectionComponent } from './widgets/tw-array.widget';
+import { TwAddReferenceComponent } from './widgets/tw-add-reference.widget';
+import { TwSectionComponent } from './widgets/tw-section.widget';
 
 @Injectable()
 export class TailwindFramework extends Framework {
@@ -46,7 +48,9 @@ export function defaultWidgetOverrides(): { [key: string]: any } {
     'submit': TwSubmitComponent,
     'reset': 'submit',
     // layout
+    'section': TwSectionComponent,
     'array': TwArraySectionComponent,
+    '$ref': TwAddReferenceComponent,
     'tabs': TwTabsComponent,
     'tabarray': 'tabs',
     'one-of': TwOneOfComponent,
