@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 import {
   JsonSchemaFormModule,
   WidgetLibraryModule,
@@ -19,6 +20,7 @@ import { TwButtonComponent } from './widgets/tw-button.widget';
 import { TwSubmitComponent } from './widgets/tw-submit.widget';
 import { TwTabsComponent } from './widgets/tw-tabs.widget';
 import { TwOneOfComponent } from './widgets/tw-oneof.widget';
+import { TwArraySectionComponent } from './widgets/tw-array.widget';
 
 /**
  * Registers the `tailwindcss` framework with @ng-formworks/core.
@@ -35,6 +37,7 @@ import { TwOneOfComponent } from './widgets/tw-oneof.widget';
         WidgetLibraryModule,
         FormsModule,
         ReactiveFormsModule,
+        DragDropModule,
     ],
     declarations: [
         TailwindFrameworkComponent,
@@ -49,6 +52,7 @@ import { TwOneOfComponent } from './widgets/tw-oneof.widget';
         TwSubmitComponent,
         TwTabsComponent,
         TwOneOfComponent,
+        TwArraySectionComponent,
     ],
     exports: [JsonSchemaFormModule],
     providers: [

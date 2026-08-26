@@ -29,6 +29,14 @@ export const TAILWIND_DEFAULT_CLASSES: TailwindFormClasses = {
     tab: 'block cursor-pointer px-3 py-2 text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-800',
     tabActive: 'border-orange-500 text-orange-600 font-medium hover:text-orange-600',
     tabPanel: '',
+    arrayRow: 'relative flex items-start gap-1',
+    dragGrip:
+        'mt-1.5 shrink-0 select-none text-gray-300 hover:text-gray-600 ' +
+        'cursor-grab active:cursor-grabbing',
+    removeItemBtn:
+        'absolute -top-2 -right-2 z-10 flex h-5 w-5 items-center justify-center ' +
+        'rounded-full bg-white text-gray-400 shadow ring-1 ring-gray-200 ' +
+        'hover:bg-red-50 hover:text-red-600',
 };
 
 /**

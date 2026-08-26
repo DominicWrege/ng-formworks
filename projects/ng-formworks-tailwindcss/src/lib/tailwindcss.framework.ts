@@ -12,6 +12,7 @@ import { TwButtonComponent } from './widgets/tw-button.widget';
 import { TwSubmitComponent } from './widgets/tw-submit.widget';
 import { TwTabsComponent } from './widgets/tw-tabs.widget';
 import { TwOneOfComponent } from './widgets/tw-oneof.widget';
+import { TwArraySectionComponent } from './widgets/tw-array.widget';
 
 @Injectable()
 export class TailwindFramework extends Framework {
@@ -45,6 +46,7 @@ export function defaultWidgetOverrides(): { [key: string]: any } {
     'submit': TwSubmitComponent,
     'reset': 'submit',
     // layout
+    'array': TwArraySectionComponent,
     'tabs': TwTabsComponent,
     'tabarray': 'tabs',
     'one-of': TwOneOfComponent,

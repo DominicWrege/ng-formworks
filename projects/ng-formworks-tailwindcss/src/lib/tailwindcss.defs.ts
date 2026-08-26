@@ -38,6 +38,12 @@ export interface TailwindFormClasses {
     tabActive: string;
     /** outer panel div of each tab pane */
     tabPanel: string;
+    /** array item row wrapper (remove/drag container) */
+    arrayRow: string;
+    /** drag grip handle button */
+    dragGrip: string;
+    /** corner remove (x) button */
+    removeItemBtn: string;
 }
 
 export const TAILWIND_CFG = new InjectionToken<TailwindFormClasses>('TAILWIND_FORM_CLASSES');

@@ -28,6 +28,7 @@
         "@angular/core": ">=22.0.0",
         "@angular/forms": ">=22.0.0",
         "@ng-formworks/core": ">=22.0.0",
-        "rxjs": "^7.0.0"
+        "rxjs": "^7.0.0",
+        "@angular/cdk": ">=22.0.0"
     }
 }
