@@ -1,96 +1,19 @@
-import { Component, OnChanges, OnDestroy, OnInit, SimpleChanges, inject, input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnChanges, OnDestroy, OnInit, SimpleChanges, inject, input } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { JsonSchemaFormService } from '../json-schema-form.service';
+import { RootComponent } from './root.component';
+import { TextTemplatePipe } from './text-template.pipe';
 
 
 @Component({
-  // tslint:disable-next-line:component-selector
+  imports: [RootComponent, TextTemplatePipe],
   selector: 'section-widget',
-  template: `
-    @if (containerType === 'div') {
-      <div
-        [class]="options?.htmlClass || ''"
-        [class.expandable]="options?.expandable && !expanded"
-        [class.expanded]="options?.expandable && expanded">
-        @if (!options.notitle) {
-          <label
-            class="legend"
-            [class]="options?.labelHtmlClass || ''"
-            [innerHTML]="options.title|textTemplate:titleContext"
-          (click)="toggleExpanded()"></label>
-        }
-        <root-widget
-          [dataIndex]="dataIndex()"
-          [layout]="layoutNode().items"
-          [layoutIndex]="layoutIndex()"
-          [isFlexItem]="getFlexAttribute('is-flex')"
-          [isOrderable]="$safeNavigationMigration(options?.orderable)"
-          [class.form-flex-column]="getFlexAttribute('flex-direction') === 'column'"
-          [class.form-flex-row]="getFlexAttribute('flex-direction') === 'row'"
-          [style.align-content]="getFlexAttribute('align-content')"
-          [style.align-items]="getFlexAttribute('align-items')"
-          [style.display]="!expanded?'none':getFlexAttribute('display')"
-          [style.flex-direction]="getFlexAttribute('flex-direction')"
-          [style.flex-wrap]="getFlexAttribute('flex-wrap')"
-        [style.justify-content]="getFlexAttribute('justify-content')"></root-widget>
-      </div>
-    }
-    @if (containerType === 'fieldset') {
-      <fieldset
-        [class]="options?.htmlClass || ''"
-        [class.expandable]="options?.expandable && !expanded"
-        [class.expanded]="options?.expandable && expanded"
-        [disabled]="$safeNavigationMigration(options?.readonly)">
-        @if (!options.notitle) {
-          <legend
-            class="legend"
-            [class]="options?.labelHtmlClass || ''"
-            [innerHTML]="options.title|textTemplate:titleContext"
-          (click)="toggleExpanded()"></legend>
-        }
-        @if (options?.messageLocation !== 'bottom') {
-          <div>
-            @if (options?.description) {
-              <p
-                class="help-block"
-                [class]="options?.labelHelpBlockClass || ''"
-              [innerHTML]="$safeNavigationMigration(options?.description)"></p>
-            }
-          </div>
-        }
-        <root-widget
-          [dataIndex]="dataIndex()"
-          [layout]="layoutNode().items"
-          [layoutIndex]="layoutIndex()"
-          [isFlexItem]="getFlexAttribute('is-flex')"
-          [isOrderable]="$safeNavigationMigration(options?.orderable)"
-          [class.form-flex-column]="getFlexAttribute('flex-direction') === 'column'"
-          [class.form-flex-row]="getFlexAttribute('flex-direction') === 'row'"
-          [style.align-content]="getFlexAttribute('align-content')"
-          [style.align-items]="getFlexAttribute('align-items')"
-          [style.display]="!expanded?'none':getFlexAttribute('display')"
-          [style.flex-direction]="getFlexAttribute('flex-direction')"
-          [style.flex-wrap]="getFlexAttribute('flex-wrap')"
-        [style.justify-content]="getFlexAttribute('justify-content')"></root-widget>
-        @if (options?.messageLocation === 'bottom') {
-          <div>
-            @if (options?.description) {
-              <p
-                class="help-block"
-                [class]="options?.labelHelpBlockClass || ''"
-              [innerHTML]="$safeNavigationMigration(options?.description)"></p>
-            }
-          </div>
-        }
-      </fieldset>
-    }`,
+  templateUrl: './section.component.html',
   styles: [`
     .legend { font-weight: bold; }
     .expandable > legend:before, .expandable > label:before  { content: '▶'; padding-right: .3em; font-family:auto }
     .expanded > legend:before, .expanded > label:before  { content: '▼'; padding-right: .2em; }
   `],
-  changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false
 })
 export class SectionComponent implements OnInit, OnDestroy, OnChanges {
 
@@ -132,7 +55,6 @@ export class SectionComponent implements OnInit, OnDestroy, OnChanges {
     this.updateTitleContext();
     this.dataChangesSubs = this.jsf.dataChanges.subscribe((val) => {
       this.updateTitleContext();
-      // this.cdr.markForCheck();
     })
   }
 

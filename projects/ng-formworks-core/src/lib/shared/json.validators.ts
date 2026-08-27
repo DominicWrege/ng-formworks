@@ -347,7 +347,7 @@ export class JsonValidators {
       let isValid: boolean;
       const currentValue: string|Date = control.value;
       if (isString(currentValue)) {
-        //TODO fix-Reg exp last index problem
+        // TODO(fix): Reg exp last index problem
         //see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/test
         //before every call to .test it needs to be reset
         //use either formatTest.lastIndex = 0; // Reset the lastIndex before each test
@@ -672,9 +672,6 @@ export class JsonValidators {
     return (control: AbstractControl, invert = false): ValidationErrors|null => {
       if (isEmpty(control.value) || !isArray(control.value)) { return null; }
       const currentItems = control.value;
-      // const isValid = currentItems.some(item =>
-      //
-      // );
       const isValid = true;
       return xor(isValid, invert) ?
         null : { 'contains': { requiredItem, currentItems } };
@@ -877,7 +874,6 @@ export class JsonValidators {
   static email(control: AbstractControl): ValidationErrors|null {
     if (!control) { return JsonValidators.nullValidator; }
     const EMAIL_REGEXP =
-      // tslint:disable-next-line:max-line-length
       /^(?=.{1,254}$)(?=.{1,64}@)[-!#$%&'*+/0-9=?A-Z^_`a-z{|}~]+(\.[-!#$%&'*+/0-9=?A-Z^_`a-z{|}~]+)*@[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?(\.[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?)*$/;
     return EMAIL_REGEXP.test(control.value) ? null : { 'email': true };
   }

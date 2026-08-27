@@ -37,8 +37,6 @@ export class FrameworkLibraryService {
       this.frameworkLibrary[framework.name] = framework
     );
     this.defaultFramework = this.frameworks[0].name;
-    //this.setFramework(this.defaultFramework);
-    
     this.activeFrameworkName=this.defaultFramework;
     this.activeFrameworkNameSubject = new Subject<string>();
     this.activeFrameworkName$ = this.activeFrameworkNameSubject.asObservable();
@@ -112,7 +110,7 @@ export class FrameworkLibraryService {
   //scripts and styles are include locally with the parent app
   public getFrameworkAssetConfig(existingFramework?:any,useAssetRelPath=true):Promise<{stylesheets:string[],scripts:string[]}>{
     let actFramework:Framework& { [key: string]: any; }=existingFramework||this.activeFramework;
-    //TODO move this into config
+    // TODO: move this into config
     const assetConfigPath = `assets/${actFramework.name}/cssframework`
     const assetConfigURL = `${assetConfigPath}/assets.json`;
     let subs=this.http

@@ -1,5 +1,6 @@
-import { Component, ChangeDetectionStrategy, inject, input } from '@angular/core';
+import { Component, inject, input } from '@angular/core';
 import { JsonSchemaFormService } from '@ng-formworks/core';
+import { SelectWidgetComponent } from '@ng-formworks/core';
 
 /**
  * Root component for the tailwindcss framework.
@@ -7,16 +8,9 @@ import { JsonSchemaFormService } from '@ng-formworks/core';
  * select-widget-widget; all styling lives in the widget overrides.
  */
 @Component({
-    // tslint:disable-next-line:component-selector
+    imports: [SelectWidgetComponent],
     selector: 'tailwindcss-framework',
-    template: `
-    <select-widget-widget
-      [dataIndex]="dataIndex()"
-      [layoutIndex]="layoutIndex()"
-      [layoutNode]="layoutNode()">
-    </select-widget-widget>`,
-    changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false,
+    templateUrl: './tailwindcss.component.html',
 })
 export class TailwindFrameworkComponent {
   jsf = inject(JsonSchemaFormService);

@@ -1,74 +1,16 @@
-import { Component, inject, input, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, input, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
 import { FrameworkLibraryService } from '../framework-library/framework-library.service';
 import { JsonSchemaFormService } from '../json-schema-form.service';
 import { buildTitleMap, isArray } from '../shared';
+import { FormsModule } from '@angular/forms';
 
 //component created as a fallback for the checkbox/sortabljs issue
 //its meant to display a select as a checkbox
 @Component({
-  // tslint:disable-next-line:component-selector
+  imports: [FormsModule],
   selector: 'selectcheckbox-widget',
-  template: `
-    <div
-      [class]="options?.htmlClass || ''">
-      @if (boundControl) {
-        <select
-          [attr.aria-describedby]="'control' + layoutNode()?._id + 'Status'"
-          [attr.readonly]="options?.readonly ? 'readonly' : null"
-          [attr.required]="options?.required"
-          [class]=" frameworkStyles[activeFramework].selectClass"
-          [multiple]="true"
-          [id]="'control' + $safeNavigationMigration(layoutNode()?._id)"
-          [name]="controlName"
-          [ngModel]="selectValue"
-          >
-          @for (selectItem of selectList; track selectItem) {
-            @if (!isArray($safeNavigationMigration(selectItem?.items))) {
-              <option
-                [class]="frameworkStyles[activeFramework].optionClass"
-                [class.active]="selectItem?.value === controlValue"
-                [class.unchecked-notusing]="selectItem?.value != controlValue"
-                [value]="$safeNavigationMigration(selectItem?.value)"
-                (click)="onSelectClicked($event)"
-                type="checkbox"
-                >
-              </option>
-            }
-            <!--NB the text is out of the option element to display besides the checkbox-->
-            <span [innerHTML]="$safeNavigationMigration(selectItem?.name)"></span>
-          }
-        </select>
-      }
-      @if (!boundControl) {
-        <select
-          [attr.aria-describedby]="'control' + layoutNode()?._id + 'Status'"
-          [attr.readonly]="options?.readonly ? 'readonly' : null"
-          [attr.required]="options?.required"
-          [class]="frameworkStyles[activeFramework].selectClass +' select-box'"
-          [multiple]="true"
-          [disabled]="controlDisabled"
-          [id]="'control' + $safeNavigationMigration(layoutNode()?._id)"
-          [name]="controlName"
-          (change)="updateValue($event)">
-          @for (selectItem of selectList; track selectItem) {
-            @if (!isArray($safeNavigationMigration(selectItem?.items))) {
-              <option
-                [selected]="selectItem?.value === controlValue"
-                [class]="frameworkStyles[activeFramework].optionClass"
-                [class.checked-notusing]="selectItem?.value === controlValue"
-                [class.unchecked-notusing]]="selectItem?.value != controlValue"
-                [value]="$safeNavigationMigration(selectItem?.value)"
-                type="checkbox">
-              </option>
-            }
-            <!--NB the text is out of the option element to display besides the checkbox-->
-            <span [innerHTML]="$safeNavigationMigration(selectItem?.name)"></span>
-          }
-        </select>
-      }
-    
-    </div>`,
+  templateUrl: './selectcheckbox.component.html',
     styles:[`
         /* Style the select element */
         .select-box {
@@ -156,8 +98,6 @@ import { buildTitleMap, isArray } from '../shared';
         }
       
       `],
-  changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false
 })
 export class SelectCheckboxComponent implements OnInit, OnDestroy {
   private jsf = inject(JsonSchemaFormService);
@@ -192,11 +132,9 @@ export class SelectCheckboxComponent implements OnInit, OnDestroy {
     this.options = this.layoutNode().options || {};
     this.activeFramework= this.jsfFLService.activeFramework.name;
     this.selectList = buildTitleMap(
-      //this.options.titleMap || this.options.enumNames,
-      //TODO review-title is set to null in the setTitle() method of CssFrameworkComponent
-      this.options.enumNames || (this.options?.title && [this.options?.title]) 
+      // TODO(review): title is set to null in the setTitle() method of CssFrameworkComponent
+      this.options.enumNames || (this.options?.title && [this.options?.title])
       || [this.layoutNode().name],
-      //this.options.enum, 
       [true],
       //make required true to avoid creating 'none' select option
       true, !!this.options.flatList

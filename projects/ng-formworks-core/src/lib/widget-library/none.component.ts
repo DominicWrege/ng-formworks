@@ -1,11 +1,8 @@
-import { Component, input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, input } from '@angular/core';
 
 @Component({
-    // tslint:disable-next-line:component-selector
     selector: 'none-widget',
-    template: ``,
-    changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    templateUrl: './none.component.html',
 })
 export class NoneComponent {
   readonly layoutNode = input<any>(undefined);

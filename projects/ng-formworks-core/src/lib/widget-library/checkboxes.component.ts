@@ -1,73 +1,12 @@
-import { Component, inject, input, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, input, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
 import { JsonSchemaFormService, TitleMapItem } from '../json-schema-form.service';
 import { buildTitleMap } from '../shared';
 
 
 @Component({
-    // tslint:disable-next-line:component-selector
     selector: 'checkboxes-widget',
-    template: `
-    @if (options?.title) {
-      <label
-        [class]="options?.labelHtmlClass || ''"
-        [style.display]="options?.notitle ? 'none' : ''"
-      [innerHTML]="$safeNavigationMigration(options?.title)"></label>
-    }
-    
-    <!-- 'horizontal' = checkboxes-inline or checkboxbuttons -->
-    @if (layoutOrientation === 'horizontal') {
-      <div [class]="options?.htmlClass || ''">
-        @for (checkboxItem of checkboxList; track checkboxItem) {
-          <label
-            [attr.for]="'control' + layoutNode()?._id + '/' + checkboxItem.value"
-        [class]="(options?.itemLabelHtmlClass || '') + (checkboxItem.checked ?
-          (' ' + (options?.activeClass || '') + ' ' + (options?.style?.selected || '')) :
-          (' ' + (options?.style?.unselected || '')))">
-            <input type="checkbox"
-              [attr.required]="options?.required"
-              [checked]="checkboxItem.checked"
-              [class]="options?.fieldHtmlClass || ''"
-              [disabled]="controlDisabled"
-              [id]="'control' + $safeNavigationMigration(layoutNode()?._id) + '/' + checkboxItem.value"
-              [name]="$safeNavigationMigration(checkboxItem?.name)"
-              [readonly]="options?.readonly ? 'readonly' : null"
-              [value]="checkboxItem.value"
-              (change)="updateValue($event)">
-              <span [innerHTML]="checkboxItem.name"></span>
-            </label>
-          }
-        </div>
-      }
-    
-      <!-- 'vertical' = regular checkboxes -->
-      @if (layoutOrientation === 'vertical') {
-        <div>
-          @for (checkboxItem of checkboxList; track checkboxItem) {
-            <div [class]="options?.htmlClass || ''">
-              <label
-                [attr.for]="'control' + layoutNode()?._id + '/' + checkboxItem.value"
-          [class]="(options?.itemLabelHtmlClass || '') + (checkboxItem.checked ?
-            (' ' + (options?.activeClass || '') + ' ' + (options?.style?.selected || '')) :
-            (' ' + (options?.style?.unselected || '')))">
-                <input type="checkbox"
-                  [attr.required]="options?.required"
-                  [checked]="checkboxItem.checked"
-                  [class]="options?.fieldHtmlClass || ''"
-                  [disabled]="controlDisabled"
-                  [id]="$safeNavigationMigration(options?.name) + '/' + checkboxItem.value"
-                  [name]="$safeNavigationMigration(checkboxItem?.name)"
-                  [readonly]="options?.readonly ? 'readonly' : null"
-                  [value]="checkboxItem.value"
-                  (change)="updateValue($event)">
-                  <span [innerHTML]="$safeNavigationMigration(checkboxItem?.name)"></span>
-                </label>
-              </div>
-            }
-          </div>
-        }`,
-    changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    templateUrl: './checkboxes.component.html',
 })
 export class CheckboxesComponent implements OnInit,OnDestroy {
   private jsf = inject(JsonSchemaFormService);
@@ -113,9 +52,8 @@ export class CheckboxesComponent implements OnInit,OnDestroy {
     }
   }
 
-  //TODO review this
+  // TODO(review): resetting the control to an empty value here may not be needed
   ngOnDestroy () {
-        //this.jsf.updateValue(this, null);
         let nullVal=[];
         this.formControl.reset(nullVal)
         this.controlValue=null;

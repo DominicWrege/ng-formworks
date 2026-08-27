@@ -1,19 +1,12 @@
-import { Component, OnInit, input, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, input, inject } from '@angular/core';
 import { JsonSchemaFormService } from '../json-schema-form.service';
+import { RootComponent } from './root.component';
 
 
 @Component({
-    // tslint:disable-next-line:component-selector
+    imports: [RootComponent],
     selector: 'tab-widget',
-    template: `
-    <div [class]="options?.htmlClass || ''">
-      <root-widget
-        [dataIndex]="dataIndex()"
-        [layoutIndex]="layoutIndex()"
-        [layout]="layoutNode().items"></root-widget>
-    </div>`,
-    changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    templateUrl: './tab.component.html',
 })
 export class TabComponent implements OnInit {
   private jsf = inject(JsonSchemaFormService);

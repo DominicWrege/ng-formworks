@@ -1,20 +1,12 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component } from '@angular/core';
 import { OneOfComponent } from '@ng-formworks/core';
 import { injectTw } from '../tw-base';
+import { TwTabsComponent } from './tw-tabs.widget';
 
 @Component({
-    // tslint:disable-next-line:component-selector
+    imports: [TwTabsComponent],
     selector: 'tw-one-of-widget',
-    template: `
-    @if (this.options?.description) {
-      <p [class]="tw.helpText" [innerHTML]="this.options?.description"></p>
-    }
-    <tw-tabs-widget #tabs [layoutNode]="layoutNode()"
-    [layoutIndex]="layoutIndex()"
-    [dataIndex]="dataIndex()">
-    </tw-tabs-widget>`,
-    changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    templateUrl: './tw-oneof.widget.html',
 })
 export class TwOneOfComponent extends OneOfComponent {
   readonly tw = injectTw();

@@ -1,0 +1,59 @@
+<div
+  [class]="options?.htmlClass || ''">
+  @if (boundControl) {
+    <select
+      [attr.aria-describedby]="'control' + layoutNode()?._id + 'Status'"
+      [attr.readonly]="options?.readonly ? 'readonly' : null"
+      [attr.required]="options?.required"
+      [class]=" frameworkStyles[activeFramework].selectClass"
+      [multiple]="true"
+      [id]="'control' + $safeNavigationMigration(layoutNode()?._id)"
+      [name]="controlName"
+      [ngModel]="selectValue"
+      >
+      @for (selectItem of selectList; track selectItem) {
+        @if (!isArray($safeNavigationMigration(selectItem?.items))) {
+          <option
+            [class]="frameworkStyles[activeFramework].optionClass"
+            [class.active]="selectItem?.value === controlValue"
+            [class.unchecked-notusing]="selectItem?.value != controlValue"
+            [value]="$safeNavigationMigration(selectItem?.value)"
+            (click)="onSelectClicked($event)"
+            type="checkbox"
+            >
+          </option>
+        }
+        <!--NB the text is out of the option element to display besides the checkbox-->
+        <span [innerHTML]="$safeNavigationMigration(selectItem?.name)"></span>
+      }
+    </select>
+  }
+  @if (!boundControl) {
+    <select
+      [attr.aria-describedby]="'control' + layoutNode()?._id + 'Status'"
+      [attr.readonly]="options?.readonly ? 'readonly' : null"
+      [attr.required]="options?.required"
+      [class]="frameworkStyles[activeFramework].selectClass +' select-box'"
+      [multiple]="true"
+      [disabled]="controlDisabled"
+      [id]="'control' + $safeNavigationMigration(layoutNode()?._id)"
+      [name]="controlName"
+      (change)="updateValue($event)">
+      @for (selectItem of selectList; track selectItem) {
+        @if (!isArray($safeNavigationMigration(selectItem?.items))) {
+          <option
+            [selected]="selectItem?.value === controlValue"
+            [class]="frameworkStyles[activeFramework].optionClass"
+            [class.checked-notusing]="selectItem?.value === controlValue"
+            [class.unchecked-notusing]]="selectItem?.value != controlValue"
+            [value]="$safeNavigationMigration(selectItem?.value)"
+            type="checkbox">
+          </option>
+        }
+        <!--NB the text is out of the option element to display besides the checkbox-->
+        <span [innerHTML]="$safeNavigationMigration(selectItem?.name)"></span>
+      }
+    </select>
+  }
+
+</div>

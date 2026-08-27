@@ -1,0 +1,96 @@
+{
+  "schema": {
+    "title": "Layout & Conditionals",
+    "type": "object",
+    "properties": {
+      "first_name": { "type": "string", "title": "First name" },
+      "last_name": { "type": "string", "title": "Last name" },
+      "email": { "type": "string", "format": "email", "title": "Email" },
+      "address": {
+        "type": "object",
+        "title": "Address",
+        "properties": {
+          "street": { "type": "string", "title": "Street" },
+          "city": { "type": "string", "title": "City" },
+          "zip": { "type": "string", "title": "ZIP" }
+        }
+      },
+      "notifications": { "type": "boolean", "title": "Enable notifications", "default": true },
+      "notes": { "type": "string", "title": "Notes" },
+      "order_type": { "type": "string", "title": "Order type", "enum": ["pickup", "delivery"], "default": "pickup" }
+    },
+    "required": ["first_name", "last_name"],
+    "allOf": [
+      {
+        "if": { "properties": { "order_type": { "const": "pickup" } } },
+        "then": {
+          "type": "object",
+          "properties": {
+            "pickup_location": { "type": "string", "title": "Pickup location", "enum": ["Main Street Store", "Airport Mall Store"] }
+          },
+          "required": ["pickup_location"]
+        }
+      },
+      {
+        "if": { "properties": { "order_type": { "const": "delivery" } } },
+        "then": {
+          "type": "object",
+          "properties": {
+            "courier": { "type": "string", "title": "Courier", "enum": ["DHL", "UPS", "FedEx"] },
+            "delivery_window": { "type": "string", "title": "Delivery window", "format": "time" }
+          },
+          "required": ["courier"]
+        }
+      }
+    ]
+  },
+  "layout": [
+    {
+      "type": "flex", "flex-flow": "row wrap",
+      "items": [
+        { "key": "first_name", "flex": "1 1 150px" },
+        { "key": "last_name", "flex": "1 1 150px" }
+      ]
+    },
+    "email",
+    {
+      "type": "tabs",
+      "tabs": [
+        {
+          "title": "Profile",
+          "items": ["notifications"]
+        },
+        {
+          "title": "Address",
+          "items": [
+            { "key": "address.street", "notitle": true, "placeholder": "Street" },
+            {
+              "type": "flex", "flex-flow": "row wrap",
+              "items": [
+                { "key": "address.city", "flex": "3 3 150px", "notitle": true, "placeholder": "City" },
+                { "key": "address.zip", "flex": "1 1 90px", "notitle": true, "placeholder": "ZIP" }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "title": "Advanced",
+      "description": "Expandable section — click the title to toggle.",
+      "expandable": true,
+      "expanded": false,
+      "items": [{ "key": "notes", "type": "textarea", "notitle": true, "placeholder": "Internal notes..." }]
+    },
+    "*"
+  ],
+  "data": {
+    "first_name": "Jane",
+    "last_name": "Doe",
+    "email": "jane@example.com",
+    "address": { "street": "123 Main St.", "city": "Las Vegas", "zip": "89123" },
+    "notifications": true,
+    "order_type": "pickup"
+  }
+}

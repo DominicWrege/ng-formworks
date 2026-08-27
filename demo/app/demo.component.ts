@@ -10,7 +10,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { environment } from '../environments/environment';
-import { Examples } from './example-schemas.model';
+import { PLAYGROUND_EXAMPLES } from './example-schemas.model';
 import { AceEditorDirective } from './ace-editor.directive';
 
 const DEFAULT_SCHEMA = `{
@@ -38,7 +38,6 @@ interface DemoFormOptions {
 }
 
 @Component({
-    // tslint:disable-next-line:component-selector
     selector: 'demo',
     templateUrl: 'demo.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -49,8 +48,7 @@ export class DemoComponent {
   private aceHost = viewChild('aceHost', { read: AceEditorDirective });
 
   envVersion = environment.version;
-  examples = Examples;
-  exampleGroups = Object.keys(Examples);
+  examples = PLAYGROUND_EXAMPLES;
 
   readonly selectedExample = signal('');
   readonly framework = signal<'tailwindcss' | 'no-framework'>('tailwindcss');
@@ -112,13 +110,11 @@ export class DemoComponent {
         ace.setText(text);
       }
     });
+    // Auto-load the first curated example so the playground starts populated
+    this.loadExample(PLAYGROUND_EXAMPLES[0].file);
   }
 
-  onExampleSelect(event: Event) {
-    const file = (event.target as HTMLSelectElement).value;
-    if (!file || file === this.selectedExample()) {
-      return;
-    }
+  loadExample(file: string) {
     this.selectedExample.set(file);
     this.http
       .get(`assets/example-schemas/${file}.json`, { responseType: 'text' })
@@ -126,6 +122,14 @@ export class DemoComponent {
         next: schema => this.loadedSchema.set(schema),
         error: () => { }
       });
+  }
+
+  onExampleSelect(event: Event) {
+    const file = (event.target as HTMLSelectElement).value;
+    if (!file || file === this.selectedExample()) {
+      return;
+    }
+    this.loadExample(file);
   }
 
   onEditorChange(text: string) {

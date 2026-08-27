@@ -1,66 +1,14 @@
 import { CdkDrag, CdkDragDrop } from '@angular/cdk/drag-drop';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
 import { memoize } from '../shared';
 import { Subscription } from 'rxjs';
 import { JsonSchemaFormService } from '../json-schema-form.service';
+import { DragDropModule } from '@angular/cdk/drag-drop';
+import { SelectFrameworkComponent } from './select-framework.component';
 @Component({
-  // tslint:disable-next-line:component-selector
+  imports: [DragDropModule, SelectFrameworkComponent],
   selector: 'root-widget',
-  template: `
-    <div cdkDropList (cdkDropListDropped)="drop($event)"
-      [class.flex-inherit]="true"
-      [cdkDropListSortPredicate]="sortPredicate"
-      >
-      <!-- -for now left out
-      cdkDragHandle directive, by itself, does not disable the
-      default drag behavior of its parent cdkDrag element.
-      You must explicitly disable dragging on the main element
-      and re-enable it only when using the handle.
-      -->
-      @for (layoutItem of layout(); track layoutItem; let i = $index) {
-        <div
-          cdkDrag  [cdkDragStartDelay]="{touch:1000,mouse:0}"
-          [cdkDragDisabled]="!isDraggable(layoutItem)"
-          [class.form-flex-item]="isFlexItem()"
-          [style.align-self]="(layoutItem.options || {})['align-self']"
-          [style.flex-basis]="getFlexAttribute(layoutItem, 'flex-basis')"
-          [style.flex-grow]="getFlexAttribute(layoutItem, 'flex-grow')"
-          [style.flex-shrink]="getFlexAttribute(layoutItem, 'flex-shrink')"
-          [style.order]="(layoutItem.options || {}).order"
-          >
-          <!-- workaround to disbale dragging of input fields -->
-          <!--
-          <div *ngIf="layoutItem?.dataType !='object'"  cdkDragHandle>
-            <p>Drag Handle {{layoutItem?.dataType}}</p>
-          </div>
-          -->
-          <!--NB orderable directive is not used but has been left in for now and set to false
-          otherwise the compiler won't recognize dataIndex and other dependent attributes
-          -->
-          <!--
-          <div
-            [dataIndex]="layoutItem?.arrayItem ? (dataIndex() || []).concat(i) : (dataIndex() || [])"
-            [layoutIndex]="(layoutIndex() || []).concat(i)"
-            [layoutNode]="layoutItem"
-            [orderable]="false"
-            >
-            <select-framework-widget *ngIf="showWidget(layoutItem)"
-              [dataIndex]="layoutItem?.arrayItem ? (dataIndex() || []).concat(i) : (dataIndex() || [])"
-              [layoutIndex]="(layoutIndex() || []).concat(i)"
-            [layoutNode]="layoutItem"></select-framework-widget>
-          </div>
-          -->
-          @if (showWidget(layoutItem)) {
-            <select-framework-widget
-              [dataIndex]="getSelectFrameworkInputs(layoutItem,i).dataIndex"
-              [layoutIndex]="getSelectFrameworkInputs(layoutItem,i).layoutIndex"
-              [layoutNode]="getSelectFrameworkInputs(layoutItem,i).layoutNode">
-            </select-framework-widget>
-          }
-        </div>
-      }
-    </div>
-    `,
+  templateUrl: './root.component.html',
   styles: [`
     [draggable=true] {
       transition: all 150ms cubic-bezier(.4, 0, .2, 1);
@@ -91,8 +39,6 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
       width:100%
     }
   `],
-  changeDetection:ChangeDetectionStrategy.OnPush,
-  standalone: false
 })
 export class RootComponent implements OnInit, OnDestroy,OnChanges {
 
@@ -130,7 +76,7 @@ export class RootComponent implements OnInit, OnDestroy,OnChanges {
     return result;
   }
 
-  //TODO also need to think of other types such as button which can be
+  // TODO: also need to think of other types such as button which can be
   //created by an arbitrary layout
   isFixed(node: any): boolean {
     let result=node.type == '$ref';
@@ -144,7 +90,7 @@ export class RootComponent implements OnInit, OnDestroy,OnChanges {
    * since 'this' is bound to the draglist and doesn't reference the
    * FlexLayoutRootComponent instance
    */
-    //TODO also need to think of other types such as button which can be
+    // TODO: also need to think of other types such as button which can be
     //created by an arbitrary layout
     //might not be needed added condition to [cdkDragDisabled]
     sortPredicate=(index: number, item: CdkDrag<number>)=> {
@@ -164,7 +110,7 @@ export class RootComponent implements OnInit, OnDestroy,OnChanges {
 
   //private selectframeworkInputCache = new Map<string, { dataIndex: any[], layoutIndex: any[], layoutNode: any }>();
 
-  //TODO review caching-if form field values change, the changes are not propagated
+  // TODO(review): caching — if form field values change, the changes are not propagated
 
   /*
   getSelectFrameworkInputs(layoutItem: any, i: number) {
@@ -221,8 +167,8 @@ export class RootComponent implements OnInit, OnDestroy,OnChanges {
       return this._getSelectFrameworkInputsRaw(layoutItem, i);
     }
   }
-  //TODO investigate-causing layout issue with layout,for now
-  //removed from template
+  // TODO: investigate — using this trackByFn in the template caused a layout issue,
+  // so it is currently unused
   trackByFn(index: number, item: any): any {
     return item._id ?? index;
   }
@@ -271,10 +217,9 @@ showWidget(layoutNode: any): boolean {
   ngOnInit(): void {
       if(this.memoizationEnabled){
         this.dataChangesSubs=this.jsf.dataChanges.subscribe((val)=>{
-          //this.selectframeworkInputCache?.clear();
           this._showWidgetMemoized.cache.clear();
-          //TODO review-causing ngOnChanges to run where ever layoutnode is used as an input
-          //commented out for now
+          // TODO(review): clearing this cache causes ngOnChanges to run wherever
+          //layoutNode is used as an input, so commented out for now
           //this._getSelectFrameworkInputsMemoized.cache.clear();
         this.cdr.markForCheck();
         })
@@ -282,8 +227,6 @@ showWidget(layoutNode: any): boolean {
 
   }
   ngOnDestroy(): void {
-      //this.selectframeworkInputCache?.clear()
-      //this.selectframeworkInputCache=null;
       this._getSelectFrameworkInputsMemoized.cache.clear();
       this.dataChangesSubs?.unsubscribe();
   }

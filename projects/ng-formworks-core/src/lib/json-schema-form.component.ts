@@ -1,6 +1,6 @@
 import { cloneDeep, deepEqual } from './shared/native.functions';
 
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, forwardRef, inject, input, output } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, forwardRef, inject, input, output } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Subject, Subscription } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -18,6 +18,8 @@ import {
   isObject
 } from './shared/validator.functions';
 import { WidgetLibraryService } from './widget-library/widget-library.service';
+import { RootComponent } from './widget-library/root.component';
+import { FormsModule } from '@angular/forms';
 
 export const JSON_SCHEMA_FORM_VALUE_ACCESSOR: any = {
   provide: NG_VALUE_ACCESSOR,
@@ -60,14 +62,12 @@ export const JSON_SCHEMA_FORM_VALUE_ACCESSOR: any = {
  *  - brace, Browserified Ace editor       http://thlorenz.github.io/brace
  */
 @Component({
-    // tslint:disable-next-line:component-selector
+    imports: [RootComponent, FormsModule],
     selector: 'json-schema-form',
     templateUrl: './json-schema-form.component.html',
-    changeDetection: ChangeDetectionStrategy.OnPush,
     // Adding 'JsonSchemaFormService' here, instead of in the module,
     // creates a separate instance of the service for each component
     providers: [JsonSchemaFormService, JSON_SCHEMA_FORM_VALUE_ACCESSOR],
-    standalone: false
 })
 export class JsonSchemaFormComponent implements ControlValueAccessor, OnChanges, OnInit,OnDestroy {
   private changeDetector = inject(ChangeDetectorRef);
@@ -155,7 +155,7 @@ export class JsonSchemaFormComponent implements ControlValueAccessor, OnChanges,
   onChange: Function;
   onTouched: Function;
 
-  //TODO-review,maybe use takeUntilDestroyed rxjs op
+  // TODO: review,maybe use takeUntilDestroyed rxjs op
   dataChangesSubs:Subscription;
   statusChangesSubs:Subscription;
   isValidChangesSubs:Subscription;
@@ -173,7 +173,7 @@ export class JsonSchemaFormComponent implements ControlValueAccessor, OnChanges,
 
 
   private getInputValue(inputKey:string){
-    //TODO review if the value is meant to be a function and not a signal,
+    // TODO(review): if the value is meant to be a function and not a signal,
     //it might inadvertently be called!
     if(typeof this[inputKey]=="function"){
       return this[inputKey]();
@@ -293,9 +293,9 @@ export class JsonSchemaFormComponent implements ControlValueAccessor, OnChanges,
           const [input, key] = this.formValuesInput.split('.');
           changedData=this.getInputValue(input)[key];
         }
-        //TODO -review if any of the the array sizes changed then the 
+        // TODO: review if any of the array sizes changed then the
         //layout array sizes need to be resynced to match
-        //-for now jsf.adjustLayout doesnt seem to work with nested arrays
+        //-for now jsf.adjustLayout doesn't seem to work with nested arrays
         //so entire form is reinited 
         let arraySizesChanged=!compareObjectArraySizes(changedData,this.jsf.data,);
         if(arraySizesChanged){
@@ -582,9 +582,7 @@ export class JsonSchemaFormComponent implements ControlValueAccessor, OnChanges,
       // draft 3 (JSON Form style) and draft 4 (Angular Schema Form style)
       this.jsf.schema = convertSchemaToDraft6(this.jsf.schema);
 
-      // Initialize ajv and compile schema
-      //this.jsf.compileAjvSchema();
-      //moved to initializeAjv()
+      // Initialize ajv and compile schema (see initializeAjv())
 
       // Create schemaRefLibrary, schemaRecursiveRefMap, dataRecursiveRefMap, & arrayMap
       this.jsf.schema = resolveSchemaReferences(
@@ -595,13 +593,7 @@ export class JsonSchemaFormComponent implements ControlValueAccessor, OnChanges,
         this.jsf.hasRootReference = true;
       }
 
-      // TODO: (?) Resolve external $ref links
-      // // Create schemaRefLibrary & schemaRecursiveRefMap
-      // this.parser.bundle(this.schema)
-      //   .then(schema => this.schema = resolveSchemaReferences(
-      //     schema, this.jsf.schemaRefLibrary,
-      //     this.jsf.schemaRecursiveRefMap, this.jsf.dataRecursiveRefMap
-      //   ));
+      // TODO: Resolve external $ref links (e.g. with $RefParser bundle())
     }
   }
 
@@ -777,9 +769,6 @@ export class JsonSchemaFormComponent implements ControlValueAccessor, OnChanges,
     if (isEmpty(this.jsf.schema)) {
 
       // TODO: If full layout input (with no '*'), build schema from layout
-      // if (!this.jsf.layout.includes('*')) {
-      //   this.jsf.buildSchemaFromLayout();
-      // } else
 
       // If data input, build schema from data
       if (!isEmpty(this.jsf.formValues)) {
@@ -789,9 +778,7 @@ export class JsonSchemaFormComponent implements ControlValueAccessor, OnChanges,
 
     if (!isEmpty(this.jsf.schema)) {
 
-      // If not already initialized, initialize ajv and compile schema
-      //this.jsf.compileAjvSchema();
-      //moved to initializeAjv()
+      // If not already initialized, initialize ajv and compile schema (see initializeAjv())
 
       // Update all layout elements, add values, widgets, and validators,
       // replace any '*' with a layout built from all schema elements,
@@ -817,14 +804,6 @@ export class JsonSchemaFormComponent implements ControlValueAccessor, OnChanges,
 
       // TODO: Figure out how to display calculated values without changing object data
       // See http://ulion.github.io/jsonform/playground/?example=templating-values
-      // Calculate references to other fields
-      // if (!isEmpty(this.jsf.formGroup.value)) {
-      //   forEach(this.jsf.formGroup.value, (value, key, object, rootObject) => {
-      //     if (typeof value === 'string') {
-      //       object[key] = this.jsf.parseText(value, value, rootObject, key);
-      //     }
-      //   }, 'top-down');
-      // }
 
       // Subscribe to form changes to output live data, validation, and errors
       this.dataChangesSubs=this.jsf.dataChanges.pipe(takeUntil(this.unsubscribeOnActivateForm$)).subscribe(data => {

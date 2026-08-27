@@ -195,7 +195,7 @@ export class JsonSchemaFormService implements OnDestroy {
   eta:Eta;
 
 
-  //TODO-review,may not be needed as sortablejs replaces dnd
+  // TODO(review): may not be needed as sortablejs replaces dnd
   //this has been added to enable or disable the dragabble state of a component
   //using the OrderableDirective, mainly when an <input type="range"> 
   //elements are present, as the draggable attribute makes it difficult to
@@ -385,8 +385,7 @@ this.ajv.addFormat("duration", {
     const compileErrors = (errors:ErrorObject[]) => {
       const compiledErrors = {};
       (errors || []).forEach(error => {
-        //TODO review-seems to be a change in newer versions
-        //of ajv giving '' as instancePath for root objects
+        // TODO(review): of ajv giving '' as instancePath for root objects
         let errorPath=error.instancePath||"ROOT";
         if (!compiledErrors[errorPath]) {
           compiledErrors[errorPath] = [];
@@ -395,7 +394,7 @@ this.ajv.addFormat("duration", {
       });
       return compiledErrors;
     };
-    //TODO:store avjErrors per ajvInstance in registry
+    // TODO: store ajv errors per ajvInstance in registry
     this.ajvErrors = this.getAjvValidator(ajvInstanceName).errors;
     this.validationErrors = compileErrors(this.ajvErrors);
     if (updateSubscriptions) {
@@ -436,7 +435,7 @@ this.ajv.addFormat("duration", {
       this.formValueSubscription = this.formGroup.valueChanges
         .pipe(
           // debounce to coalesce rapid updates (typing, drag, etc.)
-          //TODO:review seems to be causing timing issues with evaluate condition
+          // TODO(review): seems to be causing timing issues with evaluate condition
           //doesn't throw errors when not in place
           debounceTime(debounceMs),
           // optional deep-equality check to avoid redundant validation
@@ -559,11 +558,8 @@ this.ajv.addFormat("duration", {
     };
     
     try {
-      //console.log(this.eta.renderString(text,dataContext))
       // Execute the function (retrieved from cache or newly compiled)
       return compiledTemplate.call(this.eta,dataContext,this.etaConfig);
-      //this.eta.renderString(text,dataContext,{name:'tpl1'});
-      
     } catch (error) {
       console.error("Error during template execution:", error);
       return text;
@@ -641,7 +637,7 @@ this.ajv.addFormat("duration", {
     }
   }
 
-  //TODO fix- if template has value in title
+  // TODO(fix): if template has value in title
   // "items": {
   //   "title": "{{ 'Input ' + $index+value }}",
   //                   "type": "string"
@@ -746,7 +742,7 @@ this.ajv.addFormat("duration", {
         // This still uses the potentially insecure new Function approach, 
         // but encapsulated as requested by the original code's structure.
         
-        //TODO-fix- add null checking as a workaround for issue caused by adding
+        // TODO(fix): add null checking as a workaround for issue caused by adding
         //debounceTime in buildFormGroup
         //also added functionBodyRaw that won't do any replacements
         const condition_nullChecks={
@@ -887,9 +883,9 @@ this.ajv.addFormat("duration", {
     }
     //if this is a ITE conditional field, the value would not have been
     //set, as the control would only be initialized when the condition is true 
-    //TODO-review need to decide which of the data sets between data,formValues and default 
+    // TODO(review): decide which of the data sets between data, formValues and default
     //to use for the value
-    //TODO try maybe marking descendants in applyITEConditions
+    // TODO: try maybe marking descendants in applyITEConditions
     let isITEDescendant=layoutNode?.schemaPointer?.split("/")
     .some(elt=>["then","else"].includes(elt));
     if(ctx.options?.condition || layoutNode?.oneOfPointer || layoutNode?.anyOfPointer || isITEDescendant){
@@ -1262,7 +1258,7 @@ this.ajv.addFormat("duration", {
     return true;
   }
 
-   //TODO fix-doesnt seem to work for nested array
+   // TODO(fix): doesn't seem to work for nested array
     adjustLayout(layout:any, newData: any,currLayoutIndex=[0],currDataIndex=[]) {
       const createWidgetCtx=(layoutNode:any,layoutIndex:any,dataIndex:any):any=>{
         return {
@@ -1307,9 +1303,6 @@ this.ajv.addFormat("duration", {
             let updatedDataIndex=[...oldDataIndex.slice(0, oldDataIndex.length - 1),0];
             ctx=createWidgetCtx(ctx.layoutNode(),updatedLayoutIndex,updatedDataIndex)
             let removed=this.removeItem(ctx);
-           // if(removed){
-
-            //}
 
           }
         }

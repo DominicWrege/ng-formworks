@@ -1,0 +1,81 @@
+{
+  "schema": {
+    "title": "Controls Sampler",
+    "type": "object",
+    "properties": {
+      "name": { "type": "string", "title": "Full name", "minLength": 2 },
+      "email": { "type": "string", "format": "email", "title": "Email" },
+      "password": { "type": "string", "title": "Password" },
+      "age": { "type": "integer", "title": "Age", "minimum": 18, "maximum": 120, "default": 30 },
+      "birthday": { "type": "string", "format": "date", "title": "Birthday" },
+      "accent": { "type": "string", "format": "color", "title": "Accent color", "default": "#f97316" },
+      "website": { "type": "string", "format": "uri", "title": "Website" },
+      "bio": { "type": "string", "title": "Bio" },
+      "notifications": { "type": "boolean", "title": "Email me product updates", "default": true },
+      "plan": { "type": "string", "title": "Plan", "enum": ["free", "pro", "team"] },
+      "region": { "type": "string", "title": "Region", "enum": ["eu", "us", "apac"] },
+      "flavor": { "type": "string", "title": "Flavor" },
+      "skills": {
+        "type": "array",
+        "title": "Skills",
+        "items": { "type": "string", "enum": ["angular", "react", "vue", "svelte"] }
+      },
+      "days": {
+        "type": "array",
+        "title": "Best days to call",
+        "items": { "type": "string", "enum": ["Mon", "Tue", "Wed", "Thu", "Fri"] }
+      },
+      "size": { "type": "string", "title": "T-shirt size", "enum": ["S", "M", "L"] },
+      "shipping": { "type": "string", "title": "Shipping speed", "enum": ["standard", "express", "overnight"], "default": "standard" },
+      "avatar": { "type": "string", "title": "Avatar" }
+    },
+    "required": ["name", "email"]
+  },
+  "layout": [
+    "name",
+    { "key": "email", "placeholder": "you@example.com" },
+    { "key": "password", "type": "password", "placeholder": "Type a password" },
+    {
+      "type": "flex", "flex-flow": "row wrap",
+      "items": [
+        { "key": "age", "flex": "1 1 110px" },
+        { "key": "birthday", "flex": "1 1 170px" },
+        { "key": "accent", "flex": "1 1 130px" }
+      ]
+    },
+    "website",
+    { "key": "bio", "type": "textarea", "placeholder": "Tell us about yourself..." },
+    "notifications",
+    { "key": "plan", "title": "Plan (enum → select)" },
+    { "key": "region", "title": "Region (titleMap object)", "titleMap": { "eu": "Europe", "us": "United States", "apac": "Asia-Pacific" } },
+    {
+      "key": "flavor", "title": "Flavor (titleMap array)",
+      "titleMap": [
+        { "name": "Vanilla", "value": "vanilla" },
+        { "name": "Chocolate", "value": "chocolate" },
+        { "name": "Strawberry", "value": "strawberry" }
+      ]
+    },
+    { "key": "skills", "title": "Skills (checkboxes)" },
+    { "key": "days", "title": "Best days (inline checkboxes)", "inline": true },
+    { "key": "size", "title": "T-shirt size (radios)", "widget": "radios" },
+    { "key": "shipping", "title": "Shipping speed (inline radios)", "widget": "radios-inline" },
+    { "key": "avatar", "type": "file" }
+  ],
+  "data": {
+    "name": "Jane Doe",
+    "email": "jane@example.com",
+    "age": 30,
+    "birthday": "1999-09-21",
+    "accent": "#f97316",
+    "bio": "Frontend engineer.",
+    "notifications": true,
+    "plan": "pro",
+    "region": "eu",
+    "flavor": "chocolate",
+    "skills": ["angular", "react"],
+    "days": ["Mon", "Wed"],
+    "size": "M",
+    "shipping": "express"
+  }
+}

@@ -1,34 +1,13 @@
-import { Component, inject, input, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, input, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
 import { JsonSchemaFormService } from '../json-schema-form.service';
+import { StopPropagationDirective } from './stop-propagation.directive';
 
 
 @Component({
-    // tslint:disable-next-line:component-selector
+    imports: [StopPropagationDirective],
     selector: 'button-widget',
-    template: `
-    <div
-      [class]="options?.htmlClass || ''">
-      <button
-        [attr.readonly]="options?.readonly ? 'readonly' : null"
-        [attr.aria-describedby]="'control' + layoutNode()?._id + 'Status'"
-        [class]="options?.fieldHtmlClass || ''"
-        [disabled]="controlDisabled"
-        [name]="controlName"
-        [type]="$safeNavigationMigration(layoutNode()?.type)"
-        [value]="controlValue"
-        (click)="updateValue($event)"
-        [appStopPropagation]="['mousedown', 'touchstart']"
-        >
-        @if (options?.icon || options?.title) {
-          <span
-            [class]="options?.icon"
-          [innerHTML]="$safeNavigationMigration(options?.title)"></span>
-        }
-      </button>
-    </div>`,
-    changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    templateUrl: './button.component.html',
 })
 export class ButtonComponent implements OnInit,OnDestroy {
   private jsf = inject(JsonSchemaFormService);

@@ -1,17 +1,16 @@
-import { Component, ComponentRef, OnChanges, OnInit, SimpleChanges, ViewContainerRef, inject, input, viewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ComponentRef, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewContainerRef, inject, input, viewChild } from '@angular/core';
+import { Subscription } from 'rxjs';
 
 import { JsonSchemaFormService } from '../json-schema-form.service';
 
 @Component({
-    // tslint:disable-next-line:component-selector
     selector: 'select-widget-widget',
-    template: `<div #widgetContainer></div>`,
-    changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    templateUrl: './select-widget.component.html',
 })
-export class SelectWidgetComponent implements OnChanges, OnInit {
+export class SelectWidgetComponent implements OnChanges, OnInit, OnDestroy {
 
   private jsf = inject(JsonSchemaFormService);
+  private dataChangesSubs: Subscription;
 
   newComponent: ComponentRef<any> = null;
   readonly layoutNode = input<any>(undefined);
@@ -21,6 +20,15 @@ export class SelectWidgetComponent implements OnChanges, OnInit {
 
   ngOnInit() {
     this.updateComponent();
+    // OnPush bridge: the created widget has no reactive link to form data
+    // changes, so re-mark it whenever form data changes
+    this.dataChangesSubs = this.jsf.dataChanges.subscribe(() => {
+      this.newComponent?.hostView.markForCheck();
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.dataChangesSubs?.unsubscribe();
   }
 
   ngOnChanges(changes:SimpleChanges) {
@@ -35,7 +43,6 @@ export class SelectWidgetComponent implements OnChanges, OnInit {
     }
     if (this.newComponent) {
       for (const inp of ['layoutNode', 'layoutIndex', 'dataIndex']) {
-        //this.newComponent.instance[inp] = this[inp];
         this.newComponent.setInput(inp,this[inp]());
       }
     }

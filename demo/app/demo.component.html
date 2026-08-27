@@ -13,12 +13,8 @@
             class="rounded-md border border-gray-300 bg-white px-2 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             [value]="selectedExample()" (change)="onExampleSelect($event)">
       <option value="">— start from scratch —</option>
-      @for (group of exampleGroups; track group) {
-        <optgroup [label]="examples[group].name">
-          @for (example of examples[group].schemas; track example.file) {
-            <option [value]="example.file">{{ example.name }}</option>
-          }
-        </optgroup>
+      @for (example of examples; track example.file) {
+        <option [value]="example.file" [selected]="example.file === selectedExample()">{{ example.name }}</option>
       }
     </select>
 

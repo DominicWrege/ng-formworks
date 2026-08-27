@@ -1,67 +1,14 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component } from '@angular/core';
 import { NumberComponent } from '@ng-formworks/core';
 import { injectTw, twLabelCls, twFieldCls } from '../tw-base';
+import { ReactiveFormsModule } from '@angular/forms';
+import { ElementAttributeDirective } from '@ng-formworks/core';
+import { StopPropagationDirective } from '@ng-formworks/core';
 
 @Component({
-    // tslint:disable-next-line:component-selector
+    imports: [ReactiveFormsModule, ElementAttributeDirective, StopPropagationDirective],
     selector: 'tw-number-widget',
-    template: `
-    <div #divElt [class]="options?.htmlClass || tw.formGroup">
-      @if (options?.title) {
-        <label
-          [attr.for]="'control' + layoutNode()?._id"
-          [class]="labelCls(options)"
-          [style.display]="options?.notitle ? 'none' : ''"
-        [innerHTML]="$safeNavigationMigration(options?.title)"></label>
-      }
-      @if (boundControl) {
-        <input #inputControl
-          [formControl]="formControl"
-          [attr.aria-describedby]="'control' + layoutNode()?._id + 'Status'"
-          [attr.max]="options?.maximum"
-          [attr.min]="options?.minimum"
-          [attr.placeholder]="options?.placeholder"
-          [attr.required]="options?.required"
-          [attr.readonly]="options?.readonly ? 'readonly' : null"
-          [attr.step]="options?.multipleOf || options?.step || 'any'"
-          [class]="fieldCls(options)"
-          [id]="'control' + $safeNavigationMigration(layoutNode()?._id)"
-          [name]="controlName"
-          [readonly]="options?.readonly ? 'readonly' : null"
-          [title]="lastValidNumber"
-          [type]="layoutNode()?.type === 'range' ? 'range' : 'number'"
-          [attributes]="inputAttributes"
-          [appStopPropagation]="['mousedown', 'touchstart']"
-          >
-      }
-      @if (!boundControl) {
-        <input #inputControl
-          [attr.aria-describedby]="'control' + layoutNode()?._id + 'Status'"
-          [attr.max]="options?.maximum"
-          [attr.min]="options?.minimum"
-          [attr.placeholder]="options?.placeholder"
-          [attr.required]="options?.required"
-          [attr.readonly]="options?.readonly ? 'readonly' : null"
-          [attr.step]="options?.multipleOf || options?.step || 'any'"
-          [class]="fieldCls(options)"
-          [disabled]="controlDisabled"
-          [id]="'control' + $safeNavigationMigration(layoutNode()?._id)"
-          [name]="controlName"
-          [readonly]="options?.readonly ? 'readonly' : null"
-          [title]="lastValidNumber"
-          [type]="layoutNode()?.type === 'range' ? 'range' : 'number'"
-          [value]="controlValue"
-          (input)="updateValue($event)"
-          [attributes]="inputAttributes"
-          [appStopPropagation]="['mousedown', 'touchstart']"
-          >
-      }
-      @if (layoutNode()?.type === 'range') {
-        <span class="text-sm text-gray-600" [innerHTML]="controlValue"></span>
-      }
-    </div>`,
-    changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    templateUrl: './tw-number.widget.html',
 })
 export class TwNumberComponent extends NumberComponent {
   readonly tw = injectTw();

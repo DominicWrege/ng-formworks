@@ -1,35 +1,19 @@
-import { Component, OnDestroy, OnInit, inject, input, ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit, inject, input } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { JsonSchemaFormService } from '../json-schema-form.service';
 import { hasOwn } from '../shared/utility.functions';
+import { StopPropagationDirective } from './stop-propagation.directive';
 
 
 @Component({
-    // tslint:disable-next-line:component-selector
+    imports: [StopPropagationDirective],
     selector: 'submit-widget',
-    template: `
-    <div
-      [class]="options?.htmlClass || ''">
-      <input
-        [attr.aria-describedby]="'control' + layoutNode()?._id + 'Status'"
-        [attr.readonly]="options?.readonly ? 'readonly' : null"
-        [attr.required]="options?.required"
-        [class]="options?.fieldHtmlClass || ''"
-        [disabled]="controlDisabled"
-        [id]="'control' + $safeNavigationMigration(layoutNode()?._id)"
-        [name]="controlName"
-        [type]="$safeNavigationMigration(layoutNode()?.type)"
-        [value]="controlValue"
-        (click)="updateValue($event)"
-        [appStopPropagation]="['mousedown', 'touchstart']"
-        >
-    </div>`,
-    changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    templateUrl: './submit.component.html',
 })
 export class SubmitComponent implements OnInit,OnDestroy {
   private jsf = inject(JsonSchemaFormService);
+  private cdr = inject(ChangeDetectorRef);
 
   formControl: AbstractControl;
   controlName: string;
@@ -55,7 +39,10 @@ export class SubmitComponent implements OnInit,OnDestroy {
       this.controlDisabled = this.options.disabled;
     } else if (this.jsf.formOptions.disableInvalidSubmit) {
       this.controlDisabled = !this.jsf.isValid;
-      this.isValidChangesSubs=this.jsf.isValidChanges.subscribe(isValid => this.controlDisabled = !isValid);
+      this.isValidChangesSubs=this.jsf.isValidChanges.subscribe(isValid => {
+        this.controlDisabled = !isValid;
+        this.cdr.markForCheck();
+      });
     }
     if (this.controlValue === null || this.controlValue === undefined) {
       this.controlValue = this.options.title;

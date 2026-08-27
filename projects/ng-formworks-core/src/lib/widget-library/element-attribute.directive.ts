@@ -2,7 +2,6 @@ import { Directive, ElementRef, Input, Renderer2, SimpleChanges } from '@angular
 
 @Directive({
   selector: '[attributes]',
-  standalone: false
 })
 export class ElementAttributeDirective {
 

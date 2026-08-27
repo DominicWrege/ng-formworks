@@ -1,70 +1,17 @@
-import { Component, ElementRef, OnDestroy, OnInit, ViewChild, inject, input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild, inject, input } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
 
 import { JsonSchemaFormService } from '../json-schema-form.service';
+import { ReactiveFormsModule } from '@angular/forms';
+import { StopPropagationDirective } from './stop-propagation.directive';
+import { ElementAttributeDirective } from './element-attribute.directive';
 
 @Component({
-    // tslint:disable-next-line:component-selector
+    imports: [ReactiveFormsModule, StopPropagationDirective, ElementAttributeDirective],
     selector: 'number-widget',
-    template: `
-    <div #divElt [class]="options?.htmlClass || ''"  >
-      @if (options?.title) {
-        <label
-          [attr.for]="'control' + layoutNode()?._id"
-          [class]="options?.labelHtmlClass || ''"
-          [style.display]="options?.notitle ? 'none' : ''"
-        [innerHTML]="$safeNavigationMigration(options?.title)"></label>
-      }
-      @if (boundControl) {
-        <input #inputControl
-          [formControl]="formControl"
-          [attr.aria-describedby]="'control' + layoutNode()?._id + 'Status'"
-          [attr.max]="options?.maximum"
-          [attr.min]="options?.minimum"
-          [attr.placeholder]="options?.placeholder"
-          [attr.required]="options?.required"
-          [attr.readonly]="options?.readonly ? 'readonly' : null"
-          [attr.step]="options?.multipleOf || options?.step || 'any'"
-          [class]="options?.fieldHtmlClass || ''"
-          [id]="'control' + $safeNavigationMigration(layoutNode()?._id)"
-          [name]="controlName"
-          [readonly]="options?.readonly ? 'readonly' : null"
-          [title]="lastValidNumber"
-          [type]="layoutNode()?.type === 'range' ? 'range' : 'number'"
-          [attributes]="inputAttributes"
-          [appStopPropagation]="['mousedown', 'touchstart']"
-          >
-      }
-      @if (!boundControl) {
-        <input #inputControl
-          [attr.aria-describedby]="'control' + layoutNode()?._id + 'Status'"
-          [attr.max]="options?.maximum"
-          [attr.min]="options?.minimum"
-          [attr.placeholder]="options?.placeholder"
-          [attr.required]="options?.required"
-          [attr.readonly]="options?.readonly ? 'readonly' : null"
-          [attr.step]="options?.multipleOf || options?.step || 'any'"
-          [class]="options?.fieldHtmlClass || ''"
-          [disabled]="controlDisabled"
-          [id]="'control' + $safeNavigationMigration(layoutNode()?._id)"
-          [name]="controlName"
-          [readonly]="options?.readonly ? 'readonly' : null"
-          [title]="lastValidNumber"
-          [type]="layoutNode()?.type === 'range' ? 'range' : 'number'"
-          [value]="controlValue"
-          (input)="updateValue($event)"
-          [attributes]="inputAttributes"
-          [appStopPropagation]="['mousedown', 'touchstart']"
-          >
-      }
-      @if (layoutNode()?.type === 'range') {
-        <span [innerHTML]="controlValue"></span>
-      }
-    </div>`,
-    changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    templateUrl: './number.component.html',
 })
-//TODO look at reusing InputComponent
+// TODO: look at reusing InputComponent
 export class NumberComponent implements OnInit,OnDestroy {
   private jsf = inject(JsonSchemaFormService);
 

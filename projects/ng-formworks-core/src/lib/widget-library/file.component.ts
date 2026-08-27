@@ -1,4 +1,4 @@
-import { Component, inject, input, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, input, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
 import { JsonSchemaFormService } from '../json-schema-form.service';
 
@@ -6,11 +6,8 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
 // TODO: Add this control
 
 @Component({
-    // tslint:disable-next-line:component-selector
     selector: 'file-widget',
-    template: ``,
-    changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    templateUrl: './file.component.html',
 })
 export class FileComponent implements OnInit,OnDestroy {
   private jsf = inject(JsonSchemaFormService);

@@ -1,6 +1,7 @@
-import { Component, inject, input, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, input, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
 import { JsonSchemaFormService } from '../json-schema-form.service';
+import { ReactiveFormsModule } from '@angular/forms';
 
 ///NB issue caused by sortablejs when it its destroyed
 //this mainly affects checkboxes coupled with conditions
@@ -8,47 +9,9 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
 //-see https://github.com/SortableJS/Sortable/issues/1052#issuecomment-369613072
 //-switched to angular cdk for dnd
 @Component({
-    // tslint:disable-next-line:component-selector
+    imports: [ReactiveFormsModule],
     selector: 'checkbox-widget',
-    template: `
-    <label
-      [attr.for]="'control' + layoutNode()?._id"
-      [class]="options?.itemLabelHtmlClass || ''">
-      @if (boundControl) {
-        <input
-          [formControl]="formControl"
-          [attr.aria-describedby]="'control' + layoutNode()?._id + 'Status'"
-        [class]="(options?.fieldHtmlClass || '') + (isChecked ?
-          (' ' + (options?.activeClass || '') + ' ' + (options?.style?.selected || '')) :
-          (' ' + (options?.style?.unselected || '')))"
-          [id]="'control' + $safeNavigationMigration(layoutNode()?._id)"
-          [name]="controlName"
-          [readonly]="options?.readonly ? 'readonly' : null"
-          type="checkbox">
-      }
-      @if (!boundControl) {
-        <input
-          [attr.aria-describedby]="'control' + layoutNode()?._id + 'Status'"
-          [checked]="isChecked"
-        [class]="(options?.fieldHtmlClass || '') + (isChecked ?
-          (' ' + (options?.activeClass || '') + ' ' + (options?.style?.selected || '')) :
-          (' ' + (options?.style?.unselected || '')))"
-          [disabled]="controlDisabled"
-          [id]="'control' + $safeNavigationMigration(layoutNode()?._id)"
-          [name]="controlName"
-          [readonly]="options?.readonly ? 'readonly' : null"
-          [value]="controlValue"
-          type="checkbox"
-          (change)="updateValue($event)">
-      }
-      @if (options?.title) {
-        <span
-          [style.display]="options?.notitle ? 'none' : ''"
-        [innerHTML]="$safeNavigationMigration(options?.title)"></span>
-      }
-    </label>`,
-    changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    templateUrl: './checkbox.component.html',
 })
 export class CheckboxComponent implements OnInit,OnDestroy {
   private jsf = inject(JsonSchemaFormService);

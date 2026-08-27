@@ -8,9 +8,8 @@ import { WidgetLibraryModule } from './widget-library/widget-library.module';
 @NgModule({
   imports: [
     CommonModule, FormsModule, ReactiveFormsModule,
-    WidgetLibraryModule, NoFrameworkModule
+    WidgetLibraryModule, NoFrameworkModule, JsonSchemaFormComponent
   ],
-  declarations: [JsonSchemaFormComponent],
   exports: [JsonSchemaFormComponent, WidgetLibraryModule]
 })
 export class JsonSchemaFormModule {

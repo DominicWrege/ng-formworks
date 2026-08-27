@@ -40,8 +40,6 @@ import { TwSectionComponent } from './widgets/tw-section.widget';
         FormsModule,
         ReactiveFormsModule,
         DragDropModule,
-    ],
-    declarations: [
         TailwindFrameworkComponent,
         TwInputComponent,
         TwNumberComponent,

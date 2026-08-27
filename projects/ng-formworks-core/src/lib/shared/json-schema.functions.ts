@@ -56,28 +56,6 @@ import {
  */
 export function buildSchemaFromLayout(layout) {
   return;
-  // let newSchema: any = { };
-  // const walkLayout = (layoutItems: any[], callback: Function): any[] => {
-  //   let returnArray: any[] = [];
-  //   for (let layoutItem of layoutItems) {
-  //     const returnItem: any = callback(layoutItem);
-  //     if (returnItem) { returnArray = returnArray.concat(callback(layoutItem)); }
-  //     if (layoutItem.items) {
-  //       returnArray = returnArray.concat(walkLayout(layoutItem.items, callback));
-  //     }
-  //   }
-  //   return returnArray;
-  // };
-  // walkLayout(layout, layoutItem => {
-  //   let itemKey: string;
-  //   if (typeof layoutItem === 'string') {
-  //     itemKey = layoutItem;
-  //   } else if (layoutItem.key) {
-  //     itemKey = layoutItem.key;
-  //   }
-  //   if (!itemKey) { return; }
-  //   //
-  // });
 }
 
 /**
@@ -310,9 +288,7 @@ export function getInputType(schema, layoutNode: any = null) {
       return {
         'color': 'color',
         'date': 'date',
-        //as per ajv date-time requires a timezone but input 
-        //datetime-local doesn't  
-        //'date-time': 'datetime-local',
+        // ajv 'date-time' requires a timezone, which datetime-local inputs lack
         'iso-date-time':'datetime-local',
         'email': 'email',
         'uri': 'url',
@@ -320,8 +296,7 @@ export function getInputType(schema, layoutNode: any = null) {
     }
   }
   if (hasOwn(schema, '$ref')) { return '$ref'; }
-  //if (isArray(schema.anyOf)) { return 'any-of'; }//treated as allOf
-  if (isArray(schema.oneOf) ) { return 'one-of'; }//{ return 'tabarray'; }
+  if (isArray(schema.oneOf) ) { return 'one-of'; }
   if (hasOwn(schema, 'if')) { return 'if'; }
   if (hasOwn(schema, 'then')) { return 'then'; }
   if (hasOwn(schema, 'else')) { return 'else'; }
@@ -777,18 +752,15 @@ export function combineAllOf(schema) {
   if (!isObject(schema) || !isArray(schema.allOf)) { return schema; }
   const allITE=schema.allOf.map(item=>{return item.if && item})
   .filter(item => !isEmpty(item));
-  //adaped to accomodate ITE by merging all non ITE field
-  //then readding the allOf key with only ITE
+  //adapted to accommodate ITE by merging all non ITE field
+  //then re-adding the allOf key with only ITE
   let schemaITEOmitted=omitKeys(schema.allOf,['if','then','else']);
   let mergedSchema = mergeSchemas(...schemaITEOmitted);
-  //mergeSchemas(...schema.allOf);
   if (Object.keys(schema).length > 1) {
     const extraKeys = { ...schema };
     delete extraKeys.allOf;
-    //TODO Test-changed order to preserve originial order
+    // TODO(test): changed order to preserve original order
     mergedSchema = mergeSchemas(extraKeys,mergedSchema);
-    //mergeSchemas(mergedSchema, extraKeys);
-    //need to put it back if ITE 
     if(allITE && allITE.length>0){
       mergedSchema.allOf=mergedSchema.allOf||[];
       mergedSchema.allOf.push(...allITE);
@@ -840,7 +812,7 @@ export function fixRequiredArrayProperties(schema) {
   * @param negate:boolean=false
   * @returns 
   */
- //TODO also handle ifs with mixed conditional such as allOf/oneOf etc
+ // TODO: also handle ifs with mixed conditional such as allOf/oneOf etc
  /*
 
    "if": {
@@ -870,7 +842,7 @@ export function convertJSONSchemaIfToCondition(schema:any,layoutNode:any,negate=
      let condition={};
      let notOp=negate?"!":"";
      // expects "dataPointer" to be like "/a/b/c"
-    //TODO-test
+    // TODO: test
       //dataPointer can be something like /cities/-/name
       //must end up like model.cities[arrayIndices].name
       //also check can possibly be nested array like  /cities/-/sites/-/siteName

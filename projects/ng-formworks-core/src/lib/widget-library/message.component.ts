@@ -1,18 +1,10 @@
-import { Component, OnInit, input, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, input, inject } from '@angular/core';
 import { JsonSchemaFormService } from '../json-schema-form.service';
 
 
 @Component({
-    // tslint:disable-next-line:component-selector
     selector: 'message-widget',
-    template: `
-    @if (message) {
-      <span
-        [class]="options?.labelHtmlClass || ''"
-      [innerHTML]="message"></span>
-    }`,
-    changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    templateUrl: './message.component.html',
 })
 export class MessageComponent implements OnInit {
   private jsf = inject(JsonSchemaFormService);

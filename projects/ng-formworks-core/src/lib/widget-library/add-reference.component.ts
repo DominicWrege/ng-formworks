@@ -1,30 +1,12 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, input } from '@angular/core';
+import { Component, OnInit, inject, input } from '@angular/core';
 import { JsonSchemaFormService } from '../json-schema-form.service';
+import { StopPropagationDirective } from './stop-propagation.directive';
 
 
 @Component({
-    // tslint:disable-next-line:component-selector
+    imports: [StopPropagationDirective],
     selector: 'add-reference-widget',
-    template: `
-    <section [class]="options?.htmlClass || ''" align="end">
-      @if (showAddButton) {
-        <button
-          [class]="options?.fieldHtmlClass || ''"
-          [disabled]="$safeNavigationMigration(options?.readonly)"
-          (click)="addItem($event)"
-          [appStopPropagation]="['mousedown', 'touchstart']"
-          >
-          @if (options?.icon) {
-            <span [class]="options?.icon"></span>
-          }
-          @if (options?.title) {
-            <span [innerHTML]="buttonText"></span>
-          }
-        </button>
-      }
-    </section>`,
-    changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    templateUrl: './add-reference.component.html',
 })
 export class AddReferenceComponent implements OnInit {
   private jsf = inject(JsonSchemaFormService);

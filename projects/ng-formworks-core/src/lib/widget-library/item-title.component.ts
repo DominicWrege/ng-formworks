@@ -1,15 +1,11 @@
 // item-title.component.ts
-import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { JsonSchemaFormService } from '../json-schema-form.service';
 
 @Component({
     selector: 'item-title',
-    template: `<div>{{ title }}</div>`,
-    changeDetection: ChangeDetectionStrategy.Eager,
-    standalone:false
-    // Consider using ChangeDetectionStrategy.OnPush here for maximum efficiency
-
+    templateUrl: './item-title.component.html',
 })
 export class ItemTitleComponent implements OnInit, OnChanges,OnDestroy {
     @Input() item: any;
@@ -17,10 +13,10 @@ export class ItemTitleComponent implements OnInit, OnChanges,OnDestroy {
     @Input() ctx: any;
 
     title: string;
- dataChangesSubs:Subscription;
-    constructor(private jsf: JsonSchemaFormService) {
+    dataChangesSubs:Subscription;
+    private jsf = inject(JsonSchemaFormService);
+    private cdr = inject(ChangeDetectorRef);
 
-    }
     ngOnChanges(changes: SimpleChanges): void {
         this.updateTitle();
     }
@@ -29,7 +25,7 @@ export class ItemTitleComponent implements OnInit, OnChanges,OnDestroy {
         this.updateTitle();
         this.dataChangesSubs=this.jsf.dataChanges.subscribe((val)=>{
             this.updateTitle();
-           
+            this.cdr.markForCheck();
         })
     }
 

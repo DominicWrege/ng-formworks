@@ -448,46 +448,9 @@ export function hasNonNullValue(obj: Record<string, any>): boolean {
     return true; // all checks passed
   }
 
-//below are experimental helpers to make conditions more stricter
-//example allowing 
-//"or(equals(model.devices[arrayIndices].accessoryType, 'airpurifier'), greaterThan(model.devices[arrayIndices].batteryLevel, 20))"
-//but not
-//"model.devices[arrayIndices].accessoryType === 'airpurifier'"
-// predefinedFunctions = ['equals', 'greaterThan', 'contains', 'or', 'and'];
-//use 
-//const functionBody = "or(equals(model.devices[arrayIndices].accessoryType, 'airpurifier'), greaterThan(model.devices[arrayIndices].batteryLevel, 20))";
-// try {
-//   const parsedConditions = ConditionParser.parseFunctionBody(functionBody);
-//   console.log(parsedConditions);
-// } catch (error) {
-//   console.error('Error:', error.message);
-// } 
-//should out put
-// {
-//   "conditions": [
-//     {
-//       "conditionName": "or",
-//       "parameters": {
-//         "conditions": [
-//           {
-//             "conditionName": "equals",
-//             "parameters": {
-//               "src": "model.devices[arrayIndices].accessoryType",
-//               "trg": "airpurifier"
-//             }
-//           },
-//           {
-//             "conditionName": "greaterThan",
-//             "parameters": {
-//               "src": "model.devices[arrayIndices].batteryLevel",
-//               "trg": "20"
-//             }
-//           }
-//         ]
-//       }
-//     }
-//   ]
-// }
+// Experimental helpers to enforce stricter conditions:
+// allow "or(equals(model.devices[arrayIndices].accessoryType, 'airpurifier'), ...)"
+// but not "model.devices[arrayIndices].accessoryType === 'airpurifier'"
 
   /* predefinedFunctions something like
   predefinedFunctions = {

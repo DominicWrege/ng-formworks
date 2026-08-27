@@ -4,7 +4,6 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
 
 @Pipe({
   name: 'textTemplate',
-  standalone:false
 })
 export class TextTemplatePipe implements PipeTransform {
   private jsf=inject(JsonSchemaFormService);

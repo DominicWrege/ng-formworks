@@ -1,24 +1,19 @@
-import { Component, inject, input, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, input, OnInit } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
 
 import { deepEqual, pick } from '../shared/native.functions';
 import { JsonSchemaFormService } from '../json-schema-form.service';
 import { hasNonNullValue, hasOwn, isObject, JsonPointer, path2ControlKey } from '../shared';
+import { TabsComponent } from './tabs.component';
 
 // TODO: Add this control
 
 @Component({
-    // tslint:disable-next-line:component-selector
+    imports: [TabsComponent],
     selector: 'one-of-widget',
-    template: `<h4>{{this.options?.description}}</h4>
-    <tabs-widget #tabs [layoutNode]="layoutNode()" 
-    [layoutIndex]="layoutIndex()" 
-    [dataIndex]="dataIndex()" >
-    </tabs-widget>`,
-    changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    templateUrl: './one-of.component.html',
 })
-export class OneOfComponent implements OnInit,OnDestroy {
+export class OneOfComponent implements OnInit {
   private jsf = inject(JsonSchemaFormService);
 
   formControl: AbstractControl;
@@ -35,16 +30,14 @@ export class OneOfComponent implements OnInit,OnDestroy {
     this.options = this.layoutNode().options || {};
     this.options.tabMode="oneOfMode";
     this.options.selectedTab=this.findSelectedTab();
-    //this.options.description=this.options.description||"choose one of";
     this.jsf.initializeControl(this);
   }
 
     findSelectedTab(){
-        //TODO test- this.jsf.formValues seems to be the initial data supplied to the form
+        // TODO(test): jsf.formValues is the initial data supplied to the form,
         //while the jsf.formGroup value is derived from the actual controls
-        //let formValue=this.jsf.getFormControlValue(this);
         let foundInd=-1;
-        //seach for non null value
+        //search for non null value
         if(this.layoutNode().items){
           this.layoutNode().items.forEach((layoutItem,ind)=>{
             let formValue=JsonPointer.get(this.jsf.formValues,layoutItem.dataPointer);
@@ -75,9 +68,8 @@ export class OneOfComponent implements OnInit,OnDestroy {
                     let schemaPointer=parts.join("/");
                     let dPointer=schemaPointer.replace(/(anyOf|allOf|oneOf|none)\/[\d]+\//g, '')
                     .replace(/(if|then|else|properties)\//g, '').replace(/\/items\//g,'/-/');
-                    //JsonPointer.toDataPointer(parts.join("/"),this.jsf.schema);
                     let dVal=JsonPointer.get(this.jsf.formValues,dPointer);
-                    let compareVal=dVal;//formValue;
+                    let compareVal=dVal;
                     //compare only values that are in the subschema properties
                     if(controlSchema && controlSchema.properties){
                       compareVal=isObject(dVal) && hasOwn(dVal,fieldName)?
@@ -108,9 +100,5 @@ export class OneOfComponent implements OnInit,OnDestroy {
 
   updateValue(event) {
     this.jsf.updateValue(this, event.target.value);
-  }
-
-  ngOnDestroy () {
-    //this.jsf.updateValue(this, null);
   }
 }

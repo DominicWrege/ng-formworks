@@ -1,16 +1,15 @@
-import { Component, ComponentRef, OnChanges, OnInit, ViewContainerRef, inject, input, viewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ComponentRef, OnChanges, OnDestroy, OnInit, ViewContainerRef, inject, input, viewChild } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { JsonSchemaFormService } from '../json-schema-form.service';
 
 
 @Component({
-    // tslint:disable-next-line:component-selector
     selector: 'template-widget',
-    template: `<div #widgetContainer></div>`,
-    changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    templateUrl: './template.component.html',
 })
-export class TemplateComponent implements OnInit, OnChanges {
+export class TemplateComponent implements OnInit, OnChanges, OnDestroy {
   private jsf = inject(JsonSchemaFormService);
+  private dataChangesSubs: Subscription;
 
   newComponent: ComponentRef<any> = null;
   readonly layoutNode = input<any>(undefined);
@@ -20,6 +19,15 @@ export class TemplateComponent implements OnInit, OnChanges {
 
   ngOnInit() {
     this.updateComponent();
+    // OnPush bridge: the created custom component has no reactive link to
+    // form data changes, so re-mark it whenever form data changes
+    this.dataChangesSubs = this.jsf.dataChanges.subscribe(() => {
+      this.newComponent?.hostView.markForCheck();
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.dataChangesSubs?.unsubscribe();
   }
 
   ngOnChanges() {

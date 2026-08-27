@@ -1,77 +1,17 @@
-import { ChangeDetectorRef, Component, OnDestroy, OnInit, inject, input, signal, ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit, inject, input, signal } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { JsonSchemaFormService } from '../json-schema-form.service';
+import { FormsModule } from '@angular/forms';
+import { SelectFrameworkComponent } from './select-framework.component';
 
 
 @Component({
-    // tslint:disable-next-line:component-selector
+    imports: [FormsModule, SelectFrameworkComponent],
     selector: 'tabs-widget',
-    template: `
-    <ul
-      [class]="options?.labelHtmlClass || ''">
-      @for (item of layoutNode()?.items; track item; let i = $index) {
-        <li
-        [class]="(options?.itemLabelHtmlClass || '') + (selectedItem === i ?
-          (' ' + (options?.activeClass || '') + ' ' + (options?.style?.selected || '')) :
-          (' ' + options?.style?.unselected))"
-          role="presentation"
-          data-tabs>
-          @if (showAddTab || item.type !== '$ref') {
-            <a
-           [class]="'nav-link' + (selectedItem === i ? (' ' + options?.activeClass + ' ' + options?.style?.selected) :
-            (' ' + options?.style?.unselected))"
-              (click)="select(i)">
-              @if (options?.tabMode=='oneOfMode') {
-                <input type="radio" [value]="i"
-                  name="tabSelection"
-                  [(ngModel)]="selectedItem"
-                  [class]="(options?.widget_radioClass || '')"
-                  [value]="i"
-                  (change)="select(i)"
-                  />
-              }
-              {{setTabTitle(item, i)}}
-            </a>
-          }
-        </li>
-      }
-    </ul>
-    
-    @for (layoutItem of layoutNode()?.items; track layoutItem; let i = $index) {
-      <div
-        [class]="(options?.htmlClass || '') + (selectedItem != i?' ngf-hidden':'') ">
-        <!--for now the only difference between oneOfMode and the default
-        is that oneOfMode uses the *ngIf="selectedItem === i" clause, which automatically
-        destroys the tabs that are not rendered while default mode only hide them
-        the upshot is that only the active tabs value will be used
-        -->
-        @if (options?.tabMode=='oneOfMode') {
-          @if (selectedItem === i) {
-            <select-framework-widget
-          [class]="(options?.fieldHtmlClass || '') +
-            ' ' + (options?.activeClass || '') +
-            ' ' + (options?.style?.selected || '')"
-              [dataIndex]="layoutNode()?.dataType === 'array' ? (dataIndex() || []).concat(i) : dataIndex()"
-              [layoutIndex]="(layoutIndex() || []).concat(i)"
-            [layoutNode]="panelNode(layoutItem)"></select-framework-widget>
-          }
-        }
-        @if (options?.tabMode !='oneOfMode') {
-          <select-framework-widget
-          [class]="(options?.fieldHtmlClass || '') +
-            ' ' + (options?.activeClass || '') +
-            ' ' + (options?.style?.selected || '')"
-            [dataIndex]="layoutNode()?.dataType === 'array' ? (dataIndex() || []).concat(i) : dataIndex()"
-            [layoutIndex]="(layoutIndex() || []).concat(i)"
-          [layoutNode]="panelNode(layoutItem)"></select-framework-widget>
-        }
-      </div>
-    }`,
+    templateUrl: './tabs.component.html',
     styles: [` a { cursor: pointer; } 
         .ngf-hidden{display:none}
       `],
-    changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
 })
 export class TabsComponent implements OnInit,OnDestroy {
   private jsf = inject(JsonSchemaFormService);
@@ -91,12 +31,10 @@ export class TabsComponent implements OnInit,OnDestroy {
     }
     this.itemCount = this.layoutNode().items.length - 1;
     this.updateControl();
-    //TODO review/test-introduced to fix dynamic titles not updating
-    //when their conditional linked field is destroyed
-    //-forces change detection!
-    //-commented out, causing other issues
+    // TODO(review/test): subscribe only to force change detection when dynamic
+    //titles stop updating after their conditional linked field is destroyed
     this.dataChangesSubs=this.jsf.dataChanges.subscribe((val)=>{
-        //this.cdr.detectChanges();
+      this.cdr.markForCheck();
     })
   }
 

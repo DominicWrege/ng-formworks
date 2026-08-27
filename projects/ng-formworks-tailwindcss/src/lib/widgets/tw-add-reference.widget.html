@@ -1,0 +1,17 @@
+<section [class]="options?.htmlClass || ''" align="end">
+  @if (showAddButton) {
+    <button
+      [class]="tw.button + ' ' + (options?.fieldHtmlClass || '')"
+      [disabled]="$safeNavigationMigration(options?.readonly)"
+      (click)="addItem($event)"
+      [appStopPropagation]="['mousedown', 'touchstart']"
+      >
+      @if (options?.icon) {
+        <span class="inline-flex items-center gap-1.5" [class]="options?.icon"></span>
+      }
+      @if (options?.title) {
+        <span [innerHTML]="buttonText"></span>
+      }
+    </button>
+  }
+</section>

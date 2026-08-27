@@ -1,29 +1,13 @@
-import { Component, inject, input, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, input, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
 import { JsonSchemaFormService } from '../json-schema-form.service';
+import { ReactiveFormsModule } from '@angular/forms';
 
 
 @Component({
-    // tslint:disable-next-line:component-selector
+    imports: [ReactiveFormsModule],
     selector: 'hidden-widget',
-    template: `
-    @if (boundControl) {
-      <input
-        [formControl]="formControl"
-        [id]="'control' + $safeNavigationMigration(layoutNode()?._id)"
-        [name]="controlName"
-        type="hidden">
-    }
-    @if (!boundControl) {
-      <input
-        [disabled]="controlDisabled"
-        [name]="controlName"
-        [id]="'control' + $safeNavigationMigration(layoutNode()?._id)"
-        type="hidden"
-        [value]="controlValue">
-    }`,
-    changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    templateUrl: './hidden.component.html',
 })
 export class HiddenComponent implements OnInit,OnDestroy {
   private jsf = inject(JsonSchemaFormService);
