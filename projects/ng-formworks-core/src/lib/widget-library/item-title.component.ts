@@ -1,39 +1,24 @@
 // item-title.component.ts
-import { ChangeDetectorRef, Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, inject } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import type { LayoutNode } from '../shared/types';
 import { JsonSchemaFormService, type LegacyWidgetContext } from '../json-schema-form.service';
 
 @Component({
     selector: 'item-title',
     templateUrl: './item-title.component.html',
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ItemTitleComponent implements OnInit, OnChanges,OnDestroy {
-    @Input() item: LayoutNode;
-    @Input() index: number;
-    @Input() ctx: LegacyWidgetContext;
+export class ItemTitleComponent {
+    readonly item = input<LayoutNode>(undefined);
+    readonly index = input<number>(undefined);
+    readonly ctx = input<LegacyWidgetContext>(undefined);
 
-    title: string;
-    dataChangesSubs:Subscription;
     private jsf = inject(JsonSchemaFormService);
-    private cdr = inject(ChangeDetectorRef);
+    private dataChanges = toSignal(this.jsf.dataChanges);
 
-    ngOnChanges(changes: SimpleChanges): void {
-        this.updateTitle();
-    }
-    ngOnInit() {
-        // Calculate the title once on init, or subscribe to changes here
-        this.updateTitle();
-        this.dataChangesSubs=this.jsf.dataChanges.subscribe((val)=>{
-            this.updateTitle();
-            this.cdr.markForCheck();
-        })
-    }
-
-    updateTitle() {
-        this.title = this.jsf.setArrayItemTitle(this.ctx, this.item, this.index);
-    }
-    ngOnDestroy(): void {
-        this.dataChangesSubs?.unsubscribe();
-      }
+    title = computed(() => {
+        this.dataChanges();
+        return this.jsf.setArrayItemTitle(this.ctx(), this.item(), this.index());
+    });
 }

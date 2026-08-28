@@ -1,23 +1,20 @@
-import { Directive, ElementRef, Input, Renderer2, SimpleChanges } from '@angular/core';
+import { Directive, ElementRef, Renderer2, SimpleChanges, input, inject } from '@angular/core';
 
 @Directive({
   selector: '[attributes]',
 })
 export class ElementAttributeDirective {
+  private renderer = inject(Renderer2);
+  private elementRef = inject(ElementRef);
+
 
  
-  @Input()
-  public attributes: Record<string, string>;
-
-  constructor(
-    private renderer: Renderer2,
-    private elementRef: ElementRef
-  ) { }
+  public readonly attributes = input<Record<string, string>>(undefined);
 
   public ngOnChanges(changes: SimpleChanges): void {
     if (changes.attributes) {
-      for (let attributeName in this.attributes) {
-        const attributeValue = this.attributes[attributeName];
+      for (let attributeName in this.attributes()) {
+        const attributeValue = this.attributes()[attributeName];
         if (attributeValue) {
           this.renderer.setAttribute(this.elementRef.nativeElement, attributeName, attributeValue);
         } else {
