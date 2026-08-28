@@ -36,6 +36,33 @@ async function collectConsoleErrors(page: Page): Promise<string[]> {
 	return errors;
 }
 
+async function collectConsoleWarnings(page: Page): Promise<string[]> {
+	const warnings: string[] = [];
+	page.on("console", (msg) => {
+		if (msg.type() === "warning") {
+			const text = msg.text();
+			// Filter out benign warnings
+			if (
+				!text.includes("NG0956") // We'll track this separately
+			) {
+				warnings.push(text);
+			}
+		}
+	});
+	return warnings;
+}
+
+async function collectNG0956Warnings(page: Page): Promise<string[]> {
+	const warnings: string[] = [];
+	page.on("console", (msg) => {
+		const text = msg.text();
+		if (text.includes("NG0956")) {
+			warnings.push(text);
+		}
+	});
+	return warnings;
+}
+
 async function interactWithFormControls(page: Page): Promise<void> {
 	// Type in text inputs
 	const textInputs = page.locator("input[type='text']");
@@ -354,5 +381,69 @@ test.describe("Playground - Framework Switching", () => {
 		await page.waitForTimeout(300);
 
 		expect(errors).toHaveLength(0);
+	});
+});
+
+test.describe("Playground - Performance Warnings", () => {
+	test("no NG0956 warnings on recipe example (nested objects)", async ({
+		page,
+	}) => {
+		const ng0956Warnings = await collectNG0956Warnings(page);
+		await page.goto("/");
+		await page.waitForLoadState("networkidle");
+
+		await page.selectOption("#example-select", "showcase-recipe");
+		await page.waitForTimeout(2000);
+
+		// Interact with controls to trigger any tracking issues
+		await interactWithFormControls(page);
+		await page.waitForTimeout(500);
+
+		expect(ng0956Warnings).toHaveLength(0);
+	});
+
+	test("no NG0956 warnings on arrays example", async ({ page }) => {
+		const ng0956Warnings = await collectNG0956Warnings(page);
+		await page.goto("/");
+		await page.waitForLoadState("networkidle");
+
+		await page.selectOption("#example-select", "playground-arrays");
+		await page.waitForTimeout(2000);
+
+		await interactWithFormControls(page);
+		await page.waitForTimeout(500);
+
+		expect(ng0956Warnings).toHaveLength(0);
+	});
+
+	test("no NG0956 warnings on layout example (tabs, sections)", async ({
+		page,
+	}) => {
+		const ng0956Warnings = await collectNG0956Warnings(page);
+		await page.goto("/");
+		await page.waitForLoadState("networkidle");
+
+		await page.selectOption("#example-select", "playground-layout");
+		await page.waitForTimeout(2000);
+
+		await interactWithFormControls(page);
+		await page.waitForTimeout(500);
+
+		expect(ng0956Warnings).toHaveLength(0);
+	});
+
+	test("no NG0956 warnings across all examples", async ({ page }) => {
+		const ng0956Warnings = await collectNG0956Warnings(page);
+		await page.goto("/");
+		await page.waitForLoadState("networkidle");
+
+		for (const example of EXAMPLES) {
+			await page.selectOption("#example-select", example);
+			await page.waitForTimeout(1500);
+			await interactWithFormControls(page);
+			await page.waitForTimeout(300);
+		}
+
+		expect(ng0956Warnings).toHaveLength(0);
 	});
 });

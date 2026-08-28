@@ -10,7 +10,7 @@
   You must explicitly disable dragging on the main element
   and re-enable it only when using the handle.
   -->
-	@for (layoutItem of layout(); track layoutItem; let i = $index) {
+	@for (layoutItem of layout(); track layoutItem._id ?? $index; let i = $index) {
 		<div
 			cdkDrag
 			[cdkDragStartDelay]="{ touch: 1000, mouse: 0 }"

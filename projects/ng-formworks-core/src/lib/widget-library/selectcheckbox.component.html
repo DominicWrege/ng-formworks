@@ -10,7 +10,7 @@
 			[name]="controlName"
 			[ngModel]="selectValue"
 		>
-			@for (selectItem of selectList; track selectItem) {
+			@for (selectItem of selectList; track selectItem.value ?? $index) {
 				@if (!isArray($safeNavigationMigration(selectItem?.items))) {
 					<option
 						[class]="frameworkStyles[activeFramework].optionClass"
@@ -38,7 +38,7 @@
 			[name]="controlName"
 			(change)="updateValue($event)"
 		>
-			@for (selectItem of selectList; track selectItem) {
+			@for (selectItem of selectList; track selectItem.value ?? $index) {
 				@if (!isArray($safeNavigationMigration(selectItem?.items))) {
 					<option
 						[selected]="selectItem?.value === controlValue"

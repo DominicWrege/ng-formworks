@@ -9,7 +9,7 @@
 <!-- 'horizontal' = checkboxes-inline or checkboxbuttons -->
 @if (layoutOrientation === "horizontal") {
 	<div [class]="options?.htmlClass || ''">
-		@for (checkboxItem of checkboxList; track checkboxItem) {
+		@for (checkboxItem of checkboxList; track checkboxItem.value ?? $index) {
 			<label
 				[attr.for]="'control' + layoutNode()?._id + '/' + checkboxItem.value"
 				[class]="
@@ -48,7 +48,7 @@
 <!-- 'vertical' = regular checkboxes -->
 @if (layoutOrientation === "vertical") {
 	<div>
-		@for (checkboxItem of checkboxList; track checkboxItem) {
+		@for (checkboxItem of checkboxList; track checkboxItem.value ?? $index) {
 			<div [class]="options?.htmlClass || ''">
 				<label
 					[attr.for]="'control' + layoutNode()?._id + '/' + checkboxItem.value"

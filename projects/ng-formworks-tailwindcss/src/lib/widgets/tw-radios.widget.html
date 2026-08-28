@@ -8,7 +8,7 @@
 	></label>
 	} @if (layoutOrientation === 'horizontal') {
 	<div [class]="options?.htmlClass || tw.groupHorizontal">
-		@for (radioItem of radiosList; track radioItem) {
+		@for (radioItem of radiosList; track radioItem.value ?? $index) {
 		<label
 			[attr.for]="'control' + layoutNode()?._id + '/' + radioItem?.value"
 			[class]="tw.checkRow + ' ' + (options?.itemLabelHtmlClass || '')"
@@ -32,7 +32,7 @@
 	</div>
 	} @if (layoutOrientation !== 'horizontal') {
 	<div [class]="options?.htmlClass || tw.groupVertical">
-		@for (radioItem of radiosList; track radioItem) {
+		@for (radioItem of radiosList; track radioItem.value ?? $index) {
 		<label
 			[attr.for]="'control' + layoutNode()?._id + '/' + radioItem?.value"
 			[class]="tw.checkRow + ' ' + (options?.itemLabelHtmlClass || '')"

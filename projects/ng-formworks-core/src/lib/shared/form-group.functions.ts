@@ -912,9 +912,6 @@ export function getControl(
 		} else if (hasOwn(subGroup, key)) {
 			subGroup = (subGroup as Record<string, any>)[key];
 		} else {
-			console.error(`getControl error: Unable to find "${key}" item in FormGroup.`);
-			console.error(dataPointer);
-			console.error(formGroup);
 			return;
 		}
 	}

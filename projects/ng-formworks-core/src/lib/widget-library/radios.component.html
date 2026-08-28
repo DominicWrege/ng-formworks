@@ -10,7 +10,7 @@
 <!-- 'horizontal' = radios-inline or radiobuttons -->
 @if (layoutOrientation === "horizontal") {
 	<div [class]="options?.htmlClass || ''">
-		@for (radioItem of radiosList; track radioItem) {
+		@for (radioItem of radiosList; track radioItem.value ?? $index) {
 			<label
 				[attr.for]="'control' + layoutNode()?._id + '/' + radioItem?.value"
 				[class]="
@@ -50,7 +50,7 @@
 <!-- 'vertical' = regular radios -->
 @if (layoutOrientation !== "horizontal") {
 	<div>
-		@for (radioItem of radiosList; track radioItem) {
+		@for (radioItem of radiosList; track radioItem.value ?? $index) {
 			<div [class]="options?.htmlClass || ''">
 				<label
 					[attr.for]="'control' + layoutNode()?._id + '/' + radioItem?.value"

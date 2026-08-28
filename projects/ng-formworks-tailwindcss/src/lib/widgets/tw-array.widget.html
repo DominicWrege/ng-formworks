@@ -12,7 +12,7 @@
 		cdkDropListOrientation="vertical"
 		(cdkDropListDropped)="drop($event)"
 	>
-		@for (row of layoutNode()?.items; track row; let i = $index) { @if (row.type === '$ref') {
+		@for (row of layoutNode()?.items; track row._id ?? $index; let i = $index) { @if (row.type === '$ref') {
 		@if (showWidget(row)) {
 		<select-framework-widget
 			[dataIndex]="rowCtx(row, i).dataIndex()"

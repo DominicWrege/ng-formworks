@@ -16,14 +16,14 @@
 		[id]="'control' + $safeNavigationMigration(layoutNode()?._id)"
 		[name]="controlName"
 	>
-		@for (selectItem of selectList; track selectItem) { @if
+		@for (selectItem of selectList; track selectItem.value ?? $index) { @if
 		(!isArray($safeNavigationMigration(selectItem?.items))) {
 		<option [ngValue]="$safeNavigationMigration(selectItem?.value)">
 			<span [innerHTML]="$safeNavigationMigration(selectItem?.name)"></span>
 		</option>
 		} @if (isArray($safeNavigationMigration(selectItem?.items))) {
 		<optgroup [label]="$safeNavigationMigration(selectItem?.group)">
-			@for (subItem of selectItem.items; track subItem) {
+			@for (subItem of selectItem.items; track subItem.value ?? $index) {
 			<option [ngValue]="$safeNavigationMigration(subItem?.value)">
 				<span [innerHTML]="$safeNavigationMigration(subItem?.name)"></span>
 			</option>
@@ -42,7 +42,7 @@
 		[name]="controlName"
 		(change)="updateValue($event)"
 	>
-		@for (selectItem of selectList; track selectItem) { @if
+		@for (selectItem of selectList; track selectItem.value ?? $index) { @if
 		(!isArray($safeNavigationMigration(selectItem?.items))) {
 		<option
 			[selected]="selectItem?.value === controlValue"
@@ -52,7 +52,7 @@
 		</option>
 		} @if (isArray($safeNavigationMigration(selectItem?.items))) {
 		<optgroup [label]="$safeNavigationMigration(selectItem?.group)">
-			@for (subItem of selectItem.items; track subItem) {
+			@for (subItem of selectItem.items; track subItem.value ?? $index) {
 			<option
 				[attr.selected]="subItem?.value === controlValue"
 				[ngValue]="$safeNavigationMigration(subItem?.value)"
@@ -76,7 +76,7 @@
 		[(ngModel)]="controlValue"
 		(change)="updateValue($event)"
 	>
-		@for (selectItem of selectList; track selectItem) { @if
+		@for (selectItem of selectList; track selectItem.value ?? $index) { @if
 		(!isArray($safeNavigationMigration(selectItem?.items))) {
 		<option
 			[selected]="selectItem?.value === controlValue"
@@ -86,7 +86,7 @@
 		</option>
 		} @if (isArray($safeNavigationMigration(selectItem?.items))) {
 		<optgroup [label]="$safeNavigationMigration(selectItem?.group)">
-			@for (subItem of selectItem.items; track subItem) {
+			@for (subItem of selectItem.items; track subItem.value ?? $index) {
 			<option
 				[attr.selected]="subItem?.value === controlValue"
 				[ngValue]="$safeNavigationMigration(subItem?.value)"

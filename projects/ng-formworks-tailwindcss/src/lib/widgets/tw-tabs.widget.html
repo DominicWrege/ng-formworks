@@ -1,5 +1,5 @@
 <ul [class]="options?.labelHtmlClass || tw.tabBar">
-	@for (item of layoutNode()?.items; track item; let i = $index) {
+	@for (item of layoutNode()?.items; track item._id ?? $index; let i = $index) {
 	<li role="presentation" data-tabs>
 		@if (showAddTab() || item.type !== '$ref') {
 		<a
@@ -22,7 +22,7 @@
 	}
 </ul>
 
-@for (panel of tabPanels(); track panel.layoutItem; let i = $index) {
+@for (panel of tabPanels(); track panel.layoutItem._id ?? $index; let i = $index) {
 <div
 	[class]="`${((options?.htmlClass || '') + ' ' + tw.tabPanel).trim()}${selectedItem() != i ? ' ngf-hidden' : ''}`"
 >

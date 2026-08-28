@@ -7,7 +7,7 @@
 	></label>
 	} @if (layoutOrientation === 'horizontal') {
 	<div [class]="options?.htmlClass || tw.groupHorizontal">
-		@for (checkboxItem of checkboxList; track checkboxItem) {
+		@for (checkboxItem of checkboxList; track checkboxItem.value ?? $index) {
 		<label
 			[attr.for]="'control' + layoutNode()?._id + '/' + checkboxItem.value"
 			[class]="tw.checkRow + ' ' + (options?.itemLabelHtmlClass || '')"
@@ -30,7 +30,7 @@
 	</div>
 	} @if (layoutOrientation === 'vertical') {
 	<div [class]="options?.htmlClass || tw.groupVertical">
-		@for (checkboxItem of checkboxList; track checkboxItem) {
+		@for (checkboxItem of checkboxList; track checkboxItem.value ?? $index) {
 		<label
 			[attr.for]="'control' + layoutNode()?._id + '/' + checkboxItem.value"
 			[class]="tw.checkRow + ' ' + (options?.itemLabelHtmlClass || '')"
