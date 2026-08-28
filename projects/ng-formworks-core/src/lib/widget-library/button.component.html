@@ -1,20 +1,20 @@
-<div
-  [class]="options?.htmlClass || ''">
-  <button
-    [attr.readonly]="options?.readonly ? 'readonly' : null"
-    [attr.aria-describedby]="'control' + layoutNode()?._id + 'Status'"
-    [class]="options?.fieldHtmlClass || ''"
-    [disabled]="controlDisabled"
-    [name]="controlName"
-    [type]="$safeNavigationMigration(layoutNode()?.type)"
-    [value]="controlValue"
-    (click)="updateValue($event)"
-    [appStopPropagation]="['mousedown', 'touchstart']"
-    >
-    @if (options?.icon || options?.title) {
-      <span
-        [class]="options?.icon"
-      [innerHTML]="$safeNavigationMigration(options?.title)"></span>
-    }
-  </button>
+<div [class]="options?.htmlClass || ''">
+	<button
+		[attr.readonly]="options?.readonly ? 'readonly' : null"
+		[attr.aria-describedby]="'control' + layoutNode()?._id + 'Status'"
+		[class]="options?.fieldHtmlClass || ''"
+		[disabled]="controlDisabled"
+		[name]="controlName"
+		[type]="$safeNavigationMigration(layoutNode()?.type)"
+		[value]="controlValue"
+		(click)="updateValue($event)"
+		[appStopPropagation]="['mousedown', 'touchstart']"
+	>
+		@if (options?.icon || options?.title) {
+			<span
+				[class]="options?.icon"
+				[innerHTML]="$safeNavigationMigration(options?.title)"
+			></span>
+		}
+	</button>
 </div>

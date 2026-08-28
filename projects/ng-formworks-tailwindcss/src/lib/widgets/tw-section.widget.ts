@@ -11,10 +11,10 @@ import { TextTemplatePipe } from '@ng-formworks/core';
  * description and container so it no longer shows unstyled native chrome.
  */
 @Component({
-    imports: [RootComponent, TextTemplatePipe],
-    selector: 'tw-section-widget',
-    templateUrl: './tw-section.widget.html',
+	imports: [RootComponent, TextTemplatePipe],
+	selector: 'tw-section-widget',
+	templateUrl: './tw-section.widget.html',
 })
 export class TwSectionComponent extends SectionComponent {
-  readonly tw = injectTw();
+	readonly tw = injectTw();
 }

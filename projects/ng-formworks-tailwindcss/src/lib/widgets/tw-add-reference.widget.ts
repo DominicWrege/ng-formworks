@@ -8,10 +8,10 @@ import { StopPropagationDirective } from '@ng-formworks/core';
  * "add item" button is styled like a real button instead of plain text.
  */
 @Component({
-    imports: [StopPropagationDirective],
-    selector: 'tw-add-reference-widget',
-    templateUrl: './tw-add-reference.widget.html',
+	imports: [StopPropagationDirective],
+	selector: 'tw-add-reference-widget',
+	templateUrl: './tw-add-reference.widget.html',
 })
 export class TwAddReferenceComponent extends AddReferenceComponent {
-  readonly tw = injectTw();
+	readonly tw = injectTw();
 }

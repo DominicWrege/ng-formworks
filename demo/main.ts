@@ -1,22 +1,14 @@
-import {
-	enableProdMode,
-	importProvidersFrom,
-	provideZonelessChangeDetection,
-} from "@angular/core";
+import { enableProdMode, importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
 import {
 	bootstrapApplication,
 	REMOVE_STYLES_ON_COMPONENT_DESTROY,
-} from "@angular/platform-browser";
-import {
-	provideHttpClient,
-	withInterceptorsFromDi,
-	withXhr,
-} from "@angular/common/http";
-import { JsonSchemaFormModule } from "@ng-formworks/core";
-import { TailwindFrameworkModule } from "@ng-formworks/tailwindcss";
+} from '@angular/platform-browser';
+import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
+import { JsonSchemaFormModule } from '@ng-formworks/core';
+import { TailwindFrameworkModule } from '@ng-formworks/tailwindcss';
 
-import { DemoRootComponent } from "./app/demo-root.component";
-import { environment } from "./environments/environment";
+import { DemoRootComponent } from './app/demo-root.component';
+import { environment } from './environments/environment';
 
 if (environment.production) {
 	enableProdMode();

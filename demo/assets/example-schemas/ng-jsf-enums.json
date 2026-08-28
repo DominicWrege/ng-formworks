@@ -1,62 +1,62 @@
 {
-  "schema": {
-    "title": "Task Assignment",
-    "description": "Shows the enum keyword driving select lists, radio buttons and multi-selects.",
-    "type": "object",
-    "properties": {
-      "priority": {
-        "type": "string",
-        "title": "Priority",
-        "description": "Rendered as a select dropdown from a plain enum.",
-        "enum": ["Low", "Medium", "High", "Critical"]
-      },
-      "status": {
-        "type": "string",
-        "title": "Status",
-        "description": "Enum backed by a oneOf block so each option can carry its own title.",
-        "oneOf": [
-          {"title": "Backlog", "enum": ["backlog"]},
-          {"title": "In Progress", "enum": ["in_progress"]},
-          {"title": "Blocked", "enum": ["blocked"]},
-          {"title": "Done", "enum": ["done"]}
-        ]
-      },
-      "severity": {
-        "type": "integer",
-        "title": "Severity",
-        "description": "A numeric enum rendered as radio buttons.",
-        "enum": [1, 2, 3, 4, 5]
-      },
-      "estimate": {
-        "type": "number",
-        "title": "Estimate (days)",
-        "enum": [0.5, 1, 2, 3, 5, 8, 13]
-      },
-      "labels": {
-        "type": "array",
-        "title": "Labels",
-        "description": "A multi-select backed by an enum on the array item.",
-        "widget": "select",
-        "items": {
-          "type": "string",
-          "enum": ["bug", "feature", "documentation", "tech-debt", "urgent"]
-        }
-      }
-    },
-    "required": ["priority", "status"]
-  },
-  "layout": [
-    "priority",
-    "status",
-    {"key": "severity", "type": "radios"},
-    {"key": "estimate", "type": "radios", "title": "Estimate (days)"},
-    "labels"
-  ],
-  "data": {
-    "priority": "High",
-    "status": "in_progress",
-    "severity": 3,
-    "estimate": 5,
-    "labels": ["bug", "urgent"]
-  }
+	"schema": {
+		"title": "Task Assignment",
+		"description": "Shows the enum keyword driving select lists, radio buttons and multi-selects.",
+		"type": "object",
+		"properties": {
+			"priority": {
+				"type": "string",
+				"title": "Priority",
+				"description": "Rendered as a select dropdown from a plain enum.",
+				"enum": ["Low", "Medium", "High", "Critical"]
+			},
+			"status": {
+				"type": "string",
+				"title": "Status",
+				"description": "Enum backed by a oneOf block so each option can carry its own title.",
+				"oneOf": [
+					{ "title": "Backlog", "enum": ["backlog"] },
+					{ "title": "In Progress", "enum": ["in_progress"] },
+					{ "title": "Blocked", "enum": ["blocked"] },
+					{ "title": "Done", "enum": ["done"] }
+				]
+			},
+			"severity": {
+				"type": "integer",
+				"title": "Severity",
+				"description": "A numeric enum rendered as radio buttons.",
+				"enum": [1, 2, 3, 4, 5]
+			},
+			"estimate": {
+				"type": "number",
+				"title": "Estimate (days)",
+				"enum": [0.5, 1, 2, 3, 5, 8, 13]
+			},
+			"labels": {
+				"type": "array",
+				"title": "Labels",
+				"description": "A multi-select backed by an enum on the array item.",
+				"widget": "select",
+				"items": {
+					"type": "string",
+					"enum": ["bug", "feature", "documentation", "tech-debt", "urgent"]
+				}
+			}
+		},
+		"required": ["priority", "status"]
+	},
+	"layout": [
+		"priority",
+		"status",
+		{ "key": "severity", "type": "radios" },
+		{ "key": "estimate", "type": "radios", "title": "Estimate (days)" },
+		"labels"
+	],
+	"data": {
+		"priority": "High",
+		"status": "in_progress",
+		"severity": 3,
+		"estimate": 5,
+		"labels": ["bug", "urgent"]
+	}
 }

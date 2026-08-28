@@ -1,24 +1,58 @@
 {
-  "schema": {
-    "type": "object",
-    "title": "Product Order",
-    "description": "Enums, numbers and booleans — no custom layout, the form is generated from the schema.",
-    "properties": {
-      "product": { "type": "string", "title": "Product", "description": "Choose a model.", "enum": ["basic", "standard", "premium"] },
-      "quantity": { "type": "integer", "title": "Quantity", "description": "How many units.", "minimum": 1, "maximum": 99 },
-      "color": { "type": "string", "title": "Color", "description": "Finish color.", "enum": ["black", "silver", "gold"] },
-      "engraving": { "type": "string", "title": "Engraving", "description": "Optional text engraved on the device.", "maxLength": 30 },
-      "giftWrap": { "type": "boolean", "title": "Gift wrap", "description": "Wrap in festive paper." },
-      "deliveryDate": { "type": "string", "format": "date", "title": "Preferred delivery", "description": "Earliest acceptable delivery date." },
-      "notes": { "type": "string", "title": "Order notes", "description": "Anything else we should know." }
-    },
-    "required": ["product", "quantity"]
-  },
-  "data": {
-    "product": "premium",
-    "quantity": 2,
-    "color": "silver",
-    "giftWrap": true,
-    "deliveryDate": "2026-09-15"
-  }
+	"schema": {
+		"type": "object",
+		"title": "Product Order",
+		"description": "Enums, numbers and booleans — no custom layout, the form is generated from the schema.",
+		"properties": {
+			"product": {
+				"type": "string",
+				"title": "Product",
+				"description": "Choose a model.",
+				"enum": ["basic", "standard", "premium"]
+			},
+			"quantity": {
+				"type": "integer",
+				"title": "Quantity",
+				"description": "How many units.",
+				"minimum": 1,
+				"maximum": 99
+			},
+			"color": {
+				"type": "string",
+				"title": "Color",
+				"description": "Finish color.",
+				"enum": ["black", "silver", "gold"]
+			},
+			"engraving": {
+				"type": "string",
+				"title": "Engraving",
+				"description": "Optional text engraved on the device.",
+				"maxLength": 30
+			},
+			"giftWrap": {
+				"type": "boolean",
+				"title": "Gift wrap",
+				"description": "Wrap in festive paper."
+			},
+			"deliveryDate": {
+				"type": "string",
+				"format": "date",
+				"title": "Preferred delivery",
+				"description": "Earliest acceptable delivery date."
+			},
+			"notes": {
+				"type": "string",
+				"title": "Order notes",
+				"description": "Anything else we should know."
+			}
+		},
+		"required": ["product", "quantity"]
+	},
+	"data": {
+		"product": "premium",
+		"quantity": 2,
+		"color": "silver",
+		"giftWrap": true,
+		"deliveryDate": "2026-09-15"
+	}
 }

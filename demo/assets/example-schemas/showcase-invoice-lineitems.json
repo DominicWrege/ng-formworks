@@ -1,39 +1,82 @@
 {
-  "schema": {
-    "type": "object",
-    "title": "Invoice",
-    "description": "Array of line items — each item has four attributes. No custom layout.",
-    "properties": {
-      "customer": { "type": "string", "title": "Customer", "description": "Bill-to name.", "minLength": 2 },
-      "invoiceNumber": { "type": "string", "title": "Invoice number", "description": "Unique reference." },
-      "dueDate": { "type": "string", "format": "date", "title": "Due date", "description": "Payment deadline." },
-      "lineItems": {
-        "type": "array",
-        "title": "Line items",
-        "description": "Products or services billed.",
-        "items": {
-          "type": "object",
-          "title": "Line item",
-          "description": "One billed position.",
-          "properties": {
-            "description": { "type": "string", "title": "Description", "description": "What was delivered.", "minLength": 2 },
-            "quantity": { "type": "integer", "title": "Quantity", "description": "Units billed.", "minimum": 1 },
-            "unitPrice": { "type": "number", "title": "Unit price", "description": "Price per unit.", "minimum": 0 },
-            "taxable": { "type": "boolean", "title": "Taxable", "description": "Apply VAT to this line?" }
-          },
-          "required": ["description", "quantity", "unitPrice"]
-        }
-      }
-    },
-    "required": ["customer", "lineItems"]
-  },
-  "data": {
-    "customer": "Acme Corp",
-    "invoiceNumber": "INV-2026-0042",
-    "dueDate": "2026-10-15",
-    "lineItems": [
-      { "description": "Consulting (hours)", "quantity": 12, "unitPrice": 150, "taxable": true },
-      { "description": "Hosting (months)", "quantity": 3, "unitPrice": 49.9, "taxable": false }
-    ]
-  }
+	"schema": {
+		"type": "object",
+		"title": "Invoice",
+		"description": "Array of line items — each item has four attributes. No custom layout.",
+		"properties": {
+			"customer": {
+				"type": "string",
+				"title": "Customer",
+				"description": "Bill-to name.",
+				"minLength": 2
+			},
+			"invoiceNumber": {
+				"type": "string",
+				"title": "Invoice number",
+				"description": "Unique reference."
+			},
+			"dueDate": {
+				"type": "string",
+				"format": "date",
+				"title": "Due date",
+				"description": "Payment deadline."
+			},
+			"lineItems": {
+				"type": "array",
+				"title": "Line items",
+				"description": "Products or services billed.",
+				"items": {
+					"type": "object",
+					"title": "Line item",
+					"description": "One billed position.",
+					"properties": {
+						"description": {
+							"type": "string",
+							"title": "Description",
+							"description": "What was delivered.",
+							"minLength": 2
+						},
+						"quantity": {
+							"type": "integer",
+							"title": "Quantity",
+							"description": "Units billed.",
+							"minimum": 1
+						},
+						"unitPrice": {
+							"type": "number",
+							"title": "Unit price",
+							"description": "Price per unit.",
+							"minimum": 0
+						},
+						"taxable": {
+							"type": "boolean",
+							"title": "Taxable",
+							"description": "Apply VAT to this line?"
+						}
+					},
+					"required": ["description", "quantity", "unitPrice"]
+				}
+			}
+		},
+		"required": ["customer", "lineItems"]
+	},
+	"data": {
+		"customer": "Acme Corp",
+		"invoiceNumber": "INV-2026-0042",
+		"dueDate": "2026-10-15",
+		"lineItems": [
+			{
+				"description": "Consulting (hours)",
+				"quantity": 12,
+				"unitPrice": 150,
+				"taxable": true
+			},
+			{
+				"description": "Hosting (months)",
+				"quantity": 3,
+				"unitPrice": 49.9,
+				"taxable": false
+			}
+		]
+	}
 }

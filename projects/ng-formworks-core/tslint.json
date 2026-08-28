@@ -1,11 +1,6 @@
 {
-    "extends": "../../tslint.json",
-    "rules": {
-        "directive-selector": [
-            true,
-            "attribute",
-            "lib",
-            "camelCase"
-        ]
-    }
+	"extends": "../../tslint.json",
+	"rules": {
+		"directive-selector": [true, "attribute", "lib", "camelCase"]
+	}
 }

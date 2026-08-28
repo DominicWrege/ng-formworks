@@ -9,13 +9,23 @@ import { StopPropagationDirective } from './stop-propagation.directive';
 import { TextTemplatePipe } from './text-template.pipe';
 
 @NgModule({
-    imports: [CommonModule, FormsModule, ReactiveFormsModule, DragDropModule,
-        ...BASIC_WIDGETS,
-        OrderableDirective, ElementAttributeDirective, StopPropagationDirective, TextTemplatePipe
-    ],
-    exports: [...BASIC_WIDGETS,
-        OrderableDirective, ElementAttributeDirective, StopPropagationDirective, TextTemplatePipe
-    ]
+	imports: [
+		CommonModule,
+		FormsModule,
+		ReactiveFormsModule,
+		DragDropModule,
+		...BASIC_WIDGETS,
+		OrderableDirective,
+		ElementAttributeDirective,
+		StopPropagationDirective,
+		TextTemplatePipe,
+	],
+	exports: [
+		...BASIC_WIDGETS,
+		OrderableDirective,
+		ElementAttributeDirective,
+		StopPropagationDirective,
+		TextTemplatePipe,
+	],
 })
-export class WidgetLibraryModule {
-}
+export class WidgetLibraryModule {}

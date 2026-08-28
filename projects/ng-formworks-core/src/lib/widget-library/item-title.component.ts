@@ -5,20 +5,20 @@ import type { LayoutNode } from '../shared/types';
 import { JsonSchemaFormService, type LegacyWidgetContext } from '../json-schema-form.service';
 
 @Component({
-    selector: 'item-title',
-    templateUrl: './item-title.component.html',
-    changeDetection: ChangeDetectionStrategy.OnPush,
+	selector: 'item-title',
+	templateUrl: './item-title.component.html',
+	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ItemTitleComponent {
-    readonly item = input<LayoutNode | undefined>(undefined);
-    readonly index = input<number | undefined>(undefined);
-    readonly ctx = input<LegacyWidgetContext | undefined>(undefined);
+	readonly item = input<LayoutNode | undefined>(undefined);
+	readonly index = input<number | undefined>(undefined);
+	readonly ctx = input<LegacyWidgetContext | undefined>(undefined);
 
-    private jsf = inject(JsonSchemaFormService);
-    private dataChanges = toSignal(this.jsf.dataChanges);
+	private jsf = inject(JsonSchemaFormService);
+	private dataChanges = toSignal(this.jsf.dataChanges);
 
-    title = computed(() => {
-        this.dataChanges();
-        return this.jsf.setArrayItemTitle(this.ctx(), this.item(), this.index());
-    });
+	title = computed(() => {
+		this.dataChanges();
+		return this.jsf.setArrayItemTitle(this.ctx(), this.item(), this.index());
+	});
 }

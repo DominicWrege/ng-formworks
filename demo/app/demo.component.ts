@@ -1,4 +1,4 @@
-import { HttpClient } from "@angular/common/http";
+import { HttpClient } from '@angular/common/http';
 import {
 	ChangeDetectionStrategy,
 	Component,
@@ -8,12 +8,12 @@ import {
 	linkedSignal,
 	signal,
 	viewChild,
-} from "@angular/core";
-import { environment } from "../environments/environment";
-import { PLAYGROUND_EXAMPLES } from "./example-schemas.model";
-import { AceEditorDirective } from "./ace-editor.directive";
-import { JsonSchemaFormModule } from "@ng-formworks/core";
-import { TailwindFrameworkModule } from "@ng-formworks/tailwindcss";
+} from '@angular/core';
+import { environment } from '../environments/environment';
+import { PLAYGROUND_EXAMPLES } from './example-schemas.model';
+import { AceEditorDirective } from './ace-editor.directive';
+import { JsonSchemaFormModule } from '@ng-formworks/core';
+import { TailwindFrameworkModule } from '@ng-formworks/tailwindcss';
 
 const DEFAULT_SCHEMA = `{
   "type": "object",
@@ -33,44 +33,39 @@ type ParseResult = { ok: true; schema: object } | { ok: false; error: string };
 type ValidationIssue = string | { message?: string | null };
 
 interface DemoFormOptions {
-  setSchemaDefaults: boolean;
-  returnEmptyFields: boolean;
-  defaultWidgetOptions: { feedback: boolean };
+	setSchemaDefaults: boolean;
+	returnEmptyFields: boolean;
+	defaultWidgetOptions: { feedback: boolean };
 }
 
 @Component({
-	selector: "demo",
-	templateUrl: "demo.component.html",
+	selector: 'demo',
+	templateUrl: 'demo.component.html',
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	imports: [
-		AceEditorDirective,
-		JsonSchemaFormModule,
-		TailwindFrameworkModule,
-	],
+	imports: [AceEditorDirective, JsonSchemaFormModule, TailwindFrameworkModule],
 })
 export class DemoComponent {
 	private http = inject(HttpClient);
-	private aceHost = viewChild("aceHost", { read: AceEditorDirective });
+	private aceHost = viewChild('aceHost', { read: AceEditorDirective });
 
 	envVersion = environment.version;
 	examples = PLAYGROUND_EXAMPLES;
 
-	readonly selectedExample = signal("");
-	readonly framework = signal<"tailwindcss" | "no-framework">("tailwindcss");
+	readonly selectedExample = signal('');
+	readonly framework = signal<'tailwindcss' | 'no-framework'>('tailwindcss');
 	readonly frameworks: {
-		value: "tailwindcss" | "no-framework";
+		value: 'tailwindcss' | 'no-framework';
 		label: string;
 	}[] = [
-		{ value: "tailwindcss", label: "Tailwind" },
-		{ value: "no-framework", label: "Plain" },
+		{ value: 'tailwindcss', label: 'Tailwind' },
+		{ value: 'no-framework', label: 'Plain' },
 	];
 	readonly loadedSchema = signal<string | null>(null);
 
 	// Editor text: locally writable, auto-resyncs when a new example loads
 	readonly schemaText = linkedSignal<string | null, string>({
 		source: () => this.loadedSchema(),
-		computation: (src, prev) =>
-			src === null ? (prev?.value ?? DEFAULT_SCHEMA) : src,
+		computation: (src, prev) => (src === null ? (prev?.value ?? DEFAULT_SCHEMA) : src),
 	});
 
 	readonly parsedSchema = computed<ParseResult>(() => {
@@ -85,7 +80,7 @@ export class DemoComponent {
 	});
 	readonly parseError = computed(() => {
 		const p = this.parsedSchema();
-		return p.ok ? "" : p.error;
+		return p.ok ? '' : p.error;
 	});
 	readonly jsonFormObject = computed<object | undefined>(() => {
 		const p = this.parsedSchema();
@@ -96,27 +91,23 @@ export class DemoComponent {
 	readonly validationErrorList = signal<ValidationIssue[]>([]);
 	readonly prettyValidationErrors = computed(() =>
 		this.validationErrorList()
-			.map((error) =>
-				typeof error === "string" ? error : (error?.message ?? ""),
-			)
+			.map((error) => (typeof error === 'string' ? error : (error?.message ?? '')))
 			.filter(Boolean)
-			.join(", "),
+			.join(', '),
 	);
 
 	readonly liveFormData = signal<unknown>({});
 	readonly submittedFormData = signal<unknown>(null);
-	readonly prettyLiveFormData = computed(() =>
-		JSON.stringify(this.liveFormData(), null, 2),
-	);
+	readonly prettyLiveFormData = computed(() => JSON.stringify(this.liveFormData(), null, 2));
 	readonly prettySubmittedFormData = computed(() =>
 		JSON.stringify(this.submittedFormData(), null, 2),
 	);
 
-  jsonFormOptions: DemoFormOptions = {
-    setSchemaDefaults: true,
-    returnEmptyFields: false,
-    defaultWidgetOptions: { feedback: true }
-  };
+	jsonFormOptions: DemoFormOptions = {
+		setSchemaDefaults: true,
+		returnEmptyFields: false,
+		defaultWidgetOptions: { feedback: true },
+	};
 
 	constructor() {
 		// Ace <-> signal bridge: push schemaText into the editor whenever they diverge
@@ -136,7 +127,7 @@ export class DemoComponent {
 		this.selectedExample.set(file);
 		this.http
 			.get(`assets/example-schemas/${file}.json`, {
-				responseType: "text",
+				responseType: 'text',
 			})
 			.subscribe({
 				next: (schema) => this.loadedSchema.set(schema),

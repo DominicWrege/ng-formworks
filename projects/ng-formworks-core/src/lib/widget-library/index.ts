@@ -24,12 +24,30 @@ import { TemplateComponent } from './template.component';
 import { TextareaComponent } from './textarea.component';
 
 export const BASIC_WIDGETS = [
-  AddReferenceComponent, OneOfComponent, ButtonComponent, CheckboxComponent,
-  CheckboxesComponent, FileComponent, HiddenComponent, InputComponent,
-  MessageComponent, NoneComponent, NumberComponent, RadiosComponent,
-  RootComponent, SectionComponent, SelectComponent, SelectFrameworkComponent,
-  SelectWidgetComponent, SubmitComponent, TabComponent, TabsComponent,
-  TemplateComponent, TextareaComponent,SelectCheckboxComponent,ItemTitleComponent
+	AddReferenceComponent,
+	OneOfComponent,
+	ButtonComponent,
+	CheckboxComponent,
+	CheckboxesComponent,
+	FileComponent,
+	HiddenComponent,
+	InputComponent,
+	MessageComponent,
+	NoneComponent,
+	NumberComponent,
+	RadiosComponent,
+	RootComponent,
+	SectionComponent,
+	SelectComponent,
+	SelectFrameworkComponent,
+	SelectWidgetComponent,
+	SubmitComponent,
+	TabComponent,
+	TabsComponent,
+	TemplateComponent,
+	TextareaComponent,
+	SelectCheckboxComponent,
+	ItemTitleComponent,
 ];
 
 export { AddReferenceComponent } from './add-reference.component';
@@ -61,4 +79,3 @@ export { TemplateComponent } from './template.component';
 export { TextTemplatePipe } from './text-template.pipe';
 export { TextareaComponent } from './textarea.component';
 export { WidgetLibraryService } from './widget-library.service';
-

@@ -19,43 +19,43 @@ import { TwSectionComponent } from './widgets/tw-section.widget';
 
 @Injectable()
 export class TailwindFramework extends Framework {
-  name = 'tailwindcss';
-  text = 'Tailwind CSS';
-  framework: Type<unknown> = TailwindFrameworkComponent;
+	name = 'tailwindcss';
+	text = 'Tailwind CSS';
+	framework: Type<unknown> = TailwindFrameworkComponent;
 
-  widgets = {
-    ...defaultWidgetOverrides(),
-  };
+	widgets = {
+		...defaultWidgetOverrides(),
+	};
 }
 
 /** Widget map merged over the core library when this framework is active. */
 export function defaultWidgetOverrides(): WidgetLibraryMap {
-  return {
-    // form controls
-    'text': TwInputComponent,
-    'number': TwNumberComponent,
-    'integer': TwNumberComponent,
-    'textarea': TwTextareaComponent,
-    'select': TwSelectComponent,
-    'checkbox': TwCheckboxComponent,
-    'file': TwInputComponent,
-    // widget sets
-    'checkboxes': TwCheckboxesComponent,
-    'checkboxes-inline': 'checkboxes',
-    'radios': TwRadiosComponent,
-    'radios-inline': 'radios',
-    // buttons
-    'button': TwButtonComponent,
-    'submit': TwSubmitComponent,
-    'reset': 'submit',
-    // layout
-    'section': TwSectionComponent,
-    'array': TwArraySectionComponent,
-    '$ref': TwAddReferenceComponent,
-    'tabs': TwTabsComponent,
-    'tabarray': 'tabs',
-    'one-of': TwOneOfComponent,
-    'optionfieldset': 'one-of',
-    'selectfieldset': 'one-of',
-  };
+	return {
+		// form controls
+		text: TwInputComponent,
+		number: TwNumberComponent,
+		integer: TwNumberComponent,
+		textarea: TwTextareaComponent,
+		select: TwSelectComponent,
+		checkbox: TwCheckboxComponent,
+		file: TwInputComponent,
+		// widget sets
+		checkboxes: TwCheckboxesComponent,
+		'checkboxes-inline': 'checkboxes',
+		radios: TwRadiosComponent,
+		'radios-inline': 'radios',
+		// buttons
+		button: TwButtonComponent,
+		submit: TwSubmitComponent,
+		reset: 'submit',
+		// layout
+		section: TwSectionComponent,
+		array: TwArraySectionComponent,
+		$ref: TwAddReferenceComponent,
+		tabs: TwTabsComponent,
+		tabarray: 'tabs',
+		'one-of': TwOneOfComponent,
+		optionfieldset: 'one-of',
+		selectfieldset: 'one-of',
+	};
 }

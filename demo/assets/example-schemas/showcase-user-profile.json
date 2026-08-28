@@ -1,24 +1,49 @@
 {
-  "schema": {
-    "type": "object",
-    "title": "User Profile",
-    "description": "Schema-only showcase — no custom layout, the form is generated from the schema.",
-    "properties": {
-      "name": { "type": "string", "title": "Full name", "description": "Your given and family name.", "minLength": 2 },
-      "email": { "type": "string", "format": "email", "title": "Email", "description": "We never share your email." },
-      "age": { "type": "integer", "title": "Age", "description": "In completed years.", "minimum": 13, "maximum": 120 },
-      "website": { "type": "string", "format": "uri", "title": "Website", "description": "Personal site or portfolio." },
-      "bio": { "type": "string", "title": "Bio", "description": "A short introduction." },
-      "newsletter": { "type": "boolean", "title": "Subscribe to newsletter", "description": "Monthly digest of updates." }
-    },
-    "required": ["name", "email"]
-  },
-  "data": {
-    "name": "Jane Doe",
-    "email": "jane@example.com",
-    "age": 30,
-    "website": "https://janedoe.dev",
-    "bio": "Frontend engineer and open-source contributor.",
-    "newsletter": true
-  }
+	"schema": {
+		"type": "object",
+		"title": "User Profile",
+		"description": "Schema-only showcase — no custom layout, the form is generated from the schema.",
+		"properties": {
+			"name": {
+				"type": "string",
+				"title": "Full name",
+				"description": "Your given and family name.",
+				"minLength": 2
+			},
+			"email": {
+				"type": "string",
+				"format": "email",
+				"title": "Email",
+				"description": "We never share your email."
+			},
+			"age": {
+				"type": "integer",
+				"title": "Age",
+				"description": "In completed years.",
+				"minimum": 13,
+				"maximum": 120
+			},
+			"website": {
+				"type": "string",
+				"format": "uri",
+				"title": "Website",
+				"description": "Personal site or portfolio."
+			},
+			"bio": { "type": "string", "title": "Bio", "description": "A short introduction." },
+			"newsletter": {
+				"type": "boolean",
+				"title": "Subscribe to newsletter",
+				"description": "Monthly digest of updates."
+			}
+		},
+		"required": ["name", "email"]
+	},
+	"data": {
+		"name": "Jane Doe",
+		"email": "jane@example.com",
+		"age": 30,
+		"website": "https://janedoe.dev",
+		"bio": "Frontend engineer and open-source contributor.",
+		"newsletter": true
+	}
 }

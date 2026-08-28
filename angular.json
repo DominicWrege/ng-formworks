@@ -1,158 +1,153 @@
 {
-    "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
-    "version": 1,
-    "newProjectRoot": "projects",
-    "projects": {
-        "demo": {
-            "root": "",
-            "sourceRoot": "demo",
-            "projectType": "application",
-            "prefix": "app",
-            "schematics": {},
-            "architect": {
-                "build": {
-                    "builder": "@angular/build:application",
-                    "options": {
-                        "outputPath": {
-                            "base": "dist/demo"
-                        },
-                        "index": "demo/index.html",
-                        "polyfills": [],
-                        "tsConfig": "demo/tsconfig.app.json",
-                        "allowedCommonJsDependencies": [
-                            "brace",
-                            "brace/mode/json",
-                            "brace/theme/sqlserver",
-                            "ajv",
-                            "ajv-formats",
-                            "ajv/dist/2019"
-                        ],
-                        "assets": [
-                            "demo/favicon.ico",
-                            "demo/assets"
-                        ],
-                        "styles": [
-                            "demo/styles.css"
-                        ],
-                        "scripts": [],
-                        "extractLicenses": false,
-                        "sourceMap": true,
-                        "optimization": false,
-                        "namedChunks": true,
-                        "browser": "demo/main.ts"
-                    },
-                    "configurations": {
-                        "production": {
-                            "budgets": [
-                                {
-                                    "type": "anyComponentStyle",
-                                    "maximumWarning": "6kb"
-                                }
-                            ],
-                            "fileReplacements": [
-                                {
-                                    "replace": "demo/environments/environment.ts",
-                                    "with": "demo/environments/environment.prod.ts"
-                                }
-                            ],
-                            "optimization": true,
-                            "outputHashing": "all",
-                            "sourceMap": false,
-                            "namedChunks": false,
-                            "extractLicenses": true
-                        }
-                    },
-                    "defaultConfiguration": ""
-                },
-                "serve": {
-                    "builder": "@angular/build:dev-server",
-                    "options": {
-                        "buildTarget": "demo:build"
-                    },
-                    "configurations": {
-                        "production": {
-                            "buildTarget": "demo:build:production"
-                        }
-                    }
-                },
-                "extract-i18n": {
-                    "builder": "@angular/build:extract-i18n",
-                    "options": {
-                        "buildTarget": "demo:build"
-                    }
-                }
-            }
-        },
-        "@ng-formworks/core": {
-            "root": "projects/ng-formworks-core",
-            "sourceRoot": "projects/ng-formworks-core/src",
-            "projectType": "library",
-            "prefix": "",
-            "architect": {
-                "build": {
-                    "builder": "@angular/build:ng-packagr",
-                    "options": {
-                        "tsConfig": "projects/ng-formworks-core/tsconfig.lib.json",
-                        "project": "projects/ng-formworks-core/ng-package.json"
-                    },
-                    "configurations": {
-                        "production": {
-                            "tsConfig": "projects/ng-formworks-core/tsconfig.lib.prod.json"
-                        }
-                    }
-                }
-            }
-        },
-        "@ng-formworks/tailwindcss": {
-            "projectType": "library",
-            "root": "projects/ng-formworks-tailwindcss",
-            "sourceRoot": "projects/ng-formworks-tailwindcss/src",
-            "prefix": "lib",
-            "architect": {
-                "build": {
-                    "builder": "@angular/build:ng-packagr",
-                    "options": {
-                        "project": "projects/ng-formworks-tailwindcss/ng-package.json"
-                    },
-                    "configurations": {
-                        "production": {
-                            "tsConfig": "projects/ng-formworks-tailwindcss/tsconfig.lib.prod.json"
-                        }
-                    },
-                    "defaultConfiguration": "production"
-                }
-            }
-        }
-    },
-    "schematics": {
-        "@schematics/angular:component": {
-            "style": "css",
-            "type": "component"
-        },
-        "@schematics/angular:directive": {
-            "type": "directive"
-        },
-        "@schematics/angular:service": {
-            "type": "service"
-        },
-        "@schematics/angular:guard": {
-            "typeSeparator": "."
-        },
-        "@schematics/angular:interceptor": {
-            "typeSeparator": "."
-        },
-        "@schematics/angular:module": {
-            "typeSeparator": "."
-        },
-        "@schematics/angular:pipe": {
-            "typeSeparator": "."
-        },
-        "@schematics/angular:resolver": {
-            "typeSeparator": "."
-        }
-    },
-    "cli": {
-        "analytics": false,
-        "packageManager": "pnpm"
-    }
+	"$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+	"version": 1,
+	"newProjectRoot": "projects",
+	"projects": {
+		"demo": {
+			"root": "",
+			"sourceRoot": "demo",
+			"projectType": "application",
+			"prefix": "app",
+			"schematics": {},
+			"architect": {
+				"build": {
+					"builder": "@angular/build:application",
+					"options": {
+						"outputPath": {
+							"base": "dist/demo"
+						},
+						"index": "demo/index.html",
+						"polyfills": [],
+						"tsConfig": "demo/tsconfig.app.json",
+						"allowedCommonJsDependencies": [
+							"brace",
+							"brace/mode/json",
+							"brace/theme/sqlserver",
+							"ajv",
+							"ajv-formats",
+							"ajv/dist/2019"
+						],
+						"assets": ["demo/favicon.ico", "demo/assets"],
+						"styles": ["demo/styles.css"],
+						"scripts": [],
+						"extractLicenses": false,
+						"sourceMap": true,
+						"optimization": false,
+						"namedChunks": true,
+						"browser": "demo/main.ts"
+					},
+					"configurations": {
+						"production": {
+							"budgets": [
+								{
+									"type": "anyComponentStyle",
+									"maximumWarning": "6kb"
+								}
+							],
+							"fileReplacements": [
+								{
+									"replace": "demo/environments/environment.ts",
+									"with": "demo/environments/environment.prod.ts"
+								}
+							],
+							"optimization": true,
+							"outputHashing": "all",
+							"sourceMap": false,
+							"namedChunks": false,
+							"extractLicenses": true
+						}
+					},
+					"defaultConfiguration": ""
+				},
+				"serve": {
+					"builder": "@angular/build:dev-server",
+					"options": {
+						"buildTarget": "demo:build"
+					},
+					"configurations": {
+						"production": {
+							"buildTarget": "demo:build:production"
+						}
+					}
+				},
+				"extract-i18n": {
+					"builder": "@angular/build:extract-i18n",
+					"options": {
+						"buildTarget": "demo:build"
+					}
+				}
+			}
+		},
+		"@ng-formworks/core": {
+			"root": "projects/ng-formworks-core",
+			"sourceRoot": "projects/ng-formworks-core/src",
+			"projectType": "library",
+			"prefix": "",
+			"architect": {
+				"build": {
+					"builder": "@angular/build:ng-packagr",
+					"options": {
+						"tsConfig": "projects/ng-formworks-core/tsconfig.lib.json",
+						"project": "projects/ng-formworks-core/ng-package.json"
+					},
+					"configurations": {
+						"production": {
+							"tsConfig": "projects/ng-formworks-core/tsconfig.lib.prod.json"
+						}
+					}
+				}
+			}
+		},
+		"@ng-formworks/tailwindcss": {
+			"projectType": "library",
+			"root": "projects/ng-formworks-tailwindcss",
+			"sourceRoot": "projects/ng-formworks-tailwindcss/src",
+			"prefix": "lib",
+			"architect": {
+				"build": {
+					"builder": "@angular/build:ng-packagr",
+					"options": {
+						"project": "projects/ng-formworks-tailwindcss/ng-package.json"
+					},
+					"configurations": {
+						"production": {
+							"tsConfig": "projects/ng-formworks-tailwindcss/tsconfig.lib.prod.json"
+						}
+					},
+					"defaultConfiguration": "production"
+				}
+			}
+		}
+	},
+	"schematics": {
+		"@schematics/angular:component": {
+			"style": "css",
+			"type": "component"
+		},
+		"@schematics/angular:directive": {
+			"type": "directive"
+		},
+		"@schematics/angular:service": {
+			"type": "service"
+		},
+		"@schematics/angular:guard": {
+			"typeSeparator": "."
+		},
+		"@schematics/angular:interceptor": {
+			"typeSeparator": "."
+		},
+		"@schematics/angular:module": {
+			"typeSeparator": "."
+		},
+		"@schematics/angular:pipe": {
+			"typeSeparator": "."
+		},
+		"@schematics/angular:resolver": {
+			"typeSeparator": "."
+		}
+	},
+	"cli": {
+		"analytics": false,
+		"packageManager": "pnpm"
+	}
 }

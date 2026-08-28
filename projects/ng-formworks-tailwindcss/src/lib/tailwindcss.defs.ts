@@ -6,52 +6,52 @@ import { InjectionToken } from '@angular/core';
  * back to the built-in orange/gray light defaults.
  */
 export interface TailwindFormClasses {
-    /** field wrapper div */
-    formGroup: string;
-    /** label for title-having fields */
-    label: string;
-    /** text/number/email-like inputs */
-    input: string;
-    /** range (slider) input element */
-    rangeInput: string;
-    /** color picker input element */
-    colorInput: string;
-    /** appended to input when the control is invalid && dirty/touched */
-    inputInvalid: string;
-    /** <select> elements (input + extras applied by widget) */
-    select: string;
-    /** textarea elements */
-    textarea: string;
-    /** single checkbox / checkbox+radio item row */
-    checkRow: string;
-    /** checkbox/radio input element itself */
-    checkInput: string;
-    /** radio input element (round) */
-    radioInput: string;
-    /** vertical checkboxes/radios group wrapper */
-    groupVertical: string;
-    /** horizontal checkboxes/radios group wrapper */
-    groupHorizontal: string;
-    /** buttons and submit inputs */
-    button: string;
-    /** compact "add item" button of arrays */
-    addBtn: string;
-    /** muted description/help line, e.g. oneOf chooser hint */
-    helpText: string;
-    /** tab bar <ul> */
-    tabBar: string;
-    /** inactive tab link */
-    tab: string;
-    /** active tab link */
-    tabActive: string;
-    /** outer panel div of each tab pane */
-    tabPanel: string;
-    /** array item row wrapper (remove/drag container) */
-    arrayRow: string;
-    /** drag grip handle button */
-    dragGrip: string;
-    /** corner remove (x) button */
-    removeItemBtn: string;
+	/** field wrapper div */
+	formGroup: string;
+	/** label for title-having fields */
+	label: string;
+	/** text/number/email-like inputs */
+	input: string;
+	/** range (slider) input element */
+	rangeInput: string;
+	/** color picker input element */
+	colorInput: string;
+	/** appended to input when the control is invalid && dirty/touched */
+	inputInvalid: string;
+	/** <select> elements (input + extras applied by widget) */
+	select: string;
+	/** textarea elements */
+	textarea: string;
+	/** single checkbox / checkbox+radio item row */
+	checkRow: string;
+	/** checkbox/radio input element itself */
+	checkInput: string;
+	/** radio input element (round) */
+	radioInput: string;
+	/** vertical checkboxes/radios group wrapper */
+	groupVertical: string;
+	/** horizontal checkboxes/radios group wrapper */
+	groupHorizontal: string;
+	/** buttons and submit inputs */
+	button: string;
+	/** compact "add item" button of arrays */
+	addBtn: string;
+	/** muted description/help line, e.g. oneOf chooser hint */
+	helpText: string;
+	/** tab bar <ul> */
+	tabBar: string;
+	/** inactive tab link */
+	tab: string;
+	/** active tab link */
+	tabActive: string;
+	/** outer panel div of each tab pane */
+	tabPanel: string;
+	/** array item row wrapper (remove/drag container) */
+	arrayRow: string;
+	/** drag grip handle button */
+	dragGrip: string;
+	/** corner remove (x) button */
+	removeItemBtn: string;
 }
 
 export const TAILWIND_CFG = new InjectionToken<TailwindFormClasses>('TAILWIND_FORM_CLASSES');

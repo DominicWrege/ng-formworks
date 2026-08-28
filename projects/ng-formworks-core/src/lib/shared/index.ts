@@ -2,41 +2,130 @@
 // causes a library to be imported before another library it depends on.
 
 export {
-  _executeAsyncValidators, _executeValidators, _mergeErrors, _mergeObjects, _toPromise, AsyncIValidatorFn, getType, hasValue, inArray, isArray, isBoolean, isDate, isDefined, isEmpty, isFunction, isInteger, isMap, isNumber, isObject, isObservable, isPrimitive, isPromise, isSet, isString, isType, IValidatorFn, JavaScriptPrimitiveType,
-  JavaScriptType, PlainObject, PrimitiveValue, SchemaPrimitiveType, SchemaType, toJavaScriptType, toObservable, toSchemaType, xor
+	_executeAsyncValidators,
+	_executeValidators,
+	_mergeErrors,
+	_mergeObjects,
+	_toPromise,
+	AsyncIValidatorFn,
+	getType,
+	hasValue,
+	inArray,
+	isArray,
+	isBoolean,
+	isDate,
+	isDefined,
+	isEmpty,
+	isFunction,
+	isInteger,
+	isMap,
+	isNumber,
+	isObject,
+	isObservable,
+	isPrimitive,
+	isPromise,
+	isSet,
+	isString,
+	isType,
+	IValidatorFn,
+	JavaScriptPrimitiveType,
+	JavaScriptType,
+	PlainObject,
+	PrimitiveValue,
+	SchemaPrimitiveType,
+	SchemaType,
+	toJavaScriptType,
+	toObservable,
+	toSchemaType,
+	xor,
 } from './validator.functions';
 
 export {
-  cloneDeep, deepEqual, isPlainObject, memoize, omit, pick, uniqueId
+	cloneDeep,
+	deepEqual,
+	isPlainObject,
+	memoize,
+	omit,
+	pick,
+	uniqueId,
 } from './native.functions';
 
 export {
-  addClasses, commonItems, copy, fixTitle, forEach, forEachCopy, hasNonNullValue, hasOwn, mergeFilteredObject, toTitleCase, uniqueItems
+	addClasses,
+	commonItems,
+	copy,
+	fixTitle,
+	forEach,
+	forEachCopy,
+	hasNonNullValue,
+	hasOwn,
+	mergeFilteredObject,
+	toTitleCase,
+	uniqueItems,
 } from './utility.functions';
 
 export { JsonPointer, Pointer } from './jsonpointer.functions';
 
 export {
-  DataObject, FormOptions, FormGroupTemplate, FormValue, FunctionCondition, JsonObject, JsonPrimitive,
-  JsonSchema, JsonValue, Layout, LayoutItem, LayoutNode, SchemaTypeName,
-  TitleMapItem, ValidationMessage, ValidationMessageFn,
-  ValidationMessages, WidgetLibraryMap, WidgetOptions, WidgetType
+	DataObject,
+	FormOptions,
+	FormGroupTemplate,
+	FormValue,
+	FunctionCondition,
+	JsonObject,
+	JsonPrimitive,
+	JsonSchema,
+	JsonValue,
+	Layout,
+	LayoutItem,
+	LayoutNode,
+	SchemaTypeName,
+	TitleMapItem,
+	ValidationMessage,
+	ValidationMessageFn,
+	ValidationMessages,
+	WidgetLibraryMap,
+	WidgetOptions,
+	WidgetType,
 } from './types';
 
 export { JsonValidators } from './json.validators';
 
-export { buildSchemaFromData, buildSchemaFromLayout, checkInlineType, combineAllOf, fixRequiredArrayProperties, getControlValidators, getFromSchema, getInputType, getSubSchema, getTitleMapFromOneOf, isInputRequired, removeRecursiveReferences, resolveSchemaReferences, updateInputOptions } from './json-schema.functions';
+export {
+	buildSchemaFromData,
+	buildSchemaFromLayout,
+	checkInlineType,
+	combineAllOf,
+	fixRequiredArrayProperties,
+	getControlValidators,
+	getFromSchema,
+	getInputType,
+	getSubSchema,
+	getTitleMapFromOneOf,
+	isInputRequired,
+	removeRecursiveReferences,
+	resolveSchemaReferences,
+	updateInputOptions,
+} from './json-schema.functions';
 
 export { convertSchemaToDraft6 } from './convert-schema-to-draft6.function';
 
 export { mergeSchemas } from './merge-schemas.function';
 
 export {
-  buildFormGroup, buildFormGroupTemplate, formatFormData,
-  getControl, path2ControlKey, setControl, setRequiredFields
+	buildFormGroup,
+	buildFormGroupTemplate,
+	formatFormData,
+	getControl,
+	path2ControlKey,
+	setControl,
+	setRequiredFields,
 } from './form-group.functions';
 
 export {
-  buildLayout, buildLayoutFromSchema, buildTitleMap, getLayoutNode, mapLayout
+	buildLayout,
+	buildLayoutFromSchema,
+	buildTitleMap,
+	getLayoutNode,
+	mapLayout,
 } from './layout.functions';
-

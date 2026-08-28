@@ -1,23 +1,55 @@
 {
-  "schema": {
-    "type": "object",
-    "title": "Event Registration",
-    "description": "Multi-select arrays and dates — no custom layout, the form is generated from the schema.",
-    "properties": {
-      "attendee": { "type": "string", "title": "Attendee", "description": "Name as it appears on your badge." },
-      "ticketType": { "type": "string", "title": "Ticket", "description": "One per attendee.", "enum": ["workshop", "conference", "vip"] },
-      "date": { "type": "string", "format": "date", "title": "Event date", "description": "Choose the day you attend." },
-      "sessions": { "type": "array", "title": "Sessions", "description": "Pick the talks you want to join.", "items": { "type": "string", "enum": ["opening", "frameworks", "testing", "performance", "closing"] } },
-      "vegetarian": { "type": "boolean", "title": "Vegetarian lunch", "description": "Applies to catering." },
-      "guests": { "type": "integer", "title": "Extra guests", "description": "Number of plus-ones.", "minimum": 0, "maximum": 3 }
-    },
-    "required": ["attendee", "ticketType"]
-  },
-  "data": {
-    "attendee": "Jane Doe",
-    "ticketType": "conference",
-    "sessions": ["opening", "frameworks"],
-    "vegetarian": false,
-    "guests": 1
-  }
+	"schema": {
+		"type": "object",
+		"title": "Event Registration",
+		"description": "Multi-select arrays and dates — no custom layout, the form is generated from the schema.",
+		"properties": {
+			"attendee": {
+				"type": "string",
+				"title": "Attendee",
+				"description": "Name as it appears on your badge."
+			},
+			"ticketType": {
+				"type": "string",
+				"title": "Ticket",
+				"description": "One per attendee.",
+				"enum": ["workshop", "conference", "vip"]
+			},
+			"date": {
+				"type": "string",
+				"format": "date",
+				"title": "Event date",
+				"description": "Choose the day you attend."
+			},
+			"sessions": {
+				"type": "array",
+				"title": "Sessions",
+				"description": "Pick the talks you want to join.",
+				"items": {
+					"type": "string",
+					"enum": ["opening", "frameworks", "testing", "performance", "closing"]
+				}
+			},
+			"vegetarian": {
+				"type": "boolean",
+				"title": "Vegetarian lunch",
+				"description": "Applies to catering."
+			},
+			"guests": {
+				"type": "integer",
+				"title": "Extra guests",
+				"description": "Number of plus-ones.",
+				"minimum": 0,
+				"maximum": 3
+			}
+		},
+		"required": ["attendee", "ticketType"]
+	},
+	"data": {
+		"attendee": "Jane Doe",
+		"ticketType": "conference",
+		"sessions": ["opening", "frameworks"],
+		"vegetarian": false,
+		"guests": 1
+	}
 }

@@ -1,156 +1,186 @@
 {
-  "schema": {
-    "title": "Arrays & Nested Lists",
-    "type": "object",
-    "definitions": {
-      "address": {
-        "type": "object",
-        "title": "Address",
-        "properties": {
-          "street": { "type": "string", "title": "Street" },
-          "city": { "type": "string", "title": "City" },
-          "country": { "type": "string", "title": "Country", "enum": ["US", "UK", "CA", "AU", "DE"] },
-          "postal_code": { "type": "string", "title": "Postal code" }
-        },
-        "required": ["city", "country"]
-      },
-      "employee": {
-        "type": "object",
-        "title": "Employee",
-        "properties": {
-          "full_name": { "type": "string", "title": "Full name" },
-          "role": { "type": "string", "title": "Role", "enum": ["Engineer", "Manager", "Designer", "PM"] },
-          "email": { "type": "string", "format": "email", "title": "Email" },
-          "skills": {
-            "type": "array",
-            "title": "Skills",
-            "items": { "type": "string", "enum": ["frontend", "backend", "devops", "design", "management"] },
-            "default": ["frontend"]
-          },
-          "home_address": { "$ref": "#/definitions/address" },
-          "emergency_contacts": {
-            "type": "array",
-            "title": "Emergency contacts",
-            "maxItems": 3,
-            "items": {
-              "type": "object",
-              "title": "Contact",
-              "properties": {
-                "name": { "type": "string", "title": "Name" },
-                "phone": { "type": "string", "title": "Phone" },
-                "relation": { "type": "string", "title": "Relation", "enum": ["spouse", "parent", "sibling", "friend"] }
-              },
-              "required": ["name", "phone", "relation"]
-            }
-          }
-        },
-        "required": ["full_name", "role", "email"]
-      }
-    },
-    "properties": {
-      "tags": {
-        "type": "array",
-        "title": "Tags",
-        "description": "Simple array of strings — add, edit, remove.",
-        "items": { "type": "string", "placeholder": "New tag" }
-      },
-      "features": {
-        "type": "array",
-        "title": "Features",
-        "description": "Fixed checkbox group (array of enum).",
-        "items": { "type": "string", "enum": ["wifi", "parking", "pool", "gym"] }
-      },
-      "phones": {
-        "type": "array",
-        "title": "Phone numbers",
-        "description": "Array of objects — drag the grip to reorder.",
-        "items": {
-          "type": "object",
-          "properties": {
-            "type": { "type": "string", "enum": ["cell", "home", "work"] },
-            "number": { "type": "string", "title": "Number" }
-          },
-          "required": ["type", "number"]
-        }
-      },
-      "employees": {
-        "type": "array",
-        "title": "Employees",
-        "description": "Nested arrays and $ref definitions inside array items.",
-        "items": { "$ref": "#/definitions/employee", "extendRefs": true }
-      }
-    },
-    "required": ["phones"]
-  },
-  "layout": [
-    { "key": "tags" },
-    { "key": "features", "inline": true },
-    { "key": "phones" },
-    {
-      "key": "employees",
-      "type": "array",
-      "items": [
-        "employees[].full_name",
-        {
-          "type": "flex", "flex-flow": "row wrap",
-          "items": [
-            { "key": "employees[].role", "flex": "1 1 150px" },
-            { "key": "employees[].email", "flex": "2 2 220px" }
-          ]
-        },
-        { "key": "employees[].skills", "inline": true, "items": ["employees[].skills[]"] },
-        {
-          "key": "employees[].home_address",
-          "type": "fieldset",
-          "items": [
-            "employees[].home_address.street",
-            {
-              "type": "flex", "flex-flow": "row wrap",
-              "items": [
-                { "key": "employees[].home_address.city", "flex": "2 2 150px" },
-                { "key": "employees[].home_address.country", "flex": "1 1 90px" },
-                { "key": "employees[].home_address.postal_code", "flex": "1 1 110px" }
-              ]
-            }
-          ]
-        },
-        {
-          "key": "employees[].emergency_contacts",
-          "items": [
-            "employees[].emergency_contacts[].name",
-            "employees[].emergency_contacts[].phone",
-            "employees[].emergency_contacts[].relation"
-          ]
-        }
-      ]
-    }
-  ],
-  "data": {
-    "tags": ["priority", "beta"],
-    "features": ["wifi", "gym"],
-    "phones": [
-      { "type": "cell", "number": "702-123-4567" },
-      { "type": "work", "number": "702-987-6543" }
-    ],
-    "employees": [
-      {
-        "full_name": "Ada Lovelace",
-        "role": "Engineer",
-        "email": "ada@example.com",
-        "skills": ["frontend", "backend"],
-        "home_address": { "street": "1 Analytical Way", "city": "London", "country": "UK", "postal_code": "SW1A 1AA" },
-        "emergency_contacts": [
-          { "name": "Grace Hopper", "phone": "+44 20 7946 0000", "relation": "friend" }
-        ]
-      },
-      {
-        "full_name": "Alan Turing",
-        "role": "Manager",
-        "email": "alan@example.com",
-        "skills": ["backend", "devops"],
-        "home_address": { "street": "2 Enigma Rd", "city": "Manchester", "country": "UK", "postal_code": "M1 2AB" },
-        "emergency_contacts": []
-      }
-    ]
-  }
+	"schema": {
+		"title": "Arrays & Nested Lists",
+		"type": "object",
+		"definitions": {
+			"address": {
+				"type": "object",
+				"title": "Address",
+				"properties": {
+					"street": { "type": "string", "title": "Street" },
+					"city": { "type": "string", "title": "City" },
+					"country": {
+						"type": "string",
+						"title": "Country",
+						"enum": ["US", "UK", "CA", "AU", "DE"]
+					},
+					"postal_code": { "type": "string", "title": "Postal code" }
+				},
+				"required": ["city", "country"]
+			},
+			"employee": {
+				"type": "object",
+				"title": "Employee",
+				"properties": {
+					"full_name": { "type": "string", "title": "Full name" },
+					"role": {
+						"type": "string",
+						"title": "Role",
+						"enum": ["Engineer", "Manager", "Designer", "PM"]
+					},
+					"email": { "type": "string", "format": "email", "title": "Email" },
+					"skills": {
+						"type": "array",
+						"title": "Skills",
+						"items": {
+							"type": "string",
+							"enum": ["frontend", "backend", "devops", "design", "management"]
+						},
+						"default": ["frontend"]
+					},
+					"home_address": { "$ref": "#/definitions/address" },
+					"emergency_contacts": {
+						"type": "array",
+						"title": "Emergency contacts",
+						"maxItems": 3,
+						"items": {
+							"type": "object",
+							"title": "Contact",
+							"properties": {
+								"name": { "type": "string", "title": "Name" },
+								"phone": { "type": "string", "title": "Phone" },
+								"relation": {
+									"type": "string",
+									"title": "Relation",
+									"enum": ["spouse", "parent", "sibling", "friend"]
+								}
+							},
+							"required": ["name", "phone", "relation"]
+						}
+					}
+				},
+				"required": ["full_name", "role", "email"]
+			}
+		},
+		"properties": {
+			"tags": {
+				"type": "array",
+				"title": "Tags",
+				"description": "Simple array of strings — add, edit, remove.",
+				"items": { "type": "string", "placeholder": "New tag" }
+			},
+			"features": {
+				"type": "array",
+				"title": "Features",
+				"description": "Fixed checkbox group (array of enum).",
+				"items": { "type": "string", "enum": ["wifi", "parking", "pool", "gym"] }
+			},
+			"phones": {
+				"type": "array",
+				"title": "Phone numbers",
+				"description": "Array of objects — drag the grip to reorder.",
+				"items": {
+					"type": "object",
+					"properties": {
+						"type": { "type": "string", "enum": ["cell", "home", "work"] },
+						"number": { "type": "string", "title": "Number" }
+					},
+					"required": ["type", "number"]
+				}
+			},
+			"employees": {
+				"type": "array",
+				"title": "Employees",
+				"description": "Nested arrays and $ref definitions inside array items.",
+				"items": { "$ref": "#/definitions/employee", "extendRefs": true }
+			}
+		},
+		"required": ["phones"]
+	},
+	"layout": [
+		{ "key": "tags" },
+		{ "key": "features", "inline": true },
+		{ "key": "phones" },
+		{
+			"key": "employees",
+			"type": "array",
+			"items": [
+				"employees[].full_name",
+				{
+					"type": "flex",
+					"flex-flow": "row wrap",
+					"items": [
+						{ "key": "employees[].role", "flex": "1 1 150px" },
+						{ "key": "employees[].email", "flex": "2 2 220px" }
+					]
+				},
+				{ "key": "employees[].skills", "inline": true, "items": ["employees[].skills[]"] },
+				{
+					"key": "employees[].home_address",
+					"type": "fieldset",
+					"items": [
+						"employees[].home_address.street",
+						{
+							"type": "flex",
+							"flex-flow": "row wrap",
+							"items": [
+								{ "key": "employees[].home_address.city", "flex": "2 2 150px" },
+								{ "key": "employees[].home_address.country", "flex": "1 1 90px" },
+								{
+									"key": "employees[].home_address.postal_code",
+									"flex": "1 1 110px"
+								}
+							]
+						}
+					]
+				},
+				{
+					"key": "employees[].emergency_contacts",
+					"items": [
+						"employees[].emergency_contacts[].name",
+						"employees[].emergency_contacts[].phone",
+						"employees[].emergency_contacts[].relation"
+					]
+				}
+			]
+		}
+	],
+	"data": {
+		"tags": ["priority", "beta"],
+		"features": ["wifi", "gym"],
+		"phones": [
+			{ "type": "cell", "number": "702-123-4567" },
+			{ "type": "work", "number": "702-987-6543" }
+		],
+		"employees": [
+			{
+				"full_name": "Ada Lovelace",
+				"role": "Engineer",
+				"email": "ada@example.com",
+				"skills": ["frontend", "backend"],
+				"home_address": {
+					"street": "1 Analytical Way",
+					"city": "London",
+					"country": "UK",
+					"postal_code": "SW1A 1AA"
+				},
+				"emergency_contacts": [
+					{ "name": "Grace Hopper", "phone": "+44 20 7946 0000", "relation": "friend" }
+				]
+			},
+			{
+				"full_name": "Alan Turing",
+				"role": "Manager",
+				"email": "alan@example.com",
+				"skills": ["backend", "devops"],
+				"home_address": {
+					"street": "2 Enigma Rd",
+					"city": "Manchester",
+					"country": "UK",
+					"postal_code": "M1 2AB"
+				},
+				"emergency_contacts": []
+			}
+		]
+	}
 }

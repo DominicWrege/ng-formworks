@@ -1,15 +1,17 @@
 @if (boundControl) {
-  <input
-    [formControl]="formControl"
-    [id]="'control' + $safeNavigationMigration(layoutNode()?._id)"
-    [name]="controlName"
-    type="hidden">
+	<input
+		[formControl]="formControl"
+		[id]="'control' + $safeNavigationMigration(layoutNode()?._id)"
+		[name]="controlName"
+		type="hidden"
+	/>
 }
 @if (!boundControl) {
-  <input
-    [disabled]="controlDisabled"
-    [name]="controlName"
-    [id]="'control' + $safeNavigationMigration(layoutNode()?._id)"
-    type="hidden"
-    [value]="controlValue">
+	<input
+		[disabled]="controlDisabled"
+		[name]="controlName"
+		[id]="'control' + $safeNavigationMigration(layoutNode()?._id)"
+		type="hidden"
+		[value]="controlValue"
+	/>
 }

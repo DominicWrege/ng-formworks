@@ -1,112 +1,154 @@
 <div class="min-h-screen flex flex-col bg-gray-50 text-gray-900">
-  <header class="bg-white border-b border-gray-200 px-4 md:px-6 py-3 flex flex-wrap items-center gap-x-3 gap-y-2">
-    <h1 class="text-lg font-semibold tracking-tight">
-      <a href="https://github.com/zahmo/ng-formworks" target="_blank" class="hover:underline">ng-formworks</a>
-      <span class="text-gray-400 font-normal">&nbsp;/ playground</span>
-    </h1>
-    <span class="text-xs rounded-full bg-blue-100 text-blue-800 px-2 py-0.5">v{{envVersion}}</span>
+	<header
+		class="bg-white border-b border-gray-200 px-4 md:px-6 py-3 flex flex-wrap items-center gap-x-3 gap-y-2"
+	>
+		<h1 class="text-lg font-semibold tracking-tight">
+			<a href="https://github.com/zahmo/ng-formworks" target="_blank" class="hover:underline"
+				>ng-formworks</a
+			>
+			<span class="text-gray-400 font-normal">&nbsp;/ playground</span>
+		</h1>
+		<span class="text-xs rounded-full bg-blue-100 text-blue-800 px-2 py-0.5"
+			>v{{ envVersion }}</span
+		>
 
-    <div class="flex-1"></div>
+		<div class="flex-1"></div>
 
-    <label for="example-select" class="text-sm text-gray-500">Load example:</label>
-    <select id="example-select"
-            class="rounded-md border border-gray-300 bg-white px-2 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            [value]="selectedExample()" (change)="onExampleSelect($event)">
-      <option value="">— start from scratch —</option>
-      @for (example of examples; track example.file) {
-        <option [value]="example.file" [selected]="example.file === selectedExample()">{{ example.name }}</option>
-      }
-    </select>
+		<label for="example-select" class="text-sm text-gray-500">Load example:</label>
+		<select
+			id="example-select"
+			class="rounded-md border border-gray-300 bg-white px-2 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+			[value]="selectedExample()"
+			(change)="onExampleSelect($event)"
+		>
+			<option value="">— start from scratch —</option>
+			@for (example of examples; track example.file) {
+				<option [value]="example.file" [selected]="example.file === selectedExample()">
+					{{ example.name }}
+				</option>
+			}
+		</select>
 
-    <fieldset class="flex items-center gap-1 rounded-full bg-gray-100 p-0.5 text-xs">
-      @for (f of frameworks; track f.value) {
-        <button type="button"
-                (click)="framework.set(f.value)"
-                [class]="f.value === framework()
-                  ? 'rounded-full bg-white px-2.5 py-1 font-medium text-orange-600 shadow-sm'
-                  : 'rounded-full px-2.5 py-1 text-gray-500 hover:text-gray-800'">
-          {{ f.label }}
-        </button>
-      }
-    </fieldset>
-  </header>
+		<fieldset class="flex items-center gap-1 rounded-full bg-gray-100 p-0.5 text-xs">
+			@for (f of frameworks; track f.value) {
+				<button
+					type="button"
+					(click)="framework.set(f.value)"
+					[class]="
+						f.value === framework()
+							? 'rounded-full bg-white px-2.5 py-1 font-medium text-orange-600 shadow-sm'
+							: 'rounded-full px-2.5 py-1 text-gray-500 hover:text-gray-800'
+					"
+				>
+					{{ f.label }}
+				</button>
+			}
+		</fieldset>
+	</header>
 
-  <main class="flex-1 w-full max-w-[1440px] mx-auto grid grid-cols-1 xl:grid-cols-2 gap-4 p-4">
+	<main class="flex-1 w-full max-w-[1440px] mx-auto grid grid-cols-1 xl:grid-cols-2 gap-4 p-4">
+		<section
+			class="flex flex-col bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden min-h-[420px] xl:min-h-0"
+		>
+			<div class="px-4 py-2.5 border-b border-gray-100 flex items-center gap-3 flex-wrap">
+				<h2 class="font-medium">JSON Schema</h2>
+				@if (parseError()) {
+					<span class="text-xs rounded-full bg-red-100 text-red-700 px-2 py-0.5 break-all"
+						>Invalid JSON</span
+					>
+				} @else {
+					<span class="text-xs rounded-full bg-green-100 text-green-700 px-2 py-0.5"
+						>Valid JSON</span
+					>
+				}
+				<div class="flex-1"></div>
+			</div>
+			<div
+				#aceHost
+				ace-editor
+				[text]="schemaText()"
+				[options]="{ printMargin: false }"
+				[readOnly]="false"
+				(textChanged)="onEditorChange($event)"
+				class="flex-1 min-h-[380px] h-[60vh] xl:h-auto w-full overflow-auto"
+			></div>
+		</section>
 
-    <section class="flex flex-col bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden min-h-[420px] xl:min-h-0">
-      <div class="px-4 py-2.5 border-b border-gray-100 flex items-center gap-3 flex-wrap">
-        <h2 class="font-medium">JSON Schema</h2>
-        @if (parseError()) {
-          <span class="text-xs rounded-full bg-red-100 text-red-700 px-2 py-0.5 break-all">Invalid JSON</span>
-        } @else {
-          <span class="text-xs rounded-full bg-green-100 text-green-700 px-2 py-0.5">Valid JSON</span>
-        }
-        <div class="flex-1"></div>
-      </div>
-      <div #aceHost ace-editor
-           [text]="schemaText()"
-           [options]="{ printMargin: false }"
-           [readOnly]="false"
-           (textChanged)="onEditorChange($event)"
-           class="flex-1 min-h-[380px] h-[60vh] xl:h-auto w-full overflow-auto"></div>
-    </section>
+		<section class="flex flex-col gap-4">
+			<div
+				class="flex flex-col bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden"
+			>
+				<h2 class="px-4 py-2.5 border-b border-gray-100 font-medium">Generated Form</h2>
+				<div class="p-4">
+					@if (!jsonFormObject()) {
+						<p class="text-sm text-gray-400 italic">
+							{{
+								parseError()
+									? 'Fix the JSON error to render the form.'
+									: 'Edit the schema to render a form.'
+							}}
+						</p>
+					}
+					@if (jsonFormObject()) {
+						<json-schema-form
+							loadExternalAssets="true"
+							[form]="jsonFormObject()"
+							[options]="jsonFormOptions"
+							[framework]="framework()"
+							(onChanges)="liveFormData.set($event)"
+							(onSubmit)="submittedFormData.set($event)"
+							(isValid)="formIsValid.set($event === true)"
+							(validationErrors)="onValidationErrors($event)"
+						>
+						</json-schema-form>
+					}
+				</div>
+			</div>
 
-    <section class="flex flex-col gap-4">
-
-      <div class="flex flex-col bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-        <h2 class="px-4 py-2.5 border-b border-gray-100 font-medium">Generated Form</h2>
-        <div class="p-4">
-          @if (!jsonFormObject()) {
-            <p class="text-sm text-gray-400 italic">
-              {{ parseError() ? 'Fix the JSON error to render the form.' : 'Edit the schema to render a form.' }}
-            </p>
-          }
-          @if (jsonFormObject()) {
-            <json-schema-form
-              loadExternalAssets="true"
-              [form]="jsonFormObject()"
-              [options]="jsonFormOptions"
-              [framework]="framework()"
-              (onChanges)="liveFormData.set($event)"
-              (onSubmit)="submittedFormData.set($event)"
-              (isValid)="formIsValid.set($event === true)"
-              (validationErrors)="onValidationErrors($event)">
-            </json-schema-form>
-          }
-        </div>
-      </div>
-
-      <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-        <div class="px-4 py-2.5 border-b border-gray-100 flex items-center gap-2">
-          <h2 class="font-medium">Output</h2>
-          @if (formIsValid() === true) {
-            <span class="text-xs rounded-full bg-green-100 text-green-700 px-2 py-0.5">valid</span>
-          } @else if (formIsValid() === false) {
-            <span class="text-xs rounded-full bg-red-100 text-red-700 px-2 py-0.5">invalid</span>
-          } @else {
-            <span class="text-xs rounded-full bg-gray-100 text-gray-500 px-2 py-0.5">n/a</span>
-          }
-        </div>
-        <div class="p-4 space-y-3 text-sm">
-          @if (prettyValidationErrors()) {
-            <div class="text-red-700 bg-red-50 border border-red-200 rounded-md px-3 py-2 break-words">
-              {{ prettyValidationErrors() }}
-            </div>
-          }
-          <div>
-            <p class="text-gray-500 mb-1">Live data — onChanges():</p>
-            <pre class="rounded-md bg-gray-50 border border-gray-200 p-3 overflow-auto max-h-56 font-mono text-xs"
-                 [class.text-green-700]="!prettyValidationErrors() && prettyLiveFormData() !== '{}'"
-                 [class.text-red-700]="!!prettyValidationErrors()">{{ prettyLiveFormData() }}</pre>
-          </div>
-          <div>
-            <p class="text-gray-500 mb-1">Submitted data — onSubmit():</p>
-            <pre class="rounded-md bg-gray-50 border border-gray-200 p-3 overflow-auto max-h-56 font-mono text-xs"
-                 [class.text-green-700]="prettySubmittedFormData() !== 'null'">{{ prettySubmittedFormData() }}</pre>
-          </div>
-        </div>
-      </div>
-
-    </section>
-  </main>
+			<div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+				<div class="px-4 py-2.5 border-b border-gray-100 flex items-center gap-2">
+					<h2 class="font-medium">Output</h2>
+					@if (formIsValid() === true) {
+						<span class="text-xs rounded-full bg-green-100 text-green-700 px-2 py-0.5"
+							>valid</span
+						>
+					} @else if (formIsValid() === false) {
+						<span class="text-xs rounded-full bg-red-100 text-red-700 px-2 py-0.5"
+							>invalid</span
+						>
+					} @else {
+						<span class="text-xs rounded-full bg-gray-100 text-gray-500 px-2 py-0.5"
+							>n/a</span
+						>
+					}
+				</div>
+				<div class="p-4 space-y-3 text-sm">
+					@if (prettyValidationErrors()) {
+						<div
+							class="text-red-700 bg-red-50 border border-red-200 rounded-md px-3 py-2 break-words"
+						>
+							{{ prettyValidationErrors() }}
+						</div>
+					}
+					<div>
+						<p class="text-gray-500 mb-1">Live data — onChanges():</p>
+						<pre
+							class="rounded-md bg-gray-50 border border-gray-200 p-3 overflow-auto max-h-56 font-mono text-xs"
+							[class.text-green-700]="
+								!prettyValidationErrors() && prettyLiveFormData() !== '{}'
+							"
+							[class.text-red-700]="!!prettyValidationErrors()"
+							>{{ prettyLiveFormData() }}</pre>
+					</div>
+					<div>
+						<p class="text-gray-500 mb-1">Submitted data — onSubmit():</p>
+						<pre
+							class="rounded-md bg-gray-50 border border-gray-200 p-3 overflow-auto max-h-56 font-mono text-xs"
+							[class.text-green-700]="prettySubmittedFormData() !== 'null'"
+							>{{ prettySubmittedFormData() }}</pre>
+					</div>
+				</div>
+			</div>
+		</section>
+	</main>
 </div>

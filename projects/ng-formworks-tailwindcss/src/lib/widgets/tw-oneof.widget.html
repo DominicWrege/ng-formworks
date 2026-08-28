@@ -1,7 +1,10 @@
 @if (this.options?.description) {
-  <p [class]="tw.helpText" [innerHTML]="this.options?.description"></p>
+<p [class]="tw.helpText" [innerHTML]="this.options?.description"></p>
 }
-<tw-tabs-widget #tabs [layoutNode]="layoutNode()"
-[layoutIndex]="layoutIndex()"
-[dataIndex]="dataIndex()">
+<tw-tabs-widget
+	#tabs
+	[layoutNode]="layoutNode()"
+	[layoutIndex]="layoutIndex()"
+	[dataIndex]="dataIndex()"
+>
 </tw-tabs-widget>

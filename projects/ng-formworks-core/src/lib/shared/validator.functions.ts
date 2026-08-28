@@ -31,22 +31,36 @@ import { from, Observable } from 'rxjs';
  *   the opposite of its original function.
  */
 
-export type SchemaPrimitiveType =
-  'string' | 'number' | 'integer' | 'boolean' | 'null';
-export type SchemaType =
-  'string' | 'number' | 'integer' | 'boolean' | 'null' | 'object' | 'array';
-export type JavaScriptPrimitiveType =
-  'string' | 'number' | 'boolean' | 'null' | 'undefined';
+export type SchemaPrimitiveType = 'string' | 'number' | 'integer' | 'boolean' | 'null';
+export type SchemaType = 'string' | 'number' | 'integer' | 'boolean' | 'null' | 'object' | 'array';
+export type JavaScriptPrimitiveType = 'string' | 'number' | 'boolean' | 'null' | 'undefined';
 export type JavaScriptType =
-  'string' | 'number' | 'boolean' | 'null' | 'undefined' | 'object' | 'array' |
-  'map' | 'set' | 'arguments' | 'date' | 'error' | 'function' | 'json' |
-  'math' | 'regexp'; // Note: this list is incomplete
+	| 'string'
+	| 'number'
+	| 'boolean'
+	| 'null'
+	| 'undefined'
+	| 'object'
+	| 'array'
+	| 'map'
+	| 'set'
+	| 'arguments'
+	| 'date'
+	| 'error'
+	| 'function'
+	| 'json'
+	| 'math'
+	| 'regexp'; // Note: this list is incomplete
 export type PrimitiveValue = string | number | boolean | null | undefined;
-export interface PlainObject { [k: string]: any; }
+export interface PlainObject {
+	[k: string]: any;
+}
 
 export type IValidatorFn = (c: AbstractControl, i?: boolean) => PlainObject | null;
-export type AsyncIValidatorFn =
-  (c: AbstractControl, i?: boolean) => Promise<PlainObject> | Observable<PlainObject>;
+export type AsyncIValidatorFn = (
+	c: AbstractControl,
+	i?: boolean,
+) => Promise<PlainObject> | Observable<PlainObject>;
 
 /**
  * '_executeValidators' utility function
@@ -61,9 +75,11 @@ export type AsyncIValidatorFn =
  * // { PlainObject[] } - array of nulls and error message
  */
 export function _executeValidators(
-  control: AbstractControl, validators: IValidatorFn[], invert = false
+	control: AbstractControl,
+	validators: IValidatorFn[],
+	invert = false,
 ): (PlainObject | null)[] {
-  return validators.map(validator => validator(control, invert));
+	return validators.map((validator) => validator(control, invert));
 }
 
 /**
@@ -79,9 +95,11 @@ export function _executeValidators(
  * //  - array of observable nulls and error message
  */
 export function _executeAsyncValidators(
-  control: AbstractControl, validators: AsyncIValidatorFn[], invert = false
+	control: AbstractControl,
+	validators: AsyncIValidatorFn[],
+	invert = false,
 ): (Promise<PlainObject> | Observable<PlainObject>)[] {
-  return validators.map(validator => validator(control, invert));
+	return validators.map((validator) => validator(control, invert));
 }
 
 /**
@@ -95,22 +113,25 @@ export function _executeAsyncValidators(
  * // { PlainObject } - merged object
  */
 export function _mergeObjects(...objects: (PlainObject | null | undefined)[]): PlainObject {
-  const mergedObject: PlainObject = { };
-  for (const currentObject of objects) {
-    if (isObject(currentObject)) {
-      for (const key of Object.keys(currentObject!)) {
-        const currentValue = currentObject![key];
-        const mergedValue = mergedObject[key];
-        mergedObject[key] = !isDefined(mergedValue) ? currentValue :
-          key === 'not' && isBoolean(mergedValue, 'strict') &&
-            isBoolean(currentValue, 'strict') ? xor(mergedValue, currentValue) :
-          getType(mergedValue) === 'object' && getType(currentValue) === 'object' ?
-            _mergeObjects(mergedValue, currentValue) :
-            currentValue;
-      }
-    }
-  }
-  return mergedObject;
+	const mergedObject: PlainObject = {};
+	for (const currentObject of objects) {
+		if (isObject(currentObject)) {
+			for (const key of Object.keys(currentObject!)) {
+				const currentValue = currentObject![key];
+				const mergedValue = mergedObject[key];
+				mergedObject[key] = !isDefined(mergedValue)
+					? currentValue
+					: key === 'not' &&
+						  isBoolean(mergedValue, 'strict') &&
+						  isBoolean(currentValue, 'strict')
+						? xor(mergedValue, currentValue)
+						: getType(mergedValue) === 'object' && getType(currentValue) === 'object'
+							? _mergeObjects(mergedValue, currentValue)
+							: currentValue;
+			}
+		}
+	}
+	return mergedObject;
 }
 
 /**
@@ -122,9 +143,11 @@ export function _mergeObjects(...objects: (PlainObject | null | undefined)[]): P
  * //  { PlainObject[] } arrayOfErrors - array of objects
  * // { PlainObject } - merged object, or null if no usable input objectcs
  */
-export function _mergeErrors(arrayOfErrors: (PlainObject | null | undefined)[]): PlainObject | null {
-  const mergedErrors = _mergeObjects(...arrayOfErrors);
-  return isEmpty(mergedErrors) ? null : mergedErrors;
+export function _mergeErrors(
+	arrayOfErrors: (PlainObject | null | undefined)[],
+): PlainObject | null {
+	const mergedErrors = _mergeObjects(...arrayOfErrors);
+	return isEmpty(mergedErrors) ? null : mergedErrors;
 }
 
 /**
@@ -137,7 +160,7 @@ export function _mergeErrors(arrayOfErrors: (PlainObject | null | undefined)[]):
  * // { boolean } - false if undefined or null, otherwise true
  */
 export function isDefined(value: unknown): boolean {
-  return value !== undefined && value !== null;
+	return value !== undefined && value !== null;
 }
 
 /**
@@ -153,7 +176,7 @@ export function isDefined(value: unknown): boolean {
  * // { boolean } - false if undefined, null, or '', otherwise true
  */
 export function hasValue(value: unknown): boolean {
-  return value !== undefined && value !== null && value !== '';
+	return value !== undefined && value !== null && value !== '';
 }
 
 /**
@@ -165,9 +188,13 @@ export function hasValue(value: unknown): boolean {
  * // { boolean } - false if undefined, null, or '', otherwise true
  */
 export function isEmpty(value: unknown): boolean {
-  if (isArray(value)) { return !value.length; }
-  if (isObject(value)) { return !Object.keys(value as object).length; }
-  return value === undefined || value === null || value === '';
+	if (isArray(value)) {
+		return !value.length;
+	}
+	if (isObject(value)) {
+		return !Object.keys(value as object).length;
+	}
+	return value === undefined || value === null || value === '';
 }
 
 /**
@@ -179,7 +206,7 @@ export function isEmpty(value: unknown): boolean {
  * // { boolean } - true if string, false if not
  */
 export function isString(value: unknown): value is string {
-  return typeof value === 'string';
+	return typeof value === 'string';
 }
 
 /**
@@ -192,8 +219,10 @@ export function isString(value: unknown): value is string {
  * // { boolean } - true if number, false if not
  */
 export function isNumber(value: unknown, strict: boolean | 'strict' = false): boolean {
-  if (strict && typeof value !== 'number') { return false; }
-  return !isNaN(value as number) && (value as number) !== (value as number) / 0;
+	if (strict && typeof value !== 'number') {
+		return false;
+	}
+	return !isNaN(value as number) && (value as number) !== (value as number) / 0;
 }
 
 /**
@@ -206,8 +235,14 @@ export function isNumber(value: unknown, strict: boolean | 'strict' = false): bo
  * // {boolean } - true if number, false if not
  */
 export function isInteger(value: unknown, strict: boolean | 'strict' = false): boolean {
-  if (strict && typeof value !== 'number') { return false; }
-  return !isNaN(value as number) && (value as number) !== (value as number) / 0 && (value as number) % 1 === 0;
+	if (strict && typeof value !== 'number') {
+		return false;
+	}
+	return (
+		!isNaN(value as number) &&
+		(value as number) !== (value as number) / 0 &&
+		(value as number) % 1 === 0
+	);
 }
 
 /**
@@ -221,43 +256,53 @@ export function isInteger(value: unknown, strict: boolean | 'strict' = false): b
  * // { boolean } - true if boolean, false if not
  */
 export function isBoolean(value: unknown, option: boolean | 'strict' | null = null): boolean {
-  if (option === 'strict') { return value === true || value === false; }
-  if (option === true) {
-    return value === true || value === 1 || value === 'true' || value === '1';
-  }
-  if (option === false) {
-    return value === false || value === 0 || value === 'false' || value === '0';
-  }
-  return value === true || value === 1 || value === 'true' || value === '1' ||
-    value === false || value === 0 || value === 'false' || value === '0';
+	if (option === 'strict') {
+		return value === true || value === false;
+	}
+	if (option === true) {
+		return value === true || value === 1 || value === 'true' || value === '1';
+	}
+	if (option === false) {
+		return value === false || value === 0 || value === 'false' || value === '0';
+	}
+	return (
+		value === true ||
+		value === 1 ||
+		value === 'true' ||
+		value === '1' ||
+		value === false ||
+		value === 0 ||
+		value === 'false' ||
+		value === '0'
+	);
 }
 
 export function isFunction(item: unknown): item is Function {
-  return typeof item === 'function';
+	return typeof item === 'function';
 }
 
 export function isObject(item: unknown): boolean {
-  return item !== null && typeof item === 'object';
+	return item !== null && typeof item === 'object';
 }
 
 export function isArray(item: unknown): item is any[] {
-  return Array.isArray(item);
+	return Array.isArray(item);
 }
 
 export function isDate(item: unknown): item is Date {
-  return !!item && Object.prototype.toString.call(item) === '[object Date]';
+	return !!item && Object.prototype.toString.call(item) === '[object Date]';
 }
 
 export function isMap<K = unknown, V = unknown>(item: unknown): item is Map<K, V> {
-  return !!item && Object.prototype.toString.call(item) === '[object Map]';
+	return !!item && Object.prototype.toString.call(item) === '[object Map]';
 }
 
 export function isSet<T = unknown>(item: unknown): item is Set<T> {
-  return !!item && Object.prototype.toString.call(item) === '[object Set]';
+	return !!item && Object.prototype.toString.call(item) === '[object Set]';
 }
 
 export function isSymbol(item: unknown): item is symbol {
-  return typeof item === 'symbol';
+	return typeof item === 'symbol';
 }
 
 /**
@@ -295,14 +340,28 @@ export function isSymbol(item: unknown): item is symbol {
  * // { SchemaType }
  */
 export function getType(value: unknown, strict: boolean | 'strict' = false): SchemaType | null {
-  if (!isDefined(value)) { return 'null'; }
-  if (isArray(value)) { return 'array'; }
-  if (isObject(value)) { return 'object'; }
-  if (isBoolean(value, 'strict')) { return 'boolean'; }
-  if (isInteger(value, strict)) { return 'integer'; }
-  if (isNumber(value, strict)) { return 'number'; }
-  if (isString(value) || (!strict && isDate(value))) { return 'string'; }
-  return null;
+	if (!isDefined(value)) {
+		return 'null';
+	}
+	if (isArray(value)) {
+		return 'array';
+	}
+	if (isObject(value)) {
+		return 'object';
+	}
+	if (isBoolean(value, 'strict')) {
+		return 'boolean';
+	}
+	if (isInteger(value, strict)) {
+		return 'integer';
+	}
+	if (isNumber(value, strict)) {
+		return 'number';
+	}
+	if (isString(value) || (!strict && isDate(value))) {
+		return 'string';
+	}
+	return null;
 }
 
 /**
@@ -316,21 +375,21 @@ export function getType(value: unknown, strict: boolean | 'strict' = false): Sch
  * // { boolean }
  */
 export function isType(value: unknown, type: SchemaPrimitiveType): boolean {
-  switch (type) {
-    case 'string':
-      return isString(value) || isDate(value);
-    case 'number':
-      return isNumber(value);
-    case 'integer':
-      return isInteger(value);
-    case 'boolean':
-      return isBoolean(value);
-    case 'null':
-      return !hasValue(value);
-    default:
-      console.error(`isType error: "${type}" is not a recognized type.`);
-      return null as unknown as boolean;
-  }
+	switch (type) {
+		case 'string':
+			return isString(value) || isDate(value);
+		case 'number':
+			return isNumber(value);
+		case 'integer':
+			return isInteger(value);
+		case 'boolean':
+			return isBoolean(value);
+		case 'null':
+			return !hasValue(value);
+		default:
+			console.error(`isType error: "${type}" is not a recognized type.`);
+			return null as unknown as boolean;
+	}
 }
 
 /**
@@ -343,24 +402,23 @@ export function isType(value: unknown, type: SchemaPrimitiveType): boolean {
  * // { boolean }
  */
 export function isPrimitive(value: unknown): boolean {
-  return (isString(value) || isNumber(value) ||
-    isBoolean(value, 'strict') || value === null);
+	return isString(value) || isNumber(value) || isBoolean(value, 'strict') || value === null;
 }
 
 /**
- * 
- * @param date 
+ *
+ * @param date
  * @returns {string}
  * exmaple:
  * toDateString('2018-01-01') = '2018-01-01'
  * toDateString('2018-01-30T00:00:00.000Z') = '2018-01-30'
  */
 export const toIsoString = (date: Date) => {
-  const day = date.getDate();
-  const month = date.getMonth() + 1;
-  const year = date.getFullYear();
-  return `${year}-${month < 10 ? '0' + month : month}-${day < 10 ? '0' + day : day}`;
-}
+	const day = date.getDate();
+	const month = date.getMonth() + 1;
+	const year = date.getFullYear();
+	return `${year}-${month < 10 ? '0' + month : month}-${day < 10 ? '0' + day : day}`;
+};
 
 /**
  * 'toJavaScriptType' function
@@ -394,35 +452,59 @@ export const toIsoString = (date: Date) => {
  * // { PrimitiveValue }
  */
 export function toJavaScriptType(
-  value: unknown, types: SchemaPrimitiveType | SchemaPrimitiveType[], strictIntegers = true
+	value: unknown,
+	types: SchemaPrimitiveType | SchemaPrimitiveType[],
+	strictIntegers = true,
 ): PrimitiveValue {
-  if (!isDefined(value)) { return null; }
-  if (isString(types)) { types = [types]; }
-  if (strictIntegers && inArray('integer', types)) {
-    if (isInteger(value, 'strict')) { return value as PrimitiveValue; }
-    if (isInteger(value)) { return parseInt(value as string, 10); }
-  }
-  if (inArray('number', types) || (!strictIntegers && inArray('integer', types))) {
-    if (isNumber(value, 'strict')) { return value as PrimitiveValue; }
-    if (isNumber(value)) { return parseFloat(value as string); }
-  }
-  if (inArray('string', types)) {
-    if (isString(value)) { return value; }
-    // If value is a date, and types includes 'string',
-    // convert the date to a string
-    if (isDate(value)) { return toIsoString(value); }
-    if (isNumber(value)) { return (value as number).toString(); }
-  }
-  // If value is a date, and types includes 'integer' or 'number',
-  // but not 'string', convert the date to a number
-  if (isDate(value) && (inArray('integer', types) || inArray('number', types))) {
-    return value.getTime();
-  }
-  if (inArray('boolean', types)) {
-    if (isBoolean(value, true)) { return true; }
-    if (isBoolean(value, false)) { return false; }
-  }
-  return null;
+	if (!isDefined(value)) {
+		return null;
+	}
+	if (isString(types)) {
+		types = [types];
+	}
+	if (strictIntegers && inArray('integer', types)) {
+		if (isInteger(value, 'strict')) {
+			return value as PrimitiveValue;
+		}
+		if (isInteger(value)) {
+			return parseInt(value as string, 10);
+		}
+	}
+	if (inArray('number', types) || (!strictIntegers && inArray('integer', types))) {
+		if (isNumber(value, 'strict')) {
+			return value as PrimitiveValue;
+		}
+		if (isNumber(value)) {
+			return parseFloat(value as string);
+		}
+	}
+	if (inArray('string', types)) {
+		if (isString(value)) {
+			return value;
+		}
+		// If value is a date, and types includes 'string',
+		// convert the date to a string
+		if (isDate(value)) {
+			return toIsoString(value);
+		}
+		if (isNumber(value)) {
+			return (value as number).toString();
+		}
+	}
+	// If value is a date, and types includes 'integer' or 'number',
+	// but not 'string', convert the date to a number
+	if (isDate(value) && (inArray('integer', types) || inArray('number', types))) {
+		return value.getTime();
+	}
+	if (inArray('boolean', types)) {
+		if (isBoolean(value, true)) {
+			return true;
+		}
+		if (isBoolean(value, false)) {
+			return false;
+		}
+	}
+	return null;
 }
 
 /**
@@ -470,64 +552,86 @@ export function toJavaScriptType(
  * // { PrimitiveValue }
  */
 export function toSchemaType(
-  value: unknown, types: SchemaPrimitiveType | SchemaPrimitiveType[]
+	value: unknown,
+	types: SchemaPrimitiveType | SchemaPrimitiveType[],
 ): PrimitiveValue {
-  if (!isArray(<SchemaPrimitiveType>types)) {
-    types = <SchemaPrimitiveType[]>[types];
-  }
-  if ((<SchemaPrimitiveType[]>types).includes('null') && !hasValue(value)) {
-    return null;
-  }
-  if ((<SchemaPrimitiveType[]>types).includes('boolean') && !isBoolean(value, 'strict')) {
-    return value as PrimitiveValue;
-  }
-  if ((<SchemaPrimitiveType[]>types).includes('integer')) {
-    const testValue = toJavaScriptType(value, 'integer');
-    if (testValue !== null) { return +testValue!; }
-  }
-  if ((<SchemaPrimitiveType[]>types).includes('number')) {
-    const testValue = toJavaScriptType(value, 'number');
-    if (testValue !== null) { return +testValue!; }
-  }
-  if (
-    (isString(value) || isNumber(value, 'strict')) &&
-    (<SchemaPrimitiveType[]>types).includes('string')
-  ) { // Convert number to string
-    return toJavaScriptType(value, 'string');
-  }
-  if ((<SchemaPrimitiveType[]>types).includes('boolean') && isBoolean(value)) {
-    return toJavaScriptType(value, 'boolean');
-  }
-  if ((<SchemaPrimitiveType[]>types).includes('string')) { // Convert null & boolean to string
-    if (value === null) { return ''; }
-    const testValue = toJavaScriptType(value, 'string');
-    if (testValue !== null) { return testValue; }
-  }
-  if ((
-    (<SchemaPrimitiveType[]>types).includes('number') ||
-    (<SchemaPrimitiveType[]>types).includes('integer'))
-  ) {
-    if (value === true) { return 1; } // Convert boolean & null to number
-    if (value === false || value === null || value === '') { return 0; }
-  }
-  if ((<SchemaPrimitiveType[]>types).includes('number')) { // Convert mixed string to number
-    const testValue = parseFloat(<string>value);
-    if (!!testValue) { return testValue; }
-  }
-  if ((<SchemaPrimitiveType[]>types).includes('integer')) { // Convert string or number to integer
-    const testValue = parseInt(<string>value, 10);
-    if (!!testValue) { return testValue; }
-  }
-  if ((<SchemaPrimitiveType[]>types).includes('boolean')) { // Convert anything to boolean
-    return !!value;
-  }
-  if ((
-      (<SchemaPrimitiveType[]>types).includes('number') ||
-      (<SchemaPrimitiveType[]>types).includes('integer')
-    ) && !(<SchemaPrimitiveType[]>types).includes('null')
-  ) {
-    return 0; // If null not allowed, return 0 for non-convertable values
-  }
+	if (!isArray(<SchemaPrimitiveType>types)) {
+		types = <SchemaPrimitiveType[]>[types];
+	}
+	if ((<SchemaPrimitiveType[]>types).includes('null') && !hasValue(value)) {
+		return null;
+	}
+	if ((<SchemaPrimitiveType[]>types).includes('boolean') && !isBoolean(value, 'strict')) {
+		return value as PrimitiveValue;
+	}
+	if ((<SchemaPrimitiveType[]>types).includes('integer')) {
+		const testValue = toJavaScriptType(value, 'integer');
+		if (testValue !== null) {
+			return +testValue!;
+		}
+	}
+	if ((<SchemaPrimitiveType[]>types).includes('number')) {
+		const testValue = toJavaScriptType(value, 'number');
+		if (testValue !== null) {
+			return +testValue!;
+		}
+	}
+	if (
+		(isString(value) || isNumber(value, 'strict')) &&
+		(<SchemaPrimitiveType[]>types).includes('string')
+	) {
+		// Convert number to string
+		return toJavaScriptType(value, 'string');
+	}
+	if ((<SchemaPrimitiveType[]>types).includes('boolean') && isBoolean(value)) {
+		return toJavaScriptType(value, 'boolean');
+	}
+	if ((<SchemaPrimitiveType[]>types).includes('string')) {
+		// Convert null & boolean to string
+		if (value === null) {
+			return '';
+		}
+		const testValue = toJavaScriptType(value, 'string');
+		if (testValue !== null) {
+			return testValue;
+		}
+	}
+	if (
+		(<SchemaPrimitiveType[]>types).includes('number') ||
+		(<SchemaPrimitiveType[]>types).includes('integer')
+	) {
+		if (value === true) {
+			return 1;
+		} // Convert boolean & null to number
+		if (value === false || value === null || value === '') {
+			return 0;
+		}
+	}
+	if ((<SchemaPrimitiveType[]>types).includes('number')) {
+		// Convert mixed string to number
+		const testValue = parseFloat(<string>value);
+		if (!!testValue) {
+			return testValue;
+		}
+	}
+	if ((<SchemaPrimitiveType[]>types).includes('integer')) {
+		// Convert string or number to integer
+		const testValue = parseInt(<string>value, 10);
+		if (!!testValue) {
+			return testValue;
+		}
+	}
+	if ((<SchemaPrimitiveType[]>types).includes('boolean')) {
+		// Convert anything to boolean
+		return !!value;
+	}
+	if (
+		((<SchemaPrimitiveType[]>types).includes('number') ||
+			(<SchemaPrimitiveType[]>types).includes('integer')) &&
+		!(<SchemaPrimitiveType[]>types).includes('null')
+	) {
+		return 0; // If null not allowed, return 0 for non-convertable values
+	}
 }
 
 /**
@@ -537,7 +641,7 @@ export function toSchemaType(
  * // { boolean }
  */
 export function isPromise<T = unknown>(object: unknown): object is Promise<T> {
-  return !!object && typeof (object as Promise<T>).then === 'function';
+	return !!object && typeof (object as Promise<T>).then === 'function';
 }
 
 /**
@@ -547,7 +651,7 @@ export function isPromise<T = unknown>(object: unknown): object is Promise<T> {
  * // { boolean }
  */
 export function isObservable(object: unknown): object is Observable<unknown> {
-  return !!object && typeof (object as Observable<unknown>).subscribe === 'function';
+	return !!object && typeof (object as Observable<unknown>).subscribe === 'function';
 }
 
 /**
@@ -557,7 +661,7 @@ export function isObservable(object: unknown): object is Observable<unknown> {
  * // { Promise<unknown> }
  */
 export function _toPromise(object: Promise<unknown> | Observable<unknown>): Promise<unknown> {
-  return isPromise(object) ? object : object.toPromise();
+	return isPromise(object) ? object : object.toPromise();
 }
 
 /**
@@ -567,10 +671,12 @@ export function _toPromise(object: Promise<unknown> | Observable<unknown>): Prom
  * // { Observable<unknown> }
  */
 export function toObservable(object: unknown): Observable<unknown> {
-  const observable = isPromise(object) ? from(object) : object;
-  if (isObservable(observable)) { return observable; }
-  console.error('toObservable error: Expected validator to return Promise or Observable.');
-  return new Observable();
+	const observable = isPromise(object) ? from(object) : object;
+	if (isObservable(observable)) {
+		return observable;
+	}
+	console.error('toObservable error: Expected validator to return Promise or Observable.');
+	return new Observable();
 }
 
 /**
@@ -590,10 +696,12 @@ export function toObservable(object: unknown): Observable<unknown> {
  * // { boolean } - true if item(s) in array, false otherwise
  */
 export function inArray(item: unknown, array: unknown, allIn = false): boolean {
-  if (!isDefined(item) || !isArray(array)) { return false; }
-  return isArray(item) ?
-    item[allIn ? 'every' : 'some'](subItem => array.includes(subItem)) :
-    array.includes(item);
+	if (!isDefined(item) || !isArray(array)) {
+		return false;
+	}
+	return isArray(item)
+		? item[allIn ? 'every' : 'some']((subItem) => array.includes(subItem))
+		: array.includes(item);
 }
 
 /**
@@ -606,5 +714,5 @@ export function inArray(item: unknown, array: unknown, allIn = false): boolean {
  * // { boolean } - true if exactly one input value is truthy, false if not
  */
 export function xor(value1: unknown, value2: unknown): boolean {
-  return (!!value1 && !value2) || (!value1 && !!value2);
+	return (!!value1 && !value2) || (!value1 && !!value2);
 }

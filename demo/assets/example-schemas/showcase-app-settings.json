@@ -1,44 +1,82 @@
 {
-  "schema": {
-    "type": "object",
-    "title": "App Settings",
-    "description": "Grouped settings — no custom layout, the form is generated from the schema.",
-    "properties": {
-      "profile": {
-        "type": "object",
-        "title": "Profile",
-        "description": "How you appear to teammates.",
-        "properties": {
-          "displayName": { "type": "string", "title": "Display name", "description": "Shown in comments and mentions." },
-          "timezone": { "type": "string", "title": "Time zone", "description": "Used for reminders.", "enum": ["UTC", "Europe/Berlin", "America/New_York", "Asia/Tokyo"] }
-        }
-      },
-      "appearance": {
-        "type": "object",
-        "title": "Appearance",
-        "description": "Visual preferences.",
-        "properties": {
-          "theme": { "type": "string", "title": "Theme", "description": "Color scheme of the app.", "enum": ["light", "dark", "system"] },
-          "accent": { "type": "string", "format": "color", "title": "Accent color", "description": "Used for highlights and buttons." },
-          "density": { "type": "string", "title": "Density", "description": "Spacing between elements.", "enum": ["compact", "cozy", "comfortable"] }
-        }
-      },
-      "notifications": {
-        "type": "object",
-        "title": "Notifications",
-        "description": "What we ping you about.",
-        "properties": {
-          "email": { "type": "boolean", "title": "Email notifications", "description": "Daily summary email." },
-          "mentions": { "type": "boolean", "title": "Mentions", "description": "Alert when someone mentions you." },
-          "volume": { "type": "integer", "title": "Alert volume", "description": "0 is silent.", "minimum": 0, "maximum": 100 }
-        }
-      }
-    },
-    "required": ["profile"]
-  },
-  "data": {
-    "profile": { "displayName": "jdoe", "timezone": "Europe/Berlin" },
-    "appearance": { "theme": "dark", "accent": "#f97316", "density": "cozy" },
-    "notifications": { "email": true, "mentions": true, "volume": 60 }
-  }
+	"schema": {
+		"type": "object",
+		"title": "App Settings",
+		"description": "Grouped settings — no custom layout, the form is generated from the schema.",
+		"properties": {
+			"profile": {
+				"type": "object",
+				"title": "Profile",
+				"description": "How you appear to teammates.",
+				"properties": {
+					"displayName": {
+						"type": "string",
+						"title": "Display name",
+						"description": "Shown in comments and mentions."
+					},
+					"timezone": {
+						"type": "string",
+						"title": "Time zone",
+						"description": "Used for reminders.",
+						"enum": ["UTC", "Europe/Berlin", "America/New_York", "Asia/Tokyo"]
+					}
+				}
+			},
+			"appearance": {
+				"type": "object",
+				"title": "Appearance",
+				"description": "Visual preferences.",
+				"properties": {
+					"theme": {
+						"type": "string",
+						"title": "Theme",
+						"description": "Color scheme of the app.",
+						"enum": ["light", "dark", "system"]
+					},
+					"accent": {
+						"type": "string",
+						"format": "color",
+						"title": "Accent color",
+						"description": "Used for highlights and buttons."
+					},
+					"density": {
+						"type": "string",
+						"title": "Density",
+						"description": "Spacing between elements.",
+						"enum": ["compact", "cozy", "comfortable"]
+					}
+				}
+			},
+			"notifications": {
+				"type": "object",
+				"title": "Notifications",
+				"description": "What we ping you about.",
+				"properties": {
+					"email": {
+						"type": "boolean",
+						"title": "Email notifications",
+						"description": "Daily summary email."
+					},
+					"mentions": {
+						"type": "boolean",
+						"title": "Mentions",
+						"description": "Alert when someone mentions you."
+					},
+					"volume": {
+						"type": "integer",
+						"title": "Alert volume",
+						"description": "0 is silent.",
+						"minimum": 0,
+						"maximum": 100
+					}
+				}
+			}
+		},
+		"required": ["profile"]
+	},
+	"data": {
+		"profile": { "displayName": "jdoe", "timezone": "Europe/Berlin" },
+		"appearance": { "theme": "dark", "accent": "#f97316", "density": "cozy" },
+		"notifications": { "email": true, "mentions": true, "volume": 60 }
+	}
 }

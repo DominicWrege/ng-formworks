@@ -9,14 +9,14 @@ import { SelectWidgetComponent } from '@ng-formworks/core';
  * select-widget-widget; all styling lives in the widget overrides.
  */
 @Component({
-    imports: [SelectWidgetComponent],
-    selector: 'tailwindcss-framework',
-    templateUrl: './tailwindcss.component.html',
+	imports: [SelectWidgetComponent],
+	selector: 'tailwindcss-framework',
+	templateUrl: './tailwindcss.component.html',
 })
 export class TailwindFrameworkComponent {
-  jsf = inject(JsonSchemaFormService);
+	jsf = inject(JsonSchemaFormService);
 
-  readonly layoutNode = input<LayoutNode | undefined>(undefined);
-  readonly layoutIndex = input<number[] | undefined>(undefined);
-  readonly dataIndex = input<number[] | undefined>(undefined);
+	readonly layoutNode = input<LayoutNode | undefined>(undefined);
+	readonly layoutIndex = input<number[] | undefined>(undefined);
+	readonly dataIndex = input<number[] | undefined>(undefined);
 }

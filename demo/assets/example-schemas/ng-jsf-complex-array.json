@@ -1,149 +1,149 @@
 {
-  "schema": {
-    "title": "Team Directory",
-    "description": "A complex array of employees with nested objects, nested arrays and enums.",
-    "definitions": {
-      "address": {
-        "type": "object",
-        "title": "Address",
-        "properties": {
-          "street": { "type": "string", "title": "Street" },
-          "city": { "type": "string", "title": "City" },
-          "country": {
-            "type": "string",
-            "title": "Country",
-            "enum": ["US", "UK", "CA", "AU", "DE"]
-          },
-          "postal_code": { "type": "string", "title": "Postal code" }
-        },
-        "required": ["city", "country"]
-      },
-      "skill": {
-        "type": "string",
-        "enum": ["frontend", "backend", "devops", "design", "management"]
-      },
-      "employee": {
-        "type": "object",
-        "title": "Employee",
-        "properties": {
-          "full_name": { "type": "string", "title": "Full name" },
-          "role": {
-            "type": "string",
-            "title": "Role",
-            "enum": ["Engineer", "Manager", "Designer", "PM"]
-          },
-          "email": { "type": "string", "format": "email", "title": "Email" },
-          "start_date": { "type": "string", "format": "date", "title": "Start date" },
-          "skills": {
-            "type": "array",
-            "title": "Skills",
-            "items": { "$ref": "#/definitions/skill" },
-            "default": ["frontend"]
-          },
-          "home_address": { "$ref": "#/definitions/address" },
-          "emergency_contacts": {
-            "type": "array",
-            "title": "Emergency contacts",
-            "maxItems": 3,
-            "items": {
-              "type": "object",
-              "title": "Contact",
-              "properties": {
-                "name": { "type": "string", "title": "Name" },
-                "phone": { "type": "string", "title": "Phone" },
-                "relation": {
-                  "type": "string",
-                  "title": "Relation",
-                  "enum": ["spouse", "parent", "sibling", "friend"]
-                }
-              },
-              "required": ["name", "phone", "relation"]
-            }
-          }
-        },
-        "required": ["full_name", "role", "email"]
-      }
-    },
-    "type": "object",
-    "properties": {
-      "employees": {
-        "type": "array",
-        "title": "Employees",
-        "items": { "$ref": "#/definitions/employee", "extendRefs": true }
-      }
-    },
-    "required": ["employees"]
-  },
-  "layout": [
-    {
-      "key": "employees",
-      "type": "array",
-      "items": [
-        "employees[].full_name",
-        "employees[].role",
-        "employees[].email",
-        "employees[].start_date",
-        {
-          "key": "employees[].skills",
-          "type": "array",
-          "items": ["employees[].skills[]"]
-        },
-        {
-          "key": "employees[].home_address",
-          "type": "fieldset",
-          "items": [
-            "employees[].home_address.street",
-            "employees[].home_address.city",
-            "employees[].home_address.country",
-            "employees[].home_address.postal_code"
-          ]
-        },
-        {
-          "key": "employees[].emergency_contacts",
-          "type": "array",
-          "items": [
-            "employees[].emergency_contacts[].name",
-            "employees[].emergency_contacts[].phone",
-            "employees[].emergency_contacts[].relation"
-          ]
-        }
-      ]
-    }
-  ],
-  "data": {
-    "employees": [
-      {
-        "full_name": "Ada Lovelace",
-        "role": "Engineer",
-        "email": "ada@example.com",
-        "start_date": "2021-03-15",
-        "skills": ["frontend", "backend"],
-        "home_address": {
-          "street": "1 Analytical Way",
-          "city": "London",
-          "country": "UK",
-          "postal_code": "SW1A 1AA"
-        },
-        "emergency_contacts": [
-          { "name": "Grace Hopper", "phone": "+44 20 7946 0000", "relation": "friend" }
-        ]
-      },
-      {
-        "full_name": "Alan Turing",
-        "role": "Manager",
-        "email": "alan@example.com",
-        "start_date": "2019-09-02",
-        "skills": ["backend", "devops"],
-        "home_address": {
-          "street": "2 Enigma Rd",
-          "city": "Manchester",
-          "country": "UK",
-          "postal_code": "M1 2AB"
-        },
-        "emergency_contacts": [
-          { "name": "Joan Clarke", "phone": "+44 20 7946 0001", "relation": "friend" }
-        ]
-      }
-    ]
-  }
+	"schema": {
+		"title": "Team Directory",
+		"description": "A complex array of employees with nested objects, nested arrays and enums.",
+		"definitions": {
+			"address": {
+				"type": "object",
+				"title": "Address",
+				"properties": {
+					"street": { "type": "string", "title": "Street" },
+					"city": { "type": "string", "title": "City" },
+					"country": {
+						"type": "string",
+						"title": "Country",
+						"enum": ["US", "UK", "CA", "AU", "DE"]
+					},
+					"postal_code": { "type": "string", "title": "Postal code" }
+				},
+				"required": ["city", "country"]
+			},
+			"skill": {
+				"type": "string",
+				"enum": ["frontend", "backend", "devops", "design", "management"]
+			},
+			"employee": {
+				"type": "object",
+				"title": "Employee",
+				"properties": {
+					"full_name": { "type": "string", "title": "Full name" },
+					"role": {
+						"type": "string",
+						"title": "Role",
+						"enum": ["Engineer", "Manager", "Designer", "PM"]
+					},
+					"email": { "type": "string", "format": "email", "title": "Email" },
+					"start_date": { "type": "string", "format": "date", "title": "Start date" },
+					"skills": {
+						"type": "array",
+						"title": "Skills",
+						"items": { "$ref": "#/definitions/skill" },
+						"default": ["frontend"]
+					},
+					"home_address": { "$ref": "#/definitions/address" },
+					"emergency_contacts": {
+						"type": "array",
+						"title": "Emergency contacts",
+						"maxItems": 3,
+						"items": {
+							"type": "object",
+							"title": "Contact",
+							"properties": {
+								"name": { "type": "string", "title": "Name" },
+								"phone": { "type": "string", "title": "Phone" },
+								"relation": {
+									"type": "string",
+									"title": "Relation",
+									"enum": ["spouse", "parent", "sibling", "friend"]
+								}
+							},
+							"required": ["name", "phone", "relation"]
+						}
+					}
+				},
+				"required": ["full_name", "role", "email"]
+			}
+		},
+		"type": "object",
+		"properties": {
+			"employees": {
+				"type": "array",
+				"title": "Employees",
+				"items": { "$ref": "#/definitions/employee", "extendRefs": true }
+			}
+		},
+		"required": ["employees"]
+	},
+	"layout": [
+		{
+			"key": "employees",
+			"type": "array",
+			"items": [
+				"employees[].full_name",
+				"employees[].role",
+				"employees[].email",
+				"employees[].start_date",
+				{
+					"key": "employees[].skills",
+					"type": "array",
+					"items": ["employees[].skills[]"]
+				},
+				{
+					"key": "employees[].home_address",
+					"type": "fieldset",
+					"items": [
+						"employees[].home_address.street",
+						"employees[].home_address.city",
+						"employees[].home_address.country",
+						"employees[].home_address.postal_code"
+					]
+				},
+				{
+					"key": "employees[].emergency_contacts",
+					"type": "array",
+					"items": [
+						"employees[].emergency_contacts[].name",
+						"employees[].emergency_contacts[].phone",
+						"employees[].emergency_contacts[].relation"
+					]
+				}
+			]
+		}
+	],
+	"data": {
+		"employees": [
+			{
+				"full_name": "Ada Lovelace",
+				"role": "Engineer",
+				"email": "ada@example.com",
+				"start_date": "2021-03-15",
+				"skills": ["frontend", "backend"],
+				"home_address": {
+					"street": "1 Analytical Way",
+					"city": "London",
+					"country": "UK",
+					"postal_code": "SW1A 1AA"
+				},
+				"emergency_contacts": [
+					{ "name": "Grace Hopper", "phone": "+44 20 7946 0000", "relation": "friend" }
+				]
+			},
+			{
+				"full_name": "Alan Turing",
+				"role": "Manager",
+				"email": "alan@example.com",
+				"start_date": "2019-09-02",
+				"skills": ["backend", "devops"],
+				"home_address": {
+					"street": "2 Enigma Rd",
+					"city": "Manchester",
+					"country": "UK",
+					"postal_code": "M1 2AB"
+				},
+				"emergency_contacts": [
+					{ "name": "Joan Clarke", "phone": "+44 20 7946 0001", "relation": "friend" }
+				]
+			}
+		]
+	}
 }

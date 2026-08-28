@@ -4,30 +4,28 @@ import type { FormValue, LayoutNode } from '../shared/types';
 import { JsonSchemaFormService } from '../json-schema-form.service';
 import { ReactiveFormsModule } from '@angular/forms';
 
-
 @Component({
-    imports: [ReactiveFormsModule],
-    selector: 'hidden-widget',
-    templateUrl: './hidden.component.html',
+	imports: [ReactiveFormsModule],
+	selector: 'hidden-widget',
+	templateUrl: './hidden.component.html',
 })
-export class HiddenComponent implements OnInit,OnDestroy {
-  private jsf = inject(JsonSchemaFormService);
+export class HiddenComponent implements OnInit, OnDestroy {
+	private jsf = inject(JsonSchemaFormService);
 
-  formControl!: AbstractControl;
-  controlName!: string;
-  controlValue!: FormValue;
-  controlDisabled = false;
-  boundControl = false;
-  readonly layoutNode = input<LayoutNode | undefined>(undefined);
-  readonly layoutIndex = input<number[] | undefined>(undefined);
-  readonly dataIndex = input<number[] | undefined>(undefined);
+	formControl!: AbstractControl;
+	controlName!: string;
+	controlValue!: FormValue;
+	controlDisabled = false;
+	boundControl = false;
+	readonly layoutNode = input<LayoutNode | undefined>(undefined);
+	readonly layoutIndex = input<number[] | undefined>(undefined);
+	readonly dataIndex = input<number[] | undefined>(undefined);
 
-  ngOnInit() {
-    this.jsf.initializeControl(this);
-  }
+	ngOnInit() {
+		this.jsf.initializeControl(this);
+	}
 
-  ngOnDestroy () {
-    this.jsf.updateValue(this, null);
-  }
-
+	ngOnDestroy() {
+		this.jsf.updateValue(this, null);
+	}
 }

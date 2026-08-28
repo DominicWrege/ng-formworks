@@ -1,10 +1,7 @@
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DragDropModule } from '@angular/cdk/drag-drop';
-import {
-  JsonSchemaFormModule,
-  WidgetLibraryModule,
-} from '@ng-formworks/core';
+import { JsonSchemaFormModule, WidgetLibraryModule } from '@ng-formworks/core';
 import { TailwindFrameworkComponent } from './tailwindcss.component';
 import { TailwindFramework } from './tailwindcss.framework';
 import { Framework, FrameworkLibraryService, WidgetLibraryService } from '@ng-formworks/core';
@@ -34,32 +31,32 @@ import { TwSectionComponent } from './widgets/tw-section.widget';
  *   `@source "../node_modules/@ng-formworks/tailwindcss/dist";`
  */
 @NgModule({
-    imports: [
-        JsonSchemaFormModule,
-        WidgetLibraryModule,
-        FormsModule,
-        ReactiveFormsModule,
-        DragDropModule,
-        TailwindFrameworkComponent,
-        TwInputComponent,
-        TwNumberComponent,
-        TwTextareaComponent,
-        TwSelectComponent,
-        TwCheckboxComponent,
-        TwCheckboxesComponent,
-        TwRadiosComponent,
-        TwButtonComponent,
-        TwSubmitComponent,
-        TwTabsComponent,
-        TwOneOfComponent,
-        TwArraySectionComponent,
-        TwAddReferenceComponent,
-        TwSectionComponent,
-    ],
-    exports: [JsonSchemaFormModule],
-    providers: [
-        ...provideTailwindConfig(),
-        { provide: Framework, useClass: TailwindFramework, multi: true },
-    ]
+	imports: [
+		JsonSchemaFormModule,
+		WidgetLibraryModule,
+		FormsModule,
+		ReactiveFormsModule,
+		DragDropModule,
+		TailwindFrameworkComponent,
+		TwInputComponent,
+		TwNumberComponent,
+		TwTextareaComponent,
+		TwSelectComponent,
+		TwCheckboxComponent,
+		TwCheckboxesComponent,
+		TwRadiosComponent,
+		TwButtonComponent,
+		TwSubmitComponent,
+		TwTabsComponent,
+		TwOneOfComponent,
+		TwArraySectionComponent,
+		TwAddReferenceComponent,
+		TwSectionComponent,
+	],
+	exports: [JsonSchemaFormModule],
+	providers: [
+		...provideTailwindConfig(),
+		{ provide: Framework, useClass: TailwindFramework, multi: true },
+	],
 })
-export class TailwindFrameworkModule { }
+export class TailwindFrameworkModule {}

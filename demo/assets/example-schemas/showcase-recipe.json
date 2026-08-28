@@ -1,34 +1,71 @@
 {
-  "schema": {
-    "type": "object",
-    "title": "Recipe",
-    "description": "Nested objects and lists — no custom layout, the form is generated from the schema.",
-    "properties": {
-      "title": { "type": "string", "title": "Recipe name", "description": "What do you call this dish?" },
-      "servings": { "type": "integer", "title": "Servings", "description": "How many people it feeds." },
-      "prepTime": { "type": "integer", "title": "Prep time (min)", "description": "Hands-on minutes." },
-      "ingredients": { "type": "array", "title": "Ingredients", "description": "One item per entry.", "items": { "type": "string", "title": "Ingredient", "description": "e.g. 200 g flour" } },
-      "nutrition": {
-        "type": "object",
-        "title": "Nutrition (per serving)",
-        "description": "Optional values.",
-        "properties": {
-          "calories": { "type": "integer", "title": "Calories", "description": "Kilocalories." },
-          "protein": { "type": "number", "title": "Protein (g)", "description": "Grams of protein." },
-          "carbs": { "type": "number", "title": "Carbs (g)", "description": "Grams of carbohydrates." },
-          "fat": { "type": "number", "title": "Fat (g)", "description": "Grams of fat." }
-        }
-      },
-      "vegetarian": { "type": "boolean", "title": "Vegetarian", "description": "No meat or fish." }
-    },
-    "required": ["title", "ingredients"]
-  },
-  "data": {
-    "title": "Pancakes",
-    "servings": 4,
-    "prepTime": 20,
-    "ingredients": ["200 g flour", "2 eggs", "300 ml milk", "1 pinch of salt"],
-    "nutrition": { "calories": 320, "protein": 9, "carbs": 45, "fat": 11 },
-    "vegetarian": true
-  }
+	"schema": {
+		"type": "object",
+		"title": "Recipe",
+		"description": "Nested objects and lists — no custom layout, the form is generated from the schema.",
+		"properties": {
+			"title": {
+				"type": "string",
+				"title": "Recipe name",
+				"description": "What do you call this dish?"
+			},
+			"servings": {
+				"type": "integer",
+				"title": "Servings",
+				"description": "How many people it feeds."
+			},
+			"prepTime": {
+				"type": "integer",
+				"title": "Prep time (min)",
+				"description": "Hands-on minutes."
+			},
+			"ingredients": {
+				"type": "array",
+				"title": "Ingredients",
+				"description": "One item per entry.",
+				"items": {
+					"type": "string",
+					"title": "Ingredient",
+					"description": "e.g. 200 g flour"
+				}
+			},
+			"nutrition": {
+				"type": "object",
+				"title": "Nutrition (per serving)",
+				"description": "Optional values.",
+				"properties": {
+					"calories": {
+						"type": "integer",
+						"title": "Calories",
+						"description": "Kilocalories."
+					},
+					"protein": {
+						"type": "number",
+						"title": "Protein (g)",
+						"description": "Grams of protein."
+					},
+					"carbs": {
+						"type": "number",
+						"title": "Carbs (g)",
+						"description": "Grams of carbohydrates."
+					},
+					"fat": { "type": "number", "title": "Fat (g)", "description": "Grams of fat." }
+				}
+			},
+			"vegetarian": {
+				"type": "boolean",
+				"title": "Vegetarian",
+				"description": "No meat or fish."
+			}
+		},
+		"required": ["title", "ingredients"]
+	},
+	"data": {
+		"title": "Pancakes",
+		"servings": 4,
+		"prepTime": 20,
+		"ingredients": ["200 g flour", "2 eggs", "300 ml milk", "1 pinch of salt"],
+		"nutrition": { "calories": 320, "protein": 9, "carbs": 45, "fat": 11 },
+		"vegetarian": true
+	}
 }

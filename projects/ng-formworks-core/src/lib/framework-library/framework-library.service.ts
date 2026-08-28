@@ -15,182 +15,203 @@ import { Framework } from './framework';
 //   https://github.com/vladotesanovic/ngSemantic
 
 @Injectable({
-  providedIn: 'root',
+	providedIn: 'root',
 })
 export class FrameworkLibraryService {
-  private frameworks = inject(Framework) as unknown as Framework[];
+	private frameworks = inject(Framework) as unknown as Framework[];
 
-  //private frameworks = inject(Framework);
-  private widgetLibrary = inject(WidgetLibraryService);
-  private http = inject(HttpClient);
+	//private frameworks = inject(Framework);
+	private widgetLibrary = inject(WidgetLibraryService);
+	private http = inject(HttpClient);
 
-  activeFramework: Framework = null!;
-  stylesheets!: (HTMLStyleElement|HTMLLinkElement)[];
-  scripts!: HTMLScriptElement[];
-  loadExternalAssets = false;
-  defaultFramework: string;
-  frameworkLibrary: { [name: string]: Framework } = {};
+	activeFramework: Framework = null!;
+	stylesheets!: (HTMLStyleElement | HTMLLinkElement)[];
+	scripts!: HTMLScriptElement[];
+	loadExternalAssets = false;
+	defaultFramework: string;
+	frameworkLibrary: { [name: string]: Framework } = {};
 
-  activeFrameworkName$: Observable<string>;
-  private activeFrameworkNameSubject: Subject<string>;
-  private activeFrameworkName:string;
+	activeFrameworkName$: Observable<string>;
+	private activeFrameworkNameSubject: Subject<string>;
+	private activeFrameworkName: string;
 
-  constructor() {
-    this.frameworks.forEach(framework =>
-      this.frameworkLibrary[framework.name] = framework
-    );
-    this.defaultFramework = this.frameworks[0].name;
-    this.activeFrameworkName=this.defaultFramework;
-    this.activeFrameworkNameSubject = new Subject<string>();
-    this.activeFrameworkName$ = this.activeFrameworkNameSubject.asObservable();
-    this.setFramework(this.defaultFramework);
-  }
+	constructor() {
+		this.frameworks.forEach((framework) => (this.frameworkLibrary[framework.name] = framework));
+		this.defaultFramework = this.frameworks[0].name;
+		this.activeFrameworkName = this.defaultFramework;
+		this.activeFrameworkNameSubject = new Subject<string>();
+		this.activeFrameworkName$ = this.activeFrameworkNameSubject.asObservable();
+		this.setFramework(this.defaultFramework);
+	}
 
-  public setLoadExternalAssets(loadExternalAssets = true): void {
-    this.loadExternalAssets = !!loadExternalAssets;
-  }
+	public setLoadExternalAssets(loadExternalAssets = true): void {
+		this.loadExternalAssets = !!loadExternalAssets;
+	}
 
-  public setFramework(
-    framework: string|Framework = this.defaultFramework,
-    loadExternalAssets = this.loadExternalAssets
-  ): boolean {
-    this.activeFramework =
-      typeof framework === 'string' && this.hasFramework(framework) ?
-        this.frameworkLibrary[framework] :
-      typeof framework === 'object' && hasOwn(framework, 'framework') ?
-        framework :
-        this.frameworkLibrary[this.defaultFramework];
-    if(this.activeFramework.name !=this.activeFrameworkName){
-      this.activeFrameworkName=this.activeFramework.name;
-      this.activeFrameworkNameSubject.next(this.activeFrameworkName);
-    }
-    return this.registerFrameworkWidgets(this.activeFramework);
-  }
+	public setFramework(
+		framework: string | Framework = this.defaultFramework,
+		loadExternalAssets = this.loadExternalAssets,
+	): boolean {
+		this.activeFramework =
+			typeof framework === 'string' && this.hasFramework(framework)
+				? this.frameworkLibrary[framework]
+				: typeof framework === 'object' && hasOwn(framework, 'framework')
+					? framework
+					: this.frameworkLibrary[this.defaultFramework];
+		if (this.activeFramework.name != this.activeFrameworkName) {
+			this.activeFrameworkName = this.activeFramework.name;
+			this.activeFrameworkNameSubject.next(this.activeFrameworkName);
+		}
+		return this.registerFrameworkWidgets(this.activeFramework);
+	}
 
-  registerFrameworkWidgets(framework: Framework): boolean {
-    return hasOwn(framework, 'widgets') ?
-      this.widgetLibrary.registerFrameworkWidgets(framework.widgets!) :
-      this.widgetLibrary.unRegisterFrameworkWidgets();
-  }
+	registerFrameworkWidgets(framework: Framework): boolean {
+		return hasOwn(framework, 'widgets')
+			? this.widgetLibrary.registerFrameworkWidgets(framework.widgets!)
+			: this.widgetLibrary.unRegisterFrameworkWidgets();
+	}
 
-  public hasFramework(type: string): boolean {
-    return hasOwn(this.frameworkLibrary, type);
-  }
+	public hasFramework(type: string): boolean {
+		return hasOwn(this.frameworkLibrary, type);
+	}
 
-  public getFramework(): Type<unknown> | null {
-    if (!this.activeFramework) { this.setFramework('default', true); }
-    return this.activeFramework?.framework ?? null;
-  }
+	public getFramework(): Type<unknown> | null {
+		if (!this.activeFramework) {
+			this.setFramework('default', true);
+		}
+		return this.activeFramework?.framework ?? null;
+	}
 
-  public getFrameworkList():{name:string,text:string}[] {
-    return this.frameworks.map(fw=>{
-      return {name:fw.name,text:fw.text};
-    })
-    
-  }
+	public getFrameworkList(): { name: string; text: string }[] {
+		return this.frameworks.map((fw) => {
+			return { name: fw.name, text: fw.text };
+		});
+	}
 
-  public getFrameworkWidgets(): WidgetLibraryMap {
-    return this.activeFramework.widgets || {};
-  }
+	public getFrameworkWidgets(): WidgetLibraryMap {
+		return this.activeFramework.widgets || {};
+	}
 
-  
+	public getFrameworkStylesheets(load: boolean = this.loadExternalAssets): string[] {
+		return (load && this.activeFramework.stylesheets) || [];
+	}
 
-  public getFrameworkStylesheets(load: boolean = this.loadExternalAssets): string[] {
-    return (load && this.activeFramework.stylesheets) || [];
-  }
+	public getFrameworkScripts(load: boolean = this.loadExternalAssets): string[] {
+		return (load && this.activeFramework.scripts) || [];
+	}
 
-  public getFrameworkScripts(load: boolean = this.loadExternalAssets): string[] {
-    return (load && this.activeFramework.scripts) || [];
-  }
+	//applies to CssFramework classes
+	public getFrameworkConfig(
+		existingFramework?: Framework | null,
+	): Record<string, any> | undefined {
+		let actFramework: Framework & { [key: string]: any } =
+			existingFramework || this.activeFramework;
+		return actFramework.config;
+	}
 
-  //applies to CssFramework classes
-  public getFrameworkConfig(existingFramework?:Framework|null): Record<string, any> | undefined {
-    let actFramework:Framework& { [key: string]: any; }=existingFramework||this.activeFramework;
-    return actFramework.config;
-  }
+	//this will load the list of assets to be loaded at runtime in case the dependent framework
+	//scripts and styles are include locally with the parent app
+	public getFrameworkAssetConfig(
+		existingFramework?: Framework | null,
+		useAssetRelPath = true,
+	): Promise<{ stylesheets: string[]; scripts: string[] }> {
+		let actFramework: Framework & { [key: string]: any } =
+			existingFramework || this.activeFramework;
+		// TODO: move this into config
+		const assetConfigPath = `assets/${actFramework.name}/cssframework`;
+		const assetConfigURL = `${assetConfigPath}/assets.json`;
+		let subs = this.http.get(assetConfigURL, { responseType: 'text' });
+		//.subscribe(assetConfig => {
+		//  assetConfig
+		//})
 
-  //this will load the list of assets to be loaded at runtime in case the dependent framework
-  //scripts and styles are include locally with the parent app
-  public getFrameworkAssetConfig(existingFramework?:Framework|null,useAssetRelPath=true):Promise<{stylesheets:string[],scripts:string[]}>{
-    let actFramework:Framework& { [key: string]: any; }=existingFramework||this.activeFramework;
-    // TODO: move this into config
-    const assetConfigPath = `assets/${actFramework.name}/cssframework`
-    const assetConfigURL = `${assetConfigPath}/assets.json`;
-    let subs=this.http
-      .get(assetConfigURL, { responseType: 'text' })
-      //.subscribe(assetConfig => {
-      //  assetConfig
-      //})
-      
-      return lastValueFrom(subs).then(assetCfgText=>{
-        let assetCfg:{stylesheets:string[],scripts:string[]} = JSON.parse(assetCfgText);
-        if(useAssetRelPath){
-          assetCfg.stylesheets=assetCfg.stylesheets.map((styleLink:string)=>{
-            //ignore relative path if url starts with known protocol or //
-            let nonRelPrefixes=["/","//","http:","https:"];//"//" list for completeness 
-            let isNonRel=false;
-            nonRelPrefixes.forEach(prefix=>{
-              isNonRel=isNonRel||styleLink.indexOf(prefix)==0;
-            })
-            if(isNonRel){
-              return styleLink;
-            }
-            return `${assetConfigPath}/${styleLink}`;
-          })
-          assetCfg.scripts=assetCfg.scripts.map((scriptLink:string)=>{
-            return `${assetConfigPath}/${scriptLink}`;
-          })
-        }   
-        return assetCfg
-      });
-  }
+		return lastValueFrom(subs).then((assetCfgText) => {
+			let assetCfg: { stylesheets: string[]; scripts: string[] } = JSON.parse(assetCfgText);
+			if (useAssetRelPath) {
+				assetCfg.stylesheets = assetCfg.stylesheets.map((styleLink: string) => {
+					//ignore relative path if url starts with known protocol or //
+					let nonRelPrefixes = ['/', '//', 'http:', 'https:']; //"//" list for completeness
+					let isNonRel = false;
+					nonRelPrefixes.forEach((prefix) => {
+						isNonRel = isNonRel || styleLink.indexOf(prefix) == 0;
+					});
+					if (isNonRel) {
+						return styleLink;
+					}
+					return `${assetConfigPath}/${styleLink}`;
+				});
+				assetCfg.scripts = assetCfg.scripts.map((scriptLink: string) => {
+					return `${assetConfigPath}/${scriptLink}`;
+				});
+			}
+			return assetCfg;
+		});
+	}
 
-  //applies to CssFramework classes
-  public getFrameworkThemes():{name:string,text:string}[] {
-    let cssfwConfig=this.getFrameworkConfig();
-    let themes:{name:string,text:string}[]=[];
-    if(cssfwConfig){
-      themes=cssfwConfig?.widgetstyles?.__themes__||[]
-    }
-    return themes
-  }
+	//applies to CssFramework classes
+	public getFrameworkThemes(): { name: string; text: string }[] {
+		let cssfwConfig = this.getFrameworkConfig();
+		let themes: { name: string; text: string }[] = [];
+		if (cssfwConfig) {
+			themes = cssfwConfig?.widgetstyles?.__themes__ || [];
+		}
+		return themes;
+	}
 
-  //applies to CssFramework classes
-  public requestThemeChange(name:string,validateThemeExists:boolean=false,existingFramework?:Framework|null){
-    let actFramework:Framework& { [key: string]: any; }=existingFramework||this.activeFramework;
-    if(actFramework.requestThemeChange){
-      if(validateThemeExists){  
-        let themes=this.getFrameworkThemes();
-        let foundThemes=themes.filter(thm=>{return thm.name==name});
-        if(!foundThemes|| foundThemes.length==0){
-          return false;
-        }
-      }
-      actFramework.requestThemeChange(name);
-      return true;
-    }
-  }
-  //applies to CssFramework classes
-  public getActiveTheme(existingFramework?:Framework|null):{name:string,text:string}|undefined{
-    let actFramework:Framework& { [key: string]: any; }=existingFramework||this.activeFramework;
-    if(actFramework.getActiveTheme){
-      return actFramework.getActiveTheme();
-    }
-  }
+	//applies to CssFramework classes
+	public requestThemeChange(
+		name: string,
+		validateThemeExists: boolean = false,
+		existingFramework?: Framework | null,
+	) {
+		let actFramework: Framework & { [key: string]: any } =
+			existingFramework || this.activeFramework;
+		if (actFramework.requestThemeChange) {
+			if (validateThemeExists) {
+				let themes = this.getFrameworkThemes();
+				let foundThemes = themes.filter((thm) => {
+					return thm.name == name;
+				});
+				if (!foundThemes || foundThemes.length == 0) {
+					return false;
+				}
+			}
+			actFramework.requestThemeChange(name);
+			return true;
+		}
+	}
+	//applies to CssFramework classes
+	public getActiveTheme(
+		existingFramework?: Framework | null,
+	): { name: string; text: string } | undefined {
+		let actFramework: Framework & { [key: string]: any } =
+			existingFramework || this.activeFramework;
+		if (actFramework.getActiveTheme) {
+			return actFramework.getActiveTheme();
+		}
+	}
 
-  //applies to CssFramework classes
-  public registerTheme(newTheme:{name:string,text:string},existingFramework?:Framework|null):boolean|undefined{
-    let actFramework:Framework& { [key: string]: any; }=existingFramework||this.activeFramework;
-    if(actFramework.registerTheme){
-      return actFramework.registerTheme(newTheme);
-    }
-  }
+	//applies to CssFramework classes
+	public registerTheme(
+		newTheme: { name: string; text: string },
+		existingFramework?: Framework | null,
+	): boolean | undefined {
+		let actFramework: Framework & { [key: string]: any } =
+			existingFramework || this.activeFramework;
+		if (actFramework.registerTheme) {
+			return actFramework.registerTheme(newTheme);
+		}
+	}
 
-    //applies to CssFramework classes
-    public unregisterTheme(name:string,existingFramework?:Framework|null):boolean|undefined{
-      let actFramework:Framework& { [key: string]: any; }=existingFramework||this.activeFramework;
-      if(actFramework.registerTheme){
-        return actFramework.unregisterTheme(name);
-      }
-    }
+	//applies to CssFramework classes
+	public unregisterTheme(
+		name: string,
+		existingFramework?: Framework | null,
+	): boolean | undefined {
+		let actFramework: Framework & { [key: string]: any } =
+			existingFramework || this.activeFramework;
+		if (actFramework.registerTheme) {
+			return actFramework.unregisterTheme(name);
+		}
+	}
 }

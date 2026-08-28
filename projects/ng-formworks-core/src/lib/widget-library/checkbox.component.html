@@ -1,36 +1,43 @@
-<label
-  [attr.for]="'control' + layoutNode()?._id"
-  [class]="options?.itemLabelHtmlClass || ''">
-  @if (boundControl) {
-    <input
-      [formControl]="formControl"
-      [attr.aria-describedby]="'control' + layoutNode()?._id + 'Status'"
-    [class]="(options?.fieldHtmlClass || '') + (isChecked ?
-      (' ' + (options?.activeClass || '') + ' ' + (options?.style?.selected || '')) :
-      (' ' + (options?.style?.unselected || '')))"
-      [id]="'control' + $safeNavigationMigration(layoutNode()?._id)"
-      [name]="controlName"
-      [readonly]="options?.readonly ? 'readonly' : null"
-      type="checkbox">
-  }
-  @if (!boundControl) {
-    <input
-      [attr.aria-describedby]="'control' + layoutNode()?._id + 'Status'"
-      [checked]="isChecked"
-    [class]="(options?.fieldHtmlClass || '') + (isChecked ?
-      (' ' + (options?.activeClass || '') + ' ' + (options?.style?.selected || '')) :
-      (' ' + (options?.style?.unselected || '')))"
-      [disabled]="controlDisabled"
-      [id]="'control' + $safeNavigationMigration(layoutNode()?._id)"
-      [name]="controlName"
-      [readonly]="options?.readonly ? 'readonly' : null"
-      [value]="controlValue"
-      type="checkbox"
-      (change)="updateValue($event)">
-  }
-  @if (options?.title) {
-    <span
-      [style.display]="options?.notitle ? 'none' : ''"
-    [innerHTML]="$safeNavigationMigration(options?.title)"></span>
-  }
+<label [attr.for]="'control' + layoutNode()?._id" [class]="options?.itemLabelHtmlClass || ''">
+	@if (boundControl) {
+		<input
+			[formControl]="formControl"
+			[attr.aria-describedby]="'control' + layoutNode()?._id + 'Status'"
+			[class]="
+				(options?.fieldHtmlClass || '') +
+				(isChecked
+					? ' ' + (options?.activeClass || '') + ' ' + (options?.style?.selected || '')
+					: ' ' + (options?.style?.unselected || ''))
+			"
+			[id]="'control' + $safeNavigationMigration(layoutNode()?._id)"
+			[name]="controlName"
+			[readonly]="options?.readonly ? 'readonly' : null"
+			type="checkbox"
+		/>
+	}
+	@if (!boundControl) {
+		<input
+			[attr.aria-describedby]="'control' + layoutNode()?._id + 'Status'"
+			[checked]="isChecked"
+			[class]="
+				(options?.fieldHtmlClass || '') +
+				(isChecked
+					? ' ' + (options?.activeClass || '') + ' ' + (options?.style?.selected || '')
+					: ' ' + (options?.style?.unselected || ''))
+			"
+			[disabled]="controlDisabled"
+			[id]="'control' + $safeNavigationMigration(layoutNode()?._id)"
+			[name]="controlName"
+			[readonly]="options?.readonly ? 'readonly' : null"
+			[value]="controlValue"
+			type="checkbox"
+			(change)="updateValue($event)"
+		/>
+	}
+	@if (options?.title) {
+		<span
+			[style.display]="options?.notitle ? 'none' : ''"
+			[innerHTML]="$safeNavigationMigration(options?.title)"
+		></span>
+	}
 </label>

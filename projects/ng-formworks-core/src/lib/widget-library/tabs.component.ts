@@ -1,86 +1,98 @@
-import { ChangeDetectorRef, Component, OnDestroy, OnInit, inject, input, signal } from '@angular/core';
+import {
+	ChangeDetectorRef,
+	Component,
+	OnDestroy,
+	OnInit,
+	inject,
+	input,
+	signal,
+} from '@angular/core';
 import { Subscription } from 'rxjs';
 import type { LayoutNode, WidgetOptions } from '../shared/types';
 import { JsonSchemaFormService } from '../json-schema-form.service';
 import { FormsModule } from '@angular/forms';
 import { SelectFrameworkComponent } from './select-framework.component';
 
-
 @Component({
-    imports: [FormsModule, SelectFrameworkComponent],
-    selector: 'tabs-widget',
-    templateUrl: './tabs.component.html',
-    styles: [` a { cursor: pointer; } 
-        .ngf-hidden{display:none}
-      `],
+	imports: [FormsModule, SelectFrameworkComponent],
+	selector: 'tabs-widget',
+	templateUrl: './tabs.component.html',
+	styles: [
+		`
+			a {
+				cursor: pointer;
+			}
+			.ngf-hidden {
+				display: none;
+			}
+		`,
+	],
 })
-export class TabsComponent implements OnInit,OnDestroy {
-  private jsf = inject(JsonSchemaFormService);
-  private cdr = inject(ChangeDetectorRef);
-  options!: WidgetOptions;
-  itemCount!: number;
-  selectedItem = 0;
-  showAddTab = true;
-  readonly layoutNode = input<LayoutNode | undefined>(undefined);
-  readonly layoutIndex = input<number[] | undefined>(undefined);
-  readonly dataIndex = input<number[] | undefined>(undefined);
-  dataChangesSubs!: Subscription;
-  ngOnInit() {
-    this.options = this.layoutNode()!.options || {};
-    if(this.options.selectedTab){
-      this.selectedItem = this.options.selectedTab;
-    }
-    this.itemCount = this.layoutNode()!.items!.length - 1;
-    this.updateControl();
-    // TODO(review/test): subscribe only to force change detection when dynamic
-    //titles stop updating after their conditional linked field is destroyed
-    this.dataChangesSubs=this.jsf.dataChanges.subscribe((val)=>{
-      this.cdr.markForCheck();
-    })
-  }
+export class TabsComponent implements OnInit, OnDestroy {
+	private jsf = inject(JsonSchemaFormService);
+	private cdr = inject(ChangeDetectorRef);
+	options!: WidgetOptions;
+	itemCount!: number;
+	selectedItem = 0;
+	showAddTab = true;
+	readonly layoutNode = input<LayoutNode | undefined>(undefined);
+	readonly layoutIndex = input<number[] | undefined>(undefined);
+	readonly dataIndex = input<number[] | undefined>(undefined);
+	dataChangesSubs!: Subscription;
+	ngOnInit() {
+		this.options = this.layoutNode()!.options || {};
+		if (this.options.selectedTab) {
+			this.selectedItem = this.options.selectedTab;
+		}
+		this.itemCount = this.layoutNode()!.items!.length - 1;
+		this.updateControl();
+		// TODO(review/test): subscribe only to force change detection when dynamic
+		//titles stop updating after their conditional linked field is destroyed
+		this.dataChangesSubs = this.jsf.dataChanges.subscribe((val) => {
+			this.cdr.markForCheck();
+		});
+	}
 
-  select(index: number) {
-    const layoutNode = this.layoutNode()!;
-    if (layoutNode.items![index].type === '$ref') {
-      this.itemCount = layoutNode.items!.length;
-      this.jsf.addItem({
-        layoutNode: signal(layoutNode.items![index]),
-        layoutIndex: signal(this.layoutIndex()!.concat(index)),
-        dataIndex: signal(this.dataIndex()!.concat(index))
-      });
-      this.updateControl();
-    }
-    this.selectedItem = index;
-  }
+	select(index: number) {
+		const layoutNode = this.layoutNode()!;
+		if (layoutNode.items![index].type === '$ref') {
+			this.itemCount = layoutNode.items!.length;
+			this.jsf.addItem({
+				layoutNode: signal(layoutNode.items![index]),
+				layoutIndex: signal(this.layoutIndex()!.concat(index)),
+				dataIndex: signal(this.dataIndex()!.concat(index)),
+			});
+			this.updateControl();
+		}
+		this.selectedItem = index;
+	}
 
-  updateControl() {
-    const lastItem = this.layoutNode()!.items![this.layoutNode()!.items!.length - 1];
-    if (lastItem.type === '$ref' &&
-      this.itemCount >= (lastItem.options?.maxItems || 1000)
-    ) {
-      this.showAddTab = false;
-    }
-  }
+	updateControl() {
+		const lastItem = this.layoutNode()!.items![this.layoutNode()!.items!.length - 1];
+		if (lastItem.type === '$ref' && this.itemCount >= (lastItem.options?.maxItems || 1000)) {
+			this.showAddTab = false;
+		}
+	}
 
-  setTabTitle(item: LayoutNode, index: number): string {
-    return this.jsf.setArrayItemTitle(this, item, index);
-  }
+	setTabTitle(item: LayoutNode, index: number): string {
+		return this.jsf.setArrayItemTitle(this, item, index);
+	}
 
-  /** Hide a container's own title/legend when rendering a tab/option panel,
-   *  since the tab label already identifies it and otherwise the heading is
-   *  duplicated. Only container nodes are affected; leaf fields keep labels. */
-  panelNode(item: LayoutNode): LayoutNode {
-    const isContainer = !!item && (
-      item.dataType === 'object' ||
-      Array.isArray(item.items) ||
-      ['section', 'fieldset', 'div', 'flex', 'tab', 'array'].includes(item.type!)
-    );
-    return isContainer
-      ? { ...item, options: { ...(item.options || {}), notitle: true } }
-      : item;
-  }
+	/** Hide a container's own title/legend when rendering a tab/option panel,
+	 *  since the tab label already identifies it and otherwise the heading is
+	 *  duplicated. Only container nodes are affected; leaf fields keep labels. */
+	panelNode(item: LayoutNode): LayoutNode {
+		const isContainer =
+			!!item &&
+			(item.dataType === 'object' ||
+				Array.isArray(item.items) ||
+				['section', 'fieldset', 'div', 'flex', 'tab', 'array'].includes(item.type!));
+		return isContainer
+			? { ...item, options: { ...(item.options || {}), notitle: true } }
+			: item;
+	}
 
-  ngOnDestroy(): void {
-    this.dataChangesSubs?.unsubscribe();
-  }
+	ngOnDestroy(): void {
+		this.dataChangesSubs?.unsubscribe();
+	}
 }

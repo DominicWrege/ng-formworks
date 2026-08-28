@@ -1,57 +1,57 @@
-<div [class]="options?.htmlClass || ''" >
-  @if (options?.title) {
-    <label
-      [attr.for]="'control' + layoutNode()?._id"
-      [class]="options?.labelHtmlClass || ''"
-      [style.display]="options?.notitle ? 'none' : ''"
-    [innerHTML]="$safeNavigationMigration(options?.title)"></label>
-  }
-  @if (boundControl) {
-    <input
-      [formControl]="formControl"
-      [attr.aria-describedby]="'control' + layoutNode()?._id + 'Status'"
-      [attr.list]="'control' + layoutNode()?._id + 'Autocomplete'"
-      [attr.maxlength]="options?.maxLength"
-      [attr.minlength]="options?.minLength"
-      [attr.pattern]="options?.pattern"
-      [attr.placeholder]="options?.placeholder"
-      [attr.required]="options?.required"
-      [class]="options?.fieldHtmlClass || ''"
-      [id]="'control' + $safeNavigationMigration(layoutNode()?._id)"
-      [name]="controlName"
-      [readonly]="options?.readonly ? 'readonly' : null"
-      [type]="$safeNavigationMigration(layoutNode()?.type)"
-      [attributes]="inputAttributes"
-      [appStopPropagation]="['mousedown', 'touchstart']"
-      >
-  }
-  @if (!boundControl) {
-    <input
-      [attr.aria-describedby]="'control' + layoutNode()?._id + 'Status'"
-      [attr.list]="'control' + layoutNode()?._id + 'Autocomplete'"
-      [attr.maxlength]="options?.maxLength"
-      [attr.minlength]="options?.minLength"
-      [attr.pattern]="options?.pattern"
-      [attr.placeholder]="options?.placeholder"
-      [attr.required]="options?.required"
-      [class]="options?.fieldHtmlClass || ''"
-      [disabled]="controlDisabled"
-      [id]="'control' + $safeNavigationMigration(layoutNode()?._id)"
-      [name]="controlName"
-      [readonly]="options?.readonly ? 'readonly' : null"
-      [type]="$safeNavigationMigration(layoutNode()?.type)"
-      [value]="controlValue"
-      (input)="updateValue($event)"
-      [attributes]="inputAttributes"
-      [appStopPropagation]="['mousedown', 'touchstart']"
-      >
-  }
-  @if (options?.typeahead?.source) {
-    <datalist
-      [id]="'control' + $safeNavigationMigration(layoutNode()?._id) + 'Autocomplete'">
-      @for (word of options?.typeahead?.source; track word) {
-        <option [value]="word">
-        }
-      </datalist>
-    }
-  </div>
+<div [class]="options?.htmlClass || ''">
+	@if (options?.title) {
+		<label
+			[attr.for]="'control' + layoutNode()?._id"
+			[class]="options?.labelHtmlClass || ''"
+			[style.display]="options?.notitle ? 'none' : ''"
+			[innerHTML]="$safeNavigationMigration(options?.title)"
+		></label>
+	}
+	@if (boundControl) {
+		<input
+			[formControl]="formControl"
+			[attr.aria-describedby]="'control' + layoutNode()?._id + 'Status'"
+			[attr.list]="'control' + layoutNode()?._id + 'Autocomplete'"
+			[attr.maxlength]="options?.maxLength"
+			[attr.minlength]="options?.minLength"
+			[attr.pattern]="options?.pattern"
+			[attr.placeholder]="options?.placeholder"
+			[attr.required]="options?.required"
+			[class]="options?.fieldHtmlClass || ''"
+			[id]="'control' + $safeNavigationMigration(layoutNode()?._id)"
+			[name]="controlName"
+			[readonly]="options?.readonly ? 'readonly' : null"
+			[type]="$safeNavigationMigration(layoutNode()?.type)"
+			[attributes]="inputAttributes"
+			[appStopPropagation]="['mousedown', 'touchstart']"
+		/>
+	}
+	@if (!boundControl) {
+		<input
+			[attr.aria-describedby]="'control' + layoutNode()?._id + 'Status'"
+			[attr.list]="'control' + layoutNode()?._id + 'Autocomplete'"
+			[attr.maxlength]="options?.maxLength"
+			[attr.minlength]="options?.minLength"
+			[attr.pattern]="options?.pattern"
+			[attr.placeholder]="options?.placeholder"
+			[attr.required]="options?.required"
+			[class]="options?.fieldHtmlClass || ''"
+			[disabled]="controlDisabled"
+			[id]="'control' + $safeNavigationMigration(layoutNode()?._id)"
+			[name]="controlName"
+			[readonly]="options?.readonly ? 'readonly' : null"
+			[type]="$safeNavigationMigration(layoutNode()?.type)"
+			[value]="controlValue"
+			(input)="updateValue($event)"
+			[attributes]="inputAttributes"
+			[appStopPropagation]="['mousedown', 'touchstart']"
+		/>
+	}
+	@if (options?.typeahead?.source) {
+		<datalist [id]="'control' + $safeNavigationMigration(layoutNode()?._id) + 'Autocomplete'">
+			@for (word of options?.typeahead?.source; track word) {
+				<option [value]="word"></option>
+			}
+		</datalist>
+	}
+</div>

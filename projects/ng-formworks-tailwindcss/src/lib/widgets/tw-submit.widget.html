@@ -1,16 +1,15 @@
-<div
-  [class]="(tw.formGroup + ' ' + (options?.htmlClass || '')).trim()">
-  <input
-    [attr.aria-describedby]="'control' + layoutNode()?._id + 'Status'"
-    [attr.readonly]="options?.readonly ? 'readonly' : null"
-    [attr.required]="options?.required"
-    [class]="btnCls"
-    [disabled]="controlDisabled"
-    [id]="'control' + $safeNavigationMigration(layoutNode()?._id)"
-    [name]="controlName"
-    [type]="$safeNavigationMigration(layoutNode()?.type)"
-    [value]="controlValue"
-    (click)="updateValue($event)"
-    [appStopPropagation]="['mousedown', 'touchstart']"
-    >
+<div [class]="(tw.formGroup + ' ' + (options?.htmlClass || '')).trim()">
+	<input
+		[attr.aria-describedby]="'control' + layoutNode()?._id + 'Status'"
+		[attr.readonly]="options?.readonly ? 'readonly' : null"
+		[attr.required]="options?.required"
+		[class]="btnCls"
+		[disabled]="controlDisabled"
+		[id]="'control' + $safeNavigationMigration(layoutNode()?._id)"
+		[name]="controlName"
+		[type]="$safeNavigationMigration(layoutNode()?.type)"
+		[value]="controlValue"
+		(click)="updateValue($event)"
+		[appStopPropagation]="['mousedown', 'touchstart']"
+	/>
 </div>

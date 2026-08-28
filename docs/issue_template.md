@@ -1,12 +1,12 @@
 **Describe the bug**
 which template:
 
-* [ ] MaterialDesignFrameworkModule — Material Design
-* [ ] Bootstrap3FrameworkModule — Bootstrap 3
-* [ ] Bootstrap4FrameworkModule — Bootstrap 4
-* [ ] NoFrameworkModule — plain HTML
-* [ ] Other (please specify below)
-  
+- [ ] MaterialDesignFrameworkModule — Material Design
+- [ ] Bootstrap3FrameworkModule — Bootstrap 3
+- [ ] Bootstrap4FrameworkModule — Bootstrap 4
+- [ ] NoFrameworkModule — plain HTML
+- [ ] Other (please specify below)
+
 A clear and concise description of what the bug is.
 
 **To Reproduce**
@@ -35,8 +35,8 @@ Insert log hereCopy
 **Additional context**
 Add any other context about the problem here.
 
-
 <!--- For feature requests -->
+
 **Detailed Description**
 <!--- Provide a detailed description of the change or addition you are proposing -->
 

@@ -1,34 +1,36 @@
 <div [class]="tw.formGroup">
-  <label
-    [attr.for]="'control' + layoutNode()?._id"
-    [class]="tw.checkRow + ' ' + (options?.itemLabelHtmlClass || '')">
-    @if (boundControl) {
-      <input
-        [formControl]="formControl"
-        [attr.aria-describedby]="'control' + layoutNode()?._id + 'Status'"
-      [class]="tw.checkInput + ' ' + (options?.fieldHtmlClass || '')"
-        [id]="'control' + $safeNavigationMigration(layoutNode()?._id)"
-        [name]="controlName"
-        [readonly]="options?.readonly ? 'readonly' : null"
-        type="checkbox">
-    }
-    @if (!boundControl) {
-      <input
-        [attr.aria-describedby]="'control' + layoutNode()?._id + 'Status'"
-        [checked]="isChecked"
-      [class]="tw.checkInput + ' ' + (options?.fieldHtmlClass || '')"
-        [disabled]="controlDisabled"
-        [id]="'control' + $safeNavigationMigration(layoutNode()?._id)"
-        [name]="controlName"
-        [readonly]="options?.readonly ? 'readonly' : null"
-        [value]="controlValue"
-        type="checkbox"
-        (change)="updateValue($event)">
-    }
-    @if (options?.title) {
-      <span
-        [style.display]="options?.notitle ? 'none' : ''"
-      [innerHTML]="titleHtml(options)"></span>
-    }
-  </label>
+	<label
+		[attr.for]="'control' + layoutNode()?._id"
+		[class]="tw.checkRow + ' ' + (options?.itemLabelHtmlClass || '')"
+	>
+		@if (boundControl) {
+		<input
+			[formControl]="formControl"
+			[attr.aria-describedby]="'control' + layoutNode()?._id + 'Status'"
+			[class]="tw.checkInput + ' ' + (options?.fieldHtmlClass || '')"
+			[id]="'control' + $safeNavigationMigration(layoutNode()?._id)"
+			[name]="controlName"
+			[readonly]="options?.readonly ? 'readonly' : null"
+			type="checkbox"
+		/>
+		} @if (!boundControl) {
+		<input
+			[attr.aria-describedby]="'control' + layoutNode()?._id + 'Status'"
+			[checked]="isChecked"
+			[class]="tw.checkInput + ' ' + (options?.fieldHtmlClass || '')"
+			[disabled]="controlDisabled"
+			[id]="'control' + $safeNavigationMigration(layoutNode()?._id)"
+			[name]="controlName"
+			[readonly]="options?.readonly ? 'readonly' : null"
+			[value]="controlValue"
+			type="checkbox"
+			(change)="updateValue($event)"
+		/>
+		} @if (options?.title) {
+		<span
+			[style.display]="options?.notitle ? 'none' : ''"
+			[innerHTML]="titleHtml(options)"
+		></span>
+		}
+	</label>
 </div>

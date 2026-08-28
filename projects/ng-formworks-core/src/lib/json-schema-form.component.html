@@ -1,9 +1,13 @@
-<form [autocomplete]="jsf?.formOptions?.autocomplete ? 'on' : 'off'" class="json-schema-form" (ngSubmit)="submitForm()">
-  <root-widget [layout]="$safeNavigationMigration($any(jsf?.layout))"></root-widget>
+<form
+	[autocomplete]="jsf?.formOptions?.autocomplete ? 'on' : 'off'"
+	class="json-schema-form"
+	(ngSubmit)="submitForm()"
+>
+	<root-widget [layout]="$safeNavigationMigration($any(jsf?.layout))"></root-widget>
 </form>
 @if (debug() || jsf?.formOptions?.debug) {
-  <div>
-    Debug output:
-    <pre>{{debugOutput}}</pre>
-  </div>
+	<div>
+		Debug output:
+		<pre>{{ debugOutput }}</pre>
+	</div>
 }
