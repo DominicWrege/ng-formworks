@@ -47,7 +47,8 @@
 	} @if (options?.typeahead?.source) {
 	<datalist [id]="'control' + $safeNavigationMigration(layoutNode()?._id) + 'Autocomplete'">
 		@for (word of options?.typeahead?.source; track word) {
-		<option [value]="word">}</option>
+		<option [value]="word">{{ word }}</option>
+		}
 	</datalist>
 	}
 </div>

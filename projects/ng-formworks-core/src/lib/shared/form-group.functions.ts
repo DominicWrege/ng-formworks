@@ -4,12 +4,12 @@ import {
 	UntypedFormControl,
 	UntypedFormGroup,
 	ValidatorFn,
-} from '@angular/forms';
-import { cloneDeep } from './native.functions';
-import { getControlValidators, removeRecursiveReferences } from './json-schema.functions';
-import { JsonValidators } from './json.validators';
-import { JsonPointer, Pointer } from './jsonpointer.functions';
-import { forEach, hasOwn } from './utility.functions';
+} from "@angular/forms";
+import { cloneDeep } from "./native.functions";
+import { getControlValidators, removeRecursiveReferences } from "./json-schema.functions";
+import { JsonValidators } from "./json.validators";
+import { JsonPointer, Pointer } from "./jsonpointer.functions";
+import { forEach, hasOwn } from "./utility.functions";
 import {
 	PrimitiveValue,
 	SchemaPrimitiveType,
@@ -24,9 +24,9 @@ import {
 	toJavaScriptType,
 	toSchemaType,
 	IValidatorFn,
-} from './validator.functions';
-import type { DataObject, FormGroupTemplate, JsonSchema } from './types';
-import type { JsonSchemaFormService } from '../json-schema-form.service';
+} from "./validator.functions";
+import type { DataObject, FormGroupTemplate, JsonSchema } from "./types";
+import type { JsonSchemaFormService } from "../json-schema-form.service";
 
 /**
  * path2ControlKey takes a datapointer path like /some/pointer/path
@@ -37,7 +37,7 @@ import type { JsonSchemaFormService } from '../json-schema-form.service';
  * @returns string
  */
 export function path2ControlKey(path: string): string {
-	return path.replace(/\//g, '$');
+	return path.replace(/\//g, "$");
 }
 
 function isPrimitiveValue(value: unknown): value is PrimitiveValue {
@@ -84,37 +84,37 @@ export function buildFormGroupTemplate(
 	jsf: JsonSchemaFormService,
 	nodeValue: unknown = null,
 	setValues = true,
-	schemaPointer = '',
-	dataPointer = '',
-	templatePointer = '',
+	schemaPointer = "",
+	dataPointer = "",
+	templatePointer = "",
 ): FormGroupTemplate {
 	const schema = JsonPointer.get(jsf.schema, schemaPointer);
 	if (setValues) {
 		if (
 			!isDefined(nodeValue) &&
 			(jsf.formOptions.setSchemaDefaults === true ||
-				(jsf.formOptions.setSchemaDefaults === 'auto' && isEmpty(jsf.formValues)))
+				(jsf.formOptions.setSchemaDefaults === "auto" && isEmpty(jsf.formValues)))
 		) {
-			nodeValue = JsonPointer.get(jsf.schema, schemaPointer + '/default');
+			nodeValue = JsonPointer.get(jsf.schema, schemaPointer + "/default");
 		}
 	} else {
 		nodeValue = null;
 	}
 	// TODO: If nodeValue still not set, check layout for default value
-	const schemaType: string | string[] = JsonPointer.get(schema, '/type');
-	const isIfThenElse = hasOwn(schema, 'if') || hasOwn(schema, 'then') || hasOwn(schema, 'else');
+	const schemaType: string | string[] = JsonPointer.get(schema, "/type");
+	const isIfThenElse = hasOwn(schema, "if") || hasOwn(schema, "then") || hasOwn(schema, "else");
 	const controlType =
 		isIfThenElse && !schemaType
-			? 'IfThenElse'
-			: (hasOwn(schema, 'properties') || hasOwn(schema, 'additionalProperties')) &&
-				  schemaType === 'object'
-				? 'FormGroup'
-				: (hasOwn(schema, 'items') || hasOwn(schema, 'additionalItems')) &&
-					  schemaType === 'array'
-					? 'FormArray'
-					: !schemaType && hasOwn(schema, '$ref')
-						? '$ref'
-						: 'FormControl';
+			? "IfThenElse"
+			: (hasOwn(schema, "properties") || hasOwn(schema, "additionalProperties")) &&
+				  schemaType === "object"
+				? "FormGroup"
+				: (hasOwn(schema, "items") || hasOwn(schema, "additionalItems")) &&
+					  schemaType === "array"
+					? "FormArray"
+					: !schemaType && hasOwn(schema, "$ref")
+						? "$ref"
+						: "FormControl";
 	const shortDataPointer = removeRecursiveReferences(
 		dataPointer,
 		jsf.dataRecursiveRefMap,
@@ -124,33 +124,33 @@ export function buildFormGroupTemplate(
 		jsf.dataMap.set(shortDataPointer, new Map());
 	}
 	const nodeOptions = jsf.dataMap.get(shortDataPointer)!;
-	if (!nodeOptions.has('schemaType')) {
-		nodeOptions.set('schemaPointer', schemaPointer);
-		nodeOptions.set('schemaType', schema.type);
+	if (!nodeOptions.has("schemaType")) {
+		nodeOptions.set("schemaPointer", schemaPointer);
+		nodeOptions.set("schemaType", schema.type);
 		if (schema.format) {
-			nodeOptions.set('schemaFormat', schema.format);
+			nodeOptions.set("schemaFormat", schema.format);
 			if (!schema.type) {
-				nodeOptions.set('schemaType', 'string');
+				nodeOptions.set("schemaType", "string");
 			}
 		}
 		if (controlType) {
-			nodeOptions.set('templatePointer', templatePointer);
-			nodeOptions.set('templateType', controlType);
+			nodeOptions.set("templatePointer", templatePointer);
+			nodeOptions.set("templateType", controlType);
 		}
 	}
 	let controls: any;
 	const validators = getControlValidators(schema) as Record<string, unknown[]>;
 	switch (controlType) {
-		case 'FormGroup':
+		case "FormGroup":
 			controls = {};
-			if (hasOwn(schema, 'ui:order') || hasOwn(schema, 'properties')) {
-				const propertyKeys = schema['ui:order'] || Object.keys(schema.properties);
-				if (propertyKeys.includes('*') && !hasOwn(schema.properties, '*')) {
+			if (hasOwn(schema, "ui:order") || hasOwn(schema, "properties")) {
+				const propertyKeys = schema["ui:order"] || Object.keys(schema.properties);
+				if (propertyKeys.includes("*") && !hasOwn(schema.properties, "*")) {
 					const unnamedKeys = Object.keys(schema.properties).filter(
 						(key) => !propertyKeys.includes(key),
 					);
 					for (let i = propertyKeys.length - 1; i >= 0; i--) {
-						if (propertyKeys[i] === '*') {
+						if (propertyKeys[i] === "*") {
 							propertyKeys.splice(i, 1, ...unnamedKeys);
 						}
 					}
@@ -159,7 +159,7 @@ export function buildFormGroupTemplate(
 					.filter(
 						(key: string) =>
 							hasOwn(schema.properties, key) ||
-							hasOwn(schema, 'additionalProperties'),
+							hasOwn(schema, "additionalProperties"),
 					)
 					.forEach((key: string) => {
 						controls[key] = buildFormGroupTemplate(
@@ -168,15 +168,15 @@ export function buildFormGroupTemplate(
 							setValues,
 							schemaPointer +
 								(hasOwn(schema.properties, key)
-									? '/properties/' + key
-									: '/additionalProperties'),
-							dataPointer + '/' + key,
-							templatePointer + '/controls/' + key,
+									? "/properties/" + key
+									: "/additionalProperties"),
+							dataPointer + "/" + key,
+							templatePointer + "/controls/" + key,
 						);
 						//add the $<control> type to the root
 						//so it can be flattened and acceses directly in the formgroup
 						//by its full '$' path
-						['allOf', 'anyOf', 'oneOf'].forEach((ofType) => {
+						["allOf", "anyOf", "oneOf"].forEach((ofType) => {
 							if (controls[key].controls && controls[key].controls[`_${ofType}`]) {
 								Object.keys(controls[key].controls[`_${ofType}`]).forEach(
 									($key) => {
@@ -189,8 +189,8 @@ export function buildFormGroupTemplate(
 						});
 					});
 
-				if (hasOwn(schema, 'if')) {
-					['then', 'else'].forEach((con) => {
+				if (hasOwn(schema, "if")) {
+					["then", "else"].forEach((con) => {
 						if (hasOwn(schema, con)) {
 							const keySchemaPointer = `/${con}`;
 
@@ -254,17 +254,17 @@ export function buildFormGroupTemplate(
         */
 
 				let ofAllowedKeys = [
-					'allOf',
-					'anyOf',
-					'oneOf',
-					'if',
-					'then',
-					'else',
-					'type',
-					'properties',
-					'items',
+					"allOf",
+					"anyOf",
+					"oneOf",
+					"if",
+					"then",
+					"else",
+					"type",
+					"properties",
+					"items",
 				];
-				['allOf', 'anyOf', 'oneOf'].forEach((ofType) => {
+				["allOf", "anyOf", "oneOf"].forEach((ofType) => {
 					if (hasOwn(schema, ofType) && isArray(schema[ofType])) {
 						schema[ofType].forEach((ofItem, ind) => {
 							let aoItemKeys = Object.keys(ofItem);
@@ -274,7 +274,7 @@ export function buildFormGroupTemplate(
 							if (foundKeys && foundKeys.length > 0) {
 								const keySchemaPointer = `/${ofType}/${ind}`;
 								let newNodeValue = nodeValue;
-								if (ofType == 'oneOf') {
+								if (ofType == "oneOf") {
 									newNodeValue = nodeValue;
 								}
 								let allOfFGTemplate = buildFormGroupTemplate(
@@ -283,13 +283,13 @@ export function buildFormGroupTemplate(
 									setValues,
 									schemaPointer + keySchemaPointer,
 									dataPointer,
-									templatePointer + '/controls/' + ind,
+									templatePointer + "/controls/" + ind,
 								);
 								if (allOfFGTemplate.controls) {
 									Object.entries(allOfFGTemplate.controls).forEach(
 										([key, allOfControl]) => {
-											const l2SchemaPointer = hasOwn(schema, 'properties')
-												? '/properties/' + key
+											const l2SchemaPointer = hasOwn(schema, "properties")
+												? "/properties/" + key
 												: key;
 											let controlKey =
 												allOfControl.schemaPointer ||
@@ -307,7 +307,7 @@ export function buildFormGroupTemplate(
 											//as the same oneOf item will be assigned to the same value
 											//if key is a $oneOf key then it was inserted at the root of the controls
 											//as form control name will be the full(escaped) path
-											const pointerPath = key.startsWith('$oneOf')
+											const pointerPath = key.startsWith("$oneOf")
 												? controlItem.schemaPointer
 												: keySchemaPointer;
 											let oneOfItemSchema = JsonPointer.get(
@@ -317,10 +317,10 @@ export function buildFormGroupTemplate(
 											let dPointer = controlItem
 												.schemaPointer!.replace(
 													/(anyOf|allOf|oneOf|none)\/[\d]+\//g,
-													'',
+													"",
 												)
-												.replace(/(if|then|else|properties)\//g, '')
-												.replace(/\/items\//g, '/-/');
+												.replace(/(if|then|else|properties)\//g, "")
+												.replace(/\/items\//g, "/-/");
 											dPointer =
 												dPointer.indexOf(dataPointer) == 0
 													? dPointer.substring(dataPointer.length)
@@ -328,7 +328,7 @@ export function buildFormGroupTemplate(
 											let dVal = JsonPointer.get(nodeValue, dPointer);
 											let fkey = key;
 											let oneOfItemValue: DataObject = dVal;
-											if (hasOwn(controlItem, 'value')) {
+											if (hasOwn(controlItem, "value")) {
 												if (
 													!jsf.ajv.validate(
 														oneOfItemSchema,
@@ -359,15 +359,15 @@ export function buildFormGroupTemplate(
 			}
 			return { controlType, controls, validators, schemaPointer };
 
-		case 'FormArray':
+		case "FormArray":
 			controls = [];
-			const minItems = Math.max(schema.minItems || 0, nodeOptions.get('minItems') || 0);
-			const maxItems = Math.min(schema.maxItems || 1000, nodeOptions.get('maxItems') || 1000);
+			const minItems = Math.max(schema.minItems || 0, nodeOptions.get("minItems") || 0);
+			const maxItems = Math.min(schema.maxItems || 1000, nodeOptions.get("maxItems") || 1000);
 			let additionalItemsPointer: string | null = null;
 			if (isArray(schema.items)) {
 				// 'items' is an array = tuple items
 				const tupleItems =
-					nodeOptions.get('tupleItems') ||
+					nodeOptions.get("tupleItems") ||
 					(isArray(schema.items) ? Math.min(schema.items.length, maxItems) : 0);
 				for (let i = 0; i < tupleItems; i++) {
 					if (i < minItems) {
@@ -376,22 +376,22 @@ export function buildFormGroupTemplate(
 								jsf,
 								isArray(nodeValue) ? nodeValue[i] : nodeValue,
 								setValues,
-								schemaPointer + '/items/' + i,
-								dataPointer + '/' + i,
-								templatePointer + '/controls/' + i,
+								schemaPointer + "/items/" + i,
+								dataPointer + "/" + i,
+								templatePointer + "/controls/" + i,
 							),
 						);
 					} else {
 						const schemaRefPointer = removeRecursiveReferences(
-							schemaPointer + '/items/' + i,
+							schemaPointer + "/items/" + i,
 							jsf.schemaRecursiveRefMap,
 						);
 						const itemRefPointer = removeRecursiveReferences(
-							shortDataPointer + '/' + i,
+							shortDataPointer + "/" + i,
 							jsf.dataRecursiveRefMap,
 							jsf.arrayMap,
 						);
-						const itemRecursive = itemRefPointer !== shortDataPointer + '/' + i;
+						const itemRecursive = itemRefPointer !== shortDataPointer + "/" + i;
 						//if is in templateLibrary then need to check if its a conditional
 						//and conditional pointers match orthewise create a new ref
 						let conditionalRefPointer = `${itemRefPointer}@${schemaPointer}`;
@@ -406,7 +406,7 @@ export function buildFormGroupTemplate(
 								setValues,
 								schemaRefPointer,
 								itemRefPointer,
-								templatePointer + '/controls/' + i,
+								templatePointer + "/controls/" + i,
 							);
 							templateRefToUse = conditionalRefPointer;
 						}
@@ -418,7 +418,7 @@ export function buildFormGroupTemplate(
 								setValues,
 								schemaRefPointer,
 								itemRefPointer,
-								templatePointer + '/controls/' + i,
+								templatePointer + "/controls/" + i,
 							);
 							jsf.templateRefLibrary[conditionalRefPointer] =
 								jsf.templateRefLibrary[itemRefPointer];
@@ -429,9 +429,9 @@ export function buildFormGroupTemplate(
 										jsf,
 										nodeValue[i],
 										setValues,
-										schemaPointer + '/items/' + i,
-										dataPointer + '/' + i,
-										templatePointer + '/controls/' + i,
+										schemaPointer + "/items/" + i,
+										dataPointer + "/" + i,
+										templatePointer + "/controls/" + i,
 									)
 								: itemRecursive
 									? null
@@ -442,12 +442,12 @@ export function buildFormGroupTemplate(
 
 				// If 'additionalItems' is an object = additional list items (after tuple items)
 				if (schema.items.length < maxItems && isObject(schema.additionalItems)) {
-					additionalItemsPointer = schemaPointer + '/additionalItems';
+					additionalItemsPointer = schemaPointer + "/additionalItems";
 				}
 
 				// If 'items' is an object = list items only (no tuple items)
 			} else {
-				additionalItemsPointer = schemaPointer + '/items';
+				additionalItemsPointer = schemaPointer + "/items";
 			}
 
 			if (additionalItemsPointer) {
@@ -456,11 +456,11 @@ export function buildFormGroupTemplate(
 					jsf.schemaRecursiveRefMap,
 				);
 				const itemRefPointer = removeRecursiveReferences(
-					shortDataPointer + '/-',
+					shortDataPointer + "/-",
 					jsf.dataRecursiveRefMap,
 					jsf.arrayMap,
 				);
-				const itemRecursive = itemRefPointer !== shortDataPointer + '/-';
+				const itemRecursive = itemRefPointer !== shortDataPointer + "/-";
 				//if is in templateLibrary then need to check if its a conditional
 				//and conditional pointers match orthewise create a new ref
 				let conditionalRefPointer = `${itemRefPointer}@${schemaPointer}`;
@@ -475,7 +475,7 @@ export function buildFormGroupTemplate(
 						setValues,
 						schemaRefPointer,
 						itemRefPointer,
-						templatePointer + '/controls/-',
+						templatePointer + "/controls/-",
 					);
 					templateRefToUse = conditionalRefPointer;
 				}
@@ -487,18 +487,18 @@ export function buildFormGroupTemplate(
 						setValues,
 						schemaRefPointer,
 						itemRefPointer,
-						templatePointer + '/controls/-',
+						templatePointer + "/controls/-",
 					);
 					jsf.templateRefLibrary[conditionalRefPointer] =
 						jsf.templateRefLibrary[itemRefPointer];
 				}
 				const itemOptions = nodeOptions;
-				if (!itemRecursive || hasOwn(validators, 'required')) {
+				if (!itemRecursive || hasOwn(validators, "required")) {
 					const arrayLength = Math.min(
 						Math.max(
 							itemRecursive
 								? 0
-								: itemOptions.get('tupleItems') + itemOptions.get('listItems') || 0,
+								: itemOptions.get("tupleItems") + itemOptions.get("listItems") || 0,
 							isArray(nodeValue) ? nodeValue.length : 0,
 						),
 						maxItems,
@@ -511,8 +511,8 @@ export function buildFormGroupTemplate(
 										nodeValue[i],
 										setValues,
 										schemaRefPointer,
-										dataPointer + '/-',
-										templatePointer + '/controls/-',
+										dataPointer + "/-",
+										templatePointer + "/controls/-",
 									)
 								: itemRecursive
 									? null
@@ -523,7 +523,7 @@ export function buildFormGroupTemplate(
 			}
 			return { controlType, controls, validators, schemaPointer };
 
-		case '$ref':
+		case "$ref":
 			const schemaRef = JsonPointer.compile(schema.$ref);
 			const dataRef = JsonPointer.toDataPointer(schemaRef, schema)!;
 			const refPointer = removeRecursiveReferences(
@@ -543,20 +543,20 @@ export function buildFormGroupTemplate(
 			}
 			return null!;
 
-		case 'FormControl':
+		case "FormControl":
 			const value = {
 				value: setValues && isPrimitiveValue(nodeValue) ? nodeValue : null,
-				disabled: nodeOptions.get('disabled') || false,
+				disabled: nodeOptions.get("disabled") || false,
 			};
 			return { controlType, value, validators, schemaPointer };
 
 		// TODO: may make an IFThenElse widget or integrate it with the section
 		//widget
-		case 'IfThenElse':
+		case "IfThenElse":
 			controls = {};
 			let conditionType;
-			if (hasOwn(schema, 'if')) {
-				['then', 'else'].forEach((con) => {
+			if (hasOwn(schema, "if")) {
+				["then", "else"].forEach((con) => {
 					if (hasOwn(schema, con)) {
 						const keySchemaPointer = `/${con}`;
 						let thenTFGTemplate = buildFormGroupTemplate(
@@ -570,7 +570,7 @@ export function buildFormGroupTemplate(
 						//NB same property can be in both then and else
 						//so key must be the unique path to control
 
-						if (hasOwn(thenTFGTemplate, 'controls')) {
+						if (hasOwn(thenTFGTemplate, "controls")) {
 							Object.entries(thenTFGTemplate.controls!).forEach(
 								([key, thenControl]) => {
 									let controlKey = thenControl.schemaPointer;
@@ -601,23 +601,23 @@ export function buildFormGroupTemplate(
 export function buildFormGroup(template: FormGroupTemplate): AbstractControl {
 	const validatorFns: IValidatorFn[] = [];
 	let validatorFn: ValidatorFn | null = null;
-	if (hasOwn(template, 'validators')) {
+	if (hasOwn(template, "validators")) {
 		forEach(template.validators, (parameters, validator) => {
 			const validatorMethod = JsonValidators[validator as keyof typeof JsonValidators] as (
 				...parameters: unknown[]
 			) => IValidatorFn;
-			if (typeof validatorMethod === 'function') {
+			if (typeof validatorMethod === "function") {
 				validatorFns.push(validatorMethod.apply(null, parameters));
 			}
 		});
-		if (validatorFns.length && inArray(template.controlType, ['FormGroup', 'FormArray'])) {
+		if (validatorFns.length && inArray(template.controlType, ["FormGroup", "FormArray"])) {
 			validatorFn =
 				validatorFns.length > 1 ? JsonValidators.compose(validatorFns) : validatorFns[0];
 		}
 	}
-	if (hasOwn(template, 'controlType')) {
+	if (hasOwn(template, "controlType")) {
 		switch (template.controlType) {
-			case 'FormGroup':
+			case "FormGroup":
 				const groupControls: { [key: string]: AbstractControl } = {};
 				forEach(template.controls, (controls, key) => {
 					const newControl: AbstractControl = buildFormGroup(controls);
@@ -640,14 +640,14 @@ export function buildFormGroup(template: FormGroupTemplate): AbstractControl {
 					}
 				});
 				return new UntypedFormGroup(groupControls, validatorFn);
-			case 'FormArray':
+			case "FormArray":
 				return new UntypedFormArray(
 					(template.controls as FormGroupTemplate[])
 						.map((controls) => buildFormGroup(controls))
 						.filter(Boolean),
 					validatorFn,
 				);
-			case 'FormControl':
+			case "FormControl":
 				return new UntypedFormControl(template.value, validatorFns);
 		}
 	}
@@ -665,15 +665,15 @@ export function mergeValues(...valuesToMerge: unknown[]): unknown {
 	for (const currentValue of valuesToMerge) {
 		if (!isEmpty(currentValue)) {
 			if (
-				typeof currentValue === 'object' &&
-				(isEmpty(mergedValues) || typeof mergedValues !== 'object')
+				typeof currentValue === "object" &&
+				(isEmpty(mergedValues) || typeof mergedValues !== "object")
 			) {
 				if (isArray(currentValue)) {
 					mergedValues = [...currentValue];
 				} else if (isObject(currentValue)) {
 					mergedValues = { ...currentValue };
 				}
-			} else if (typeof currentValue !== 'object') {
+			} else if (typeof currentValue !== "object") {
 				mergedValues = currentValue;
 			} else if (isObject(mergedValues) && isObject(currentValue)) {
 				Object.assign(mergedValues, currentValue);
@@ -719,11 +719,11 @@ export function setRequiredFields(
 	formControlTemplate: FormGroupTemplate,
 ): boolean {
 	let fieldsRequired = false;
-	if (hasOwn(schema, 'required') && !isEmpty(schema.required)) {
+	if (hasOwn(schema, "required") && !isEmpty(schema.required)) {
 		fieldsRequired = true;
 		const requiredArray = isArray(schema.required) ? schema.required : [schema.required];
 		forEach(requiredArray, (key) =>
-			JsonPointer.set(formControlTemplate, '/' + key + '/validators/required', []),
+			JsonPointer.set(formControlTemplate, "/" + key + "/validators/required", []),
 		);
 	}
 	return fieldsRequired;
@@ -750,11 +750,11 @@ export function formatFormData(
 	returnEmptyFields = false,
 	fixErrors = false,
 ): DataObject {
-	if (formData === null || typeof formData !== 'object') {
+	if (formData === null || typeof formData !== "object") {
 		return formData;
 	}
 	const formattedData = isArray(formData) ? [] : {};
-	JsonPointer.forEachDeep(formData, (value, dataPointer = '') => {
+	JsonPointer.forEachDeep(formData, (value, dataPointer = "") => {
 		// If returnEmptyFields === true,
 		// add empty arrays and objects to all allowed keys
 		if (returnEmptyFields && isArray(value)) {
@@ -762,18 +762,18 @@ export function formatFormData(
 		} else if (returnEmptyFields && isObject(value) && !isDate(value)) {
 			JsonPointer.set(formattedData, dataPointer, {});
 		} else {
-			const genericPointer = JsonPointer.has(dataMap, [dataPointer, 'schemaType'])
+			const genericPointer = JsonPointer.has(dataMap, [dataPointer, "schemaType"])
 				? dataPointer
 				: removeRecursiveReferences(dataPointer, recursiveRefMap, arrayMap);
-			if (JsonPointer.has(dataMap, [genericPointer, 'schemaType'])) {
+			if (JsonPointer.has(dataMap, [genericPointer, "schemaType"])) {
 				const schemaType: SchemaPrimitiveType | SchemaPrimitiveType[] = dataMap
 					.get(genericPointer)!
-					.get('schemaType') as SchemaPrimitiveType | SchemaPrimitiveType[];
-				if (schemaType === 'null') {
+					.get("schemaType") as SchemaPrimitiveType | SchemaPrimitiveType[];
+				if (schemaType === "null") {
 					JsonPointer.set(formattedData, dataPointer, null);
 				} else if (
 					(hasValue(value) || returnEmptyFields) &&
-					inArray(schemaType, ['string', 'integer', 'number', 'boolean'])
+					inArray(schemaType, ["string", "integer", "number", "boolean"])
 				) {
 					const newValue =
 						fixErrors || (value === null && returnEmptyFields)
@@ -784,20 +784,20 @@ export function formatFormData(
 					}
 				}
 			} else if (
-				typeof value !== 'object' ||
+				typeof value !== "object" ||
 				isDate(value) ||
 				(value === null && returnEmptyFields)
 			) {
-				if (genericPointer.indexOf('/$') >= 0) {
+				if (genericPointer.indexOf("/$") >= 0) {
 					return formattedData;
 				}
 				console.error(
-					'formatFormData error: ' +
+					"formatFormData error: " +
 						`Schema type not found for form value at ${genericPointer}`,
 				);
-				console.error('dataMap', dataMap);
-				console.error('recursiveRefMap', recursiveRefMap);
-				console.error('genericPointer', genericPointer);
+				console.error("dataMap", dataMap);
+				console.error("recursiveRefMap", recursiveRefMap);
+				console.error("genericPointer", genericPointer);
 			}
 		}
 	});
@@ -830,7 +830,7 @@ export function getControl(
 		if (!JsonPointer.isJsonPointer(dataPointer)) {
 			// If dataPointer input is not a valid JSON pointer, check to
 			// see if it is instead a valid object path, using dot notaion
-			if (typeof dataPointer === 'string') {
+			if (typeof dataPointer === "string") {
 				const controlPath = !!schemaPointer ? path2ControlKey(schemaPointer) : dataPointer;
 				const formControl = formGroup!.get(controlPath);
 				if (formControl) {
@@ -852,12 +852,12 @@ export function getControl(
 	// If formGroup input is a real formGroup (not a formGroup template)
 	// try using formGroup.get() to return the control
 	if (
-		typeof formGroup!.get === 'function' &&
-		dataPointerArray.every((key) => key.indexOf('.') === -1)
+		typeof formGroup!.get === "function" &&
+		dataPointerArray.every((key) => key.indexOf(".") === -1)
 	) {
 		const controlPath = !!schemaPointer
 			? path2ControlKey(schemaPointer)
-			: dataPointerArray.join('.');
+			: dataPointerArray.join(".");
 		const formControl = formGroup!.get(controlPath);
 		if (formControl) {
 			return formControl;
@@ -880,7 +880,7 @@ export function getControl(
 	//for control path /0/name
 	if (schemaPointer) {
 		let controlPointer = JsonPointer.toControlPointer(dataPointer, {});
-		let schemaPointerArray = schemaPointer.split('/');
+		let schemaPointerArray = schemaPointer.split("/");
 		let controlPointerArray = JsonPointer.parse(dataPointer)!;
 		//controlPointer.split('/').splice(1);
 
@@ -888,7 +888,7 @@ export function getControl(
 		let spFormGroup;
 		while (schemaPointerArray.length > 0) {
 			currSPAKey = schemaPointerArray.pop();
-			let ckey = path2ControlKey(schemaPointerArray.join('/'));
+			let ckey = path2ControlKey(schemaPointerArray.join("/"));
 			spFormGroup = formGroup!.get(ckey);
 			if (controlPointerArray[0] == schemaPointerArray[schemaPointerArray.length - 1]) {
 				controlPointerArray.shift();
@@ -901,13 +901,13 @@ export function getControl(
 		dataPointerArray = spFormGroup ? controlPointerArray : dataPointerArray;
 	}
 	for (const key of dataPointerArray) {
-		if (hasOwn(subGroup, 'controls')) {
+		if (hasOwn(subGroup, "controls")) {
 			subGroup = subGroup.controls;
 		}
 		if (schemaPointer && hasOwn(subGroup, path2ControlKey(schemaPointer))) {
 			subGroup = subGroup[path2ControlKey(schemaPointer)];
 			return subGroup;
-		} else if (isArray(subGroup) && key === '-') {
+		} else if (isArray(subGroup) && key === "-") {
 			subGroup = subGroup[subGroup.length - 1];
 		} else if (hasOwn(subGroup, key)) {
 			subGroup = (subGroup as Record<string, any>)[key];
@@ -960,7 +960,7 @@ export function setControl(
 		currentGroup = currentGroup!.get(dataPointerArray[i]);
 
 		// If it's not a FormGroup, we throw an error since we can't set a control in a non-group.
-		if (!(typeof (currentGroup as { setControl?: unknown }).setControl === 'function')) {
+		if (!(typeof (currentGroup as { setControl?: unknown }).setControl === "function")) {
 			throw new Error(
 				`Path '${dataPointerArray[i]}' is not a valid FormGroup or  FormArray.`,
 			);

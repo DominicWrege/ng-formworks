@@ -1,12 +1,12 @@
-import { Component, inject, input, OnDestroy, OnInit } from '@angular/core';
-import { AbstractControl } from '@angular/forms';
-import type { FormValue, LayoutNode, TitleMapItem, WidgetOptions } from '../shared/types';
-import { JsonSchemaFormService } from '../json-schema-form.service';
-import { buildTitleMap } from '../shared';
+import { Component, inject, input, OnDestroy, OnInit } from "@angular/core";
+import { AbstractControl } from "@angular/forms";
+import type { FormValue, LayoutNode, TitleMapItem, WidgetOptions } from "../shared/types";
+import { JsonSchemaFormService } from "../json-schema-form.service";
+import { buildTitleMap } from "../shared";
 
 @Component({
-	selector: 'radios-widget',
-	templateUrl: './radios.component.html',
+	selector: "radios-widget",
+	templateUrl: "./radios.component.html",
 })
 export class RadiosComponent implements OnInit, OnDestroy {
 	private jsf = inject(JsonSchemaFormService);
@@ -17,7 +17,7 @@ export class RadiosComponent implements OnInit, OnDestroy {
 	controlDisabled = false;
 	boundControl = false;
 	options!: WidgetOptions;
-	layoutOrientation = 'vertical';
+	layoutOrientation = "vertical";
 	radiosList: TitleMapItem[] = [];
 	readonly layoutNode = input<LayoutNode | undefined>(undefined);
 	readonly layoutIndex = input<number[] | undefined>(undefined);
@@ -26,8 +26,8 @@ export class RadiosComponent implements OnInit, OnDestroy {
 	ngOnInit() {
 		this.options = this.layoutNode()!.options || {};
 		const layoutNode = this.layoutNode()!;
-		if (layoutNode.type === 'radios-inline' || layoutNode.type === 'radiobuttons') {
-			this.layoutOrientation = 'horizontal';
+		if (layoutNode.type === "radios-inline" || layoutNode.type === "radiobuttons") {
+			this.layoutOrientation = "horizontal";
 		}
 		this.radiosList = buildTitleMap(
 			this.options.titleMap || this.options.enumNames || null,

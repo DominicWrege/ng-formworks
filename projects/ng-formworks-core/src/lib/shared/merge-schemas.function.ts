@@ -1,9 +1,9 @@
-import { deepEqual } from './native.functions';
+import { deepEqual } from "./native.functions";
 
-import { isArray, isEmpty, isNumber, isObject, isString } from './validator.functions';
-import { hasOwn, uniqueItems, commonItems } from './utility.functions';
-import { JsonPointer, Pointer } from './jsonpointer.functions';
-import type { JsonSchema } from './types';
+import { isArray, isEmpty, isNumber, isObject, isString } from "./validator.functions";
+import { hasOwn, uniqueItems, commonItems } from "./utility.functions";
+import { JsonPointer, Pointer } from "./jsonpointer.functions";
+import type { JsonSchema } from "./types";
 
 /**
  * 'mergeSchemas' function
@@ -38,7 +38,7 @@ export function mergeSchemas(...schemas: JsonSchema[]): JsonSchema {
 				combinedSchema[key] = schemaValue;
 			} else {
 				switch (key) {
-					case 'allOf':
+					case "allOf":
 						// Combine all items from both arrays
 						if (isArray(combinedValue) && isArray(schemaValue)) {
 							combinedSchema.allOf = mergeSchemas(
@@ -49,16 +49,16 @@ export function mergeSchemas(...schemas: JsonSchema[]): JsonSchema {
 							return { allOf: [...schemas] };
 						}
 						break;
-					case 'additionalItems':
-					case 'additionalProperties':
-					case 'contains':
-					case 'propertyNames':
+					case "additionalItems":
+					case "additionalProperties":
+					case "contains":
+					case "propertyNames":
 						// Merge schema objects
 						if (isObject(combinedValue) && isObject(schemaValue)) {
 							combinedSchema[key] = mergeSchemas(combinedValue, schemaValue);
 							// additionalProperties == false in any schema overrides all other values
 						} else if (
-							key === 'additionalProperties' &&
+							key === "additionalProperties" &&
 							(combinedValue === false || schemaValue === false)
 						) {
 							combinedSchema.combinedSchema = false;
@@ -66,9 +66,9 @@ export function mergeSchemas(...schemas: JsonSchema[]): JsonSchema {
 							return { allOf: [...schemas] };
 						}
 						break;
-					case 'anyOf':
-					case 'oneOf':
-					case 'enum':
+					case "anyOf":
+					case "oneOf":
+					case "enum":
 						// Keep only items that appear in both arrays
 						if (isArray(combinedValue) && isArray(schemaValue)) {
 							combinedSchema[key] = combinedValue.filter(
@@ -82,7 +82,7 @@ export function mergeSchemas(...schemas: JsonSchema[]): JsonSchema {
 							return { allOf: [...schemas] };
 						}
 						break;
-					case 'definitions':
+					case "definitions":
 						// Combine keys from both objects
 						if (isObject(combinedValue) && isObject(schemaValue)) {
 							const combinedObject = { ...combinedValue } as Record<string, any>;
@@ -102,7 +102,7 @@ export function mergeSchemas(...schemas: JsonSchema[]): JsonSchema {
 							return { allOf: [...schemas] };
 						}
 						break;
-					case 'dependencies':
+					case "dependencies":
 						// Combine all keys from both objects
 						// and merge schemas on matching keys,
 						// converting from arrays to objects if necessary
@@ -164,7 +164,7 @@ export function mergeSchemas(...schemas: JsonSchema[]): JsonSchema {
 							return { allOf: [...schemas] };
 						}
 						break;
-					case 'items':
+					case "items":
 						// If arrays, keep only items that appear in both arrays
 						if (isArray(combinedValue) && isArray(schemaValue)) {
 							combinedSchema.items = combinedValue.filter(
@@ -190,7 +190,7 @@ export function mergeSchemas(...schemas: JsonSchema[]): JsonSchema {
 							return { allOf: [...schemas] };
 						}
 						break;
-					case 'multipleOf':
+					case "multipleOf":
 						// TODO: Adjust to correctly handle decimal values
 						// If numbers, set to least common multiple
 						if (isNumber(combinedValue) && isNumber(schemaValue)) {
@@ -204,11 +204,11 @@ export function mergeSchemas(...schemas: JsonSchema[]): JsonSchema {
 							return { allOf: [...schemas] };
 						}
 						break;
-					case 'maximum':
-					case 'exclusiveMaximum':
-					case 'maxLength':
-					case 'maxItems':
-					case 'maxProperties':
+					case "maximum":
+					case "exclusiveMaximum":
+					case "maxLength":
+					case "maxItems":
+					case "maxProperties":
 						// If numbers, set to lowest value
 						if (isNumber(combinedValue) && isNumber(schemaValue)) {
 							combinedSchema[key] = Math.min(
@@ -219,11 +219,11 @@ export function mergeSchemas(...schemas: JsonSchema[]): JsonSchema {
 							return { allOf: [...schemas] };
 						}
 						break;
-					case 'minimum':
-					case 'exclusiveMinimum':
-					case 'minLength':
-					case 'minItems':
-					case 'minProperties':
+					case "minimum":
+					case "exclusiveMinimum":
+					case "minLength":
+					case "minItems":
+					case "minProperties":
 						// If numbers, set to highest value
 						if (isNumber(combinedValue) && isNumber(schemaValue)) {
 							combinedSchema[key] = Math.max(
@@ -234,7 +234,7 @@ export function mergeSchemas(...schemas: JsonSchema[]): JsonSchema {
 							return { allOf: [...schemas] };
 						}
 						break;
-					case 'not':
+					case "not":
 						// Combine not values into anyOf array
 						if (isObject(combinedValue) && isObject(schemaValue)) {
 							const notAnyOf = [combinedValue, schemaValue].reduce(
@@ -250,7 +250,7 @@ export function mergeSchemas(...schemas: JsonSchema[]): JsonSchema {
 							return { allOf: [...schemas] };
 						}
 						break;
-					case 'patternProperties':
+					case "patternProperties":
 						// Combine all keys from both objects
 						// and merge schemas on matching keys
 						if (isObject(combinedValue) && isObject(schemaValue)) {
@@ -279,7 +279,7 @@ export function mergeSchemas(...schemas: JsonSchema[]): JsonSchema {
 							return { allOf: [...schemas] };
 						}
 						break;
-					case 'properties':
+					case "properties":
 						// Combine all keys from both objects
 						// unless additionalProperties === false
 						// and merge schemas on matching keys
@@ -287,7 +287,7 @@ export function mergeSchemas(...schemas: JsonSchema[]): JsonSchema {
 							const combinedObject = { ...combinedValue } as Record<string, any>;
 							// If new schema has additionalProperties,
 							// merge or remove non-matching property keys in combined schema
-							if (hasOwn(schemaValue, 'additionalProperties')) {
+							if (hasOwn(schemaValue, "additionalProperties")) {
 								Object.keys(combinedValue)
 									.filter(
 										(combinedKey) =>
@@ -308,14 +308,14 @@ export function mergeSchemas(...schemas: JsonSchema[]): JsonSchema {
 								if (
 									deepEqual(combinedObject[subKey], schemaValue[subKey]) ||
 									(!hasOwn(combinedObject, subKey) &&
-										!hasOwn(combinedObject, 'additionalProperties'))
+										!hasOwn(combinedObject, "additionalProperties"))
 								) {
 									combinedObject[subKey] = schemaValue[subKey];
 									// If combined schema has additionalProperties,
 									// merge or ignore non-matching property keys in new schema
 								} else if (
 									!hasOwn(combinedObject, subKey) &&
-									hasOwn(combinedObject, 'additionalProperties')
+									hasOwn(combinedObject, "additionalProperties")
 								) {
 									// If combinedObject.additionalProperties === false,
 									// do nothing (don't set key)
@@ -344,33 +344,33 @@ export function mergeSchemas(...schemas: JsonSchema[]): JsonSchema {
 							return { allOf: [...schemas] };
 						}
 						break;
-					case 'required':
+					case "required":
 						// If arrays, include all items from both arrays, excluding duplicates
 						if (isArray(combinedValue) && isArray(schemaValue)) {
 							combinedSchema.required = uniqueItems(...combinedValue, ...schemaValue);
 							// If booleans, aet true if either true
 						} else if (
-							typeof schemaValue === 'boolean' &&
-							typeof combinedValue === 'boolean'
+							typeof schemaValue === "boolean" &&
+							typeof combinedValue === "boolean"
 						) {
 							combinedSchema.required = (!!combinedValue || !!schemaValue) as any;
 						} else {
 							return { allOf: [...schemas] };
 						}
 						break;
-					case '$schema':
-					case '$id':
-					case 'id':
+					case "$schema":
+					case "$id":
+					case "id":
 						// Don't combine these keys
 						break;
-					case 'title':
-					case 'description':
-					case '$comment':
+					case "title":
+					case "description":
+					case "$comment":
 						// Return the last value, overwriting any previous one
 						// These properties are not used for validation, so conflicts don't matter
 						combinedSchema[key] = schemaValue;
 						break;
-					case 'type':
+					case "type":
 						if (
 							(isArray(schemaValue) || isString(schemaValue)) &&
 							(isArray(combinedValue) || isString(combinedValue))
@@ -381,12 +381,12 @@ export function mergeSchemas(...schemas: JsonSchema[]): JsonSchema {
 							}
 							combinedSchema.type = (
 								combinedTypes.length > 1 ? combinedTypes : combinedTypes[0]
-							) as JsonSchema['type'];
+							) as JsonSchema["type"];
 						} else {
 							return { allOf: [...schemas] };
 						}
 						break;
-					case 'uniqueItems':
+					case "uniqueItems":
 						// Set true if either true
 						combinedSchema.uniqueItems = !!combinedValue || !!schemaValue;
 						break;

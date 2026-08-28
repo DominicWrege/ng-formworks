@@ -1,8 +1,8 @@
-import { inject, Pipe, PipeTransform } from '@angular/core';
-import { JsonSchemaFormService } from '../json-schema-form.service';
+import { inject, Pipe, PipeTransform } from "@angular/core";
+import { JsonSchemaFormService } from "../json-schema-form.service";
 
 @Pipe({
-	name: 'textTemplate',
+	name: "textTemplate",
 })
 export class TextTemplatePipe implements PipeTransform {
 	private jsf = inject(JsonSchemaFormService);

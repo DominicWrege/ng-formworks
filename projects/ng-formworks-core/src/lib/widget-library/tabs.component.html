@@ -1,29 +1,18 @@
 <ul [class]="options?.labelHtmlClass || ''">
 	@for (item of layoutNode()?.items; track item; let i = $index) {
 		<li
-			[class]="
-				(options?.itemLabelHtmlClass || '') +
-				(selectedItem === i
-					? ' ' + (options?.activeClass || '') + ' ' + (options?.style?.selected || '')
-					: ' ' + options?.style?.unselected)
-			"
+			[class]="`${options?.itemLabelHtmlClass || ''}${selectedItem() === i ? ' ' + (options?.activeClass || '') + ' ' + (options?.style?.selected || '') : ' ' + options?.style?.unselected}`"
 			role="presentation"
 			data-tabs
 		>
-			@if (showAddTab || item.type !== '$ref') {
+			@if (showAddTab() || item.type !== "$ref") {
 				<a
-					[class]="
-						'nav-link' +
-						(selectedItem === i
-							? ' ' + options?.activeClass + ' ' + options?.style?.selected
-							: ' ' + options?.style?.unselected)
-					"
+					[class]="`nav-link${selectedItem() === i ? ' ' + options?.activeClass + ' ' + options?.style?.selected : ' ' + options?.style?.unselected}`"
 					(click)="select(i)"
 				>
-					@if (options?.tabMode == 'oneOfMode') {
+					@if (options?.tabMode == "oneOfMode") {
 						<input
 							type="radio"
-							[value]="i"
 							name="tabSelection"
 							[(ngModel)]="selectedItem"
 							[class]="options?.widget_radioClass || ''"
@@ -38,15 +27,15 @@
 	}
 </ul>
 
-@for (layoutItem of layoutNode()?.items; track layoutItem; let i = $index) {
-	<div [class]="(options?.htmlClass || '') + (selectedItem != i ? ' ngf-hidden' : '')">
+@for (panel of tabPanels(); track panel.layoutItem; let i = $index) {
+	<div [class]="`${options?.htmlClass || ''}${selectedItem() != i ? ' ngf-hidden' : ''}`">
 		<!--for now the only difference between oneOfMode and the default
     is that oneOfMode uses the *ngIf="selectedItem === i" clause, which automatically
     destroys the tabs that are not rendered while default mode only hide them
     the upshot is that only the active tabs value will be used
     -->
-		@if (options?.tabMode == 'oneOfMode') {
-			@if (selectedItem === i) {
+		@if (options?.tabMode == "oneOfMode") {
+			@if (selectedItem() === i) {
 				<select-framework-widget
 					[class]="
 						(options?.fieldHtmlClass || '') +
@@ -55,17 +44,13 @@
 						' ' +
 						(options?.style?.selected || '')
 					"
-					[dataIndex]="
-						layoutNode()?.dataType === 'array'
-							? (dataIndex() || []).concat(i)
-							: dataIndex()
-					"
-					[layoutIndex]="(layoutIndex() || []).concat(i)"
-					[layoutNode]="panelNode(layoutItem)"
+					[dataIndex]="panel.dataIndex"
+					[layoutIndex]="panel.layoutIndex"
+					[layoutNode]="panel.panelNode"
 				></select-framework-widget>
 			}
 		}
-		@if (options?.tabMode != 'oneOfMode') {
+		@if (options?.tabMode != "oneOfMode") {
 			<select-framework-widget
 				[class]="
 					(options?.fieldHtmlClass || '') +
@@ -74,11 +59,9 @@
 					' ' +
 					(options?.style?.selected || '')
 				"
-				[dataIndex]="
-					layoutNode()?.dataType === 'array' ? (dataIndex() || []).concat(i) : dataIndex()
-				"
-				[layoutIndex]="(layoutIndex() || []).concat(i)"
-				[layoutNode]="panelNode(layoutItem)"
+				[dataIndex]="panel.dataIndex"
+				[layoutIndex]="panel.layoutIndex"
+				[layoutNode]="panel.panelNode"
 			></select-framework-widget>
 		}
 	</div>

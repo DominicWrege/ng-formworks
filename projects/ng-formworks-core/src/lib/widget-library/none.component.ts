@@ -1,9 +1,9 @@
-import { Component, input } from '@angular/core';
-import type { LayoutNode } from '../shared/types';
+import { Component, input } from "@angular/core";
+import type { LayoutNode } from "../shared/types";
 
 @Component({
-	selector: 'none-widget',
-	templateUrl: './none.component.html',
+	selector: "none-widget",
+	templateUrl: "./none.component.html",
 })
 export class NoneComponent {
 	readonly layoutNode = input<LayoutNode | undefined>(undefined);

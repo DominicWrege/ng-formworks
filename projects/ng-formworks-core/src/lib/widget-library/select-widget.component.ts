@@ -10,25 +10,28 @@ import {
 	inject,
 	input,
 	viewChild,
-} from '@angular/core';
-import { Subscription } from 'rxjs';
+} from "@angular/core";
+import { Subscription } from "rxjs";
 
-import type { LayoutNode } from '../shared/types';
-import { JsonSchemaFormService } from '../json-schema-form.service';
+import type { LayoutNode } from "../shared/types";
+import { JsonSchemaFormService } from "../json-schema-form.service";
 
 @Component({
-	selector: 'select-widget-widget',
-	templateUrl: './select-widget.component.html',
+	selector: "select-widget-widget",
+	templateUrl: "./select-widget.component.html",
 })
 export class SelectWidgetComponent implements OnChanges, OnInit, OnDestroy {
 	private jsf = inject(JsonSchemaFormService);
 	private dataChangesSubs!: Subscription;
+	// Last values pushed into the created widget; skipping writes for unchanged
+	// references avoids re-marking the widget dirty on every CD cycle (NG0103)
+	private lastInputs = new Map<string, unknown>();
 
 	newComponent: ComponentRef<unknown> | null = null;
 	readonly layoutNode = input<LayoutNode | undefined>(undefined);
 	readonly layoutIndex = input<number[] | undefined>(undefined);
 	readonly dataIndex = input<number[] | undefined>(undefined);
-	readonly widgetContainer = viewChild('widgetContainer', { read: ViewContainerRef });
+	readonly widgetContainer = viewChild("widgetContainer", { read: ViewContainerRef });
 
 	ngOnInit() {
 		this.updateComponent();
@@ -43,7 +46,7 @@ export class SelectWidgetComponent implements OnChanges, OnInit, OnDestroy {
 		this.dataChangesSubs?.unsubscribe();
 	}
 
-	ngOnChanges(changes: SimpleChanges) {
+	ngOnChanges() {
 		this.updateComponent();
 	}
 
@@ -53,13 +56,14 @@ export class SelectWidgetComponent implements OnChanges, OnInit, OnDestroy {
 			this.newComponent = widgetContainer.createComponent(
 				this.layoutNode()!.widget as Type<unknown>,
 			);
+			this.lastInputs.clear();
 		}
 		if (this.newComponent) {
-			for (const inp of ['layoutNode', 'layoutIndex', 'dataIndex']) {
-				this.newComponent.setInput(
-					inp,
-					(this as unknown as Record<string, () => unknown>)[inp](),
-				);
+			for (const inp of ["layoutNode", "layoutIndex", "dataIndex"]) {
+				const value = (this as unknown as Record<string, () => unknown>)[inp]();
+				if (this.lastInputs.get(inp) === value) continue;
+				this.lastInputs.set(inp, value);
+				this.newComponent.setInput(inp, value);
 			}
 		}
 	}

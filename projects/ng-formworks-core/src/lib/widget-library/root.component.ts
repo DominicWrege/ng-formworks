@@ -1,4 +1,4 @@
-import { CdkDrag, CdkDragDrop } from '@angular/cdk/drag-drop';
+import { CdkDrag, CdkDragDrop } from "@angular/cdk/drag-drop";
 import {
 	ChangeDetectorRef,
 	Component,
@@ -8,23 +8,23 @@ import {
 	OnDestroy,
 	OnInit,
 	SimpleChanges,
-} from '@angular/core';
-import { memoize } from '../shared';
-import type { LayoutNode, WidgetOptions } from '../shared/types';
-import { Subscription } from 'rxjs';
-import { JsonSchemaFormService, type WidgetContext } from '../json-schema-form.service';
-import { DragDropModule } from '@angular/cdk/drag-drop';
-import { SelectFrameworkComponent } from './select-framework.component';
+} from "@angular/core";
+import { memoize } from "../shared";
+import type { LayoutNode, WidgetOptions } from "../shared/types";
+import { Subscription } from "rxjs";
+import { JsonSchemaFormService, type WidgetContext } from "../json-schema-form.service";
+import { DragDropModule } from "@angular/cdk/drag-drop";
+import { SelectFrameworkComponent } from "./select-framework.component";
 @Component({
 	imports: [DragDropModule, SelectFrameworkComponent],
-	selector: 'root-widget',
-	templateUrl: './root.component.html',
+	selector: "root-widget",
+	templateUrl: "./root.component.html",
 	styles: [
 		`
-			[draggable='true'] {
+			[draggable="true"] {
 				transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
 			}
-			[draggable='true']:hover {
+			[draggable="true"]:hover {
 				cursor: move;
 				box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
 				position: relative;
@@ -34,12 +34,12 @@ import { SelectFrameworkComponent } from './select-framework.component';
 				margin-right: 1px;
 				margin-bottom: 1px;
 			}
-			[draggable='true'].drag-target-top {
+			[draggable="true"].drag-target-top {
 				box-shadow: 0 -2px 0 #000;
 				position: relative;
 				z-index: 20;
 			}
-			[draggable='true'].drag-target-bottom {
+			[draggable="true"].drag-target-bottom {
 				box-shadow: 0 2px 0 #000;
 				position: relative;
 				z-index: 20;
@@ -94,17 +94,17 @@ export class RootComponent implements OnInit, OnDestroy, OnChanges {
 	isDraggable(node: LayoutNode): boolean {
 		let result =
 			node.arrayItem &&
-			node.type !== '$ref' &&
-			node.arrayItemType === 'list' &&
+			node.type !== "$ref" &&
+			node.arrayItemType === "list" &&
 			this.isOrderable() !== false &&
-			node.type !== 'submit';
+			node.type !== "submit";
 		return result as boolean;
 	}
 
 	// TODO: also need to think of other types such as button which can be
 	//created by an arbitrary layout
 	isFixed(node: LayoutNode): boolean {
-		let result = node.type == '$ref';
+		let result = node.type == "$ref";
 		return result;
 	}
 
@@ -128,11 +128,11 @@ export class RootComponent implements OnInit, OnDestroy, OnChanges {
 	// Set attributes for flexbox child
 	// (container attributes are set in section.component)
 	getFlexAttribute(node: LayoutNode, attribute: string) {
-		const index = ['flex-grow', 'flex-shrink', 'flex-basis'].indexOf(attribute);
+		const index = ["flex-grow", "flex-shrink", "flex-basis"].indexOf(attribute);
 		return (
-			((node.options || {}).flex || '').split(/\s+/)[index] ||
+			((node.options || {}).flex || "").split(/\s+/)[index] ||
 			(node.options || {})[attribute] ||
-			['1', '1', 'auto'][index]
+			["1", "1", "auto"][index]
 		);
 	}
 
@@ -210,7 +210,7 @@ export class RootComponent implements OnInit, OnDestroy, OnChanges {
   }
   */
 	ngOnChanges(changes: SimpleChanges): void {
-		if (changes['layout'] || changes['dataIndex'] || changes['layoutIndex']) {
+		if (changes["layout"] || changes["dataIndex"] || changes["layoutIndex"]) {
 			// Clear the entire cache of the memoized function
 			this._showWidgetMemoized.cache.clear(); // Clear cache for showWidget
 			this._getSelectFrameworkInputsMemoized.cache.clear();
@@ -225,7 +225,7 @@ export class RootComponent implements OnInit, OnDestroy, OnChanges {
 
 	private _showWidgetMemoized = memoize(this._showWidgetRaw, (layoutNode: LayoutNode) => {
 		// Memoize based on the layoutNode and dataIndex
-		return JSON.stringify(layoutNode) + '-' + (this.dataIndex() || []).join('-');
+		return JSON.stringify(layoutNode) + "-" + (this.dataIndex() || []).join("-");
 	});
 
 	// Public function used in the template

@@ -1,8 +1,8 @@
-import { inject } from '@angular/core';
-import { AbstractControl } from '@angular/forms';
-import type { WidgetOptions } from '@ng-formworks/core';
-import { TAILWIND_CFG, TailwindFormClasses } from './tailwindcss.defs';
-import { TAILWIND_DEFAULT_CLASSES } from './default.config';
+import { inject } from "@angular/core";
+import { AbstractControl } from "@angular/forms";
+import type { WidgetOptions } from "@ng-formworks/core";
+import { TAILWIND_CFG, TailwindFormClasses } from "./tailwindcss.defs";
+import { TAILWIND_DEFAULT_CLASSES } from "./default.config";
 
 /** Resolves the app-provided class map, falling back to orange/gray defaults. */
 export function injectTw(): TailwindFormClasses {
@@ -18,7 +18,7 @@ export function twLabelCls(tw: TailwindFormClasses, options?: WidgetOptions | nu
 /** widget title html, with a required marker appended for required fields */
 export function twTitle(options?: WidgetOptions | null): string {
 	const o = options || {};
-	const title = String(o.title ?? '');
+	const title = String(o.title ?? "");
 	return o.required ? `${title}<span class="text-orange-600"> *</span>` : title;
 }
 

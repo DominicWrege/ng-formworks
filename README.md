@@ -92,16 +92,16 @@ yarn  add  @ng-formworks/core @ng-formworks/cssframework @ng-formworks/material
 include the themes scss in your applications sass file(typically "styles.scss" under "src" folder -see angular docs for more details)
 
 ```scss
-@import 'node_modules/@ng-formworks/material/assets/material-design-themes.scss';
+@import "node_modules/@ng-formworks/material/assets/material-design-themes.scss";
 ```
 
 Then import `MaterialDesignFrameworkModule` in your main application module like this:
 
 ```javascript
-import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
-import { MaterialDesignFrameworkModule } from '@ng-formworks/material';
-import { AppComponent } from './app.component';
+import { BrowserModule } from "@angular/platform-browser";
+import { NgModule } from "@angular/core";
+import { MaterialDesignFrameworkModule } from "@ng-formworks/material";
+import { AppComponent } from "./app.component";
 
 @NgModule({
 	declarations: [AppComponent],
@@ -213,23 +213,23 @@ Angular JSON Schema Form can also create a form entirely from a JSON object—wi
 
 ```javascript
 exampleJsonObject = {
-	first_name: 'Jane',
-	last_name: 'Doe',
+	first_name: "Jane",
+	last_name: "Doe",
 	age: 25,
 	is_company: false,
 	address: {
-		street_1: '123 Main St.',
+		street_1: "123 Main St.",
 		street_2: null,
-		city: 'Las Vegas',
-		state: 'NV',
-		zip_code: '89123',
+		city: "Las Vegas",
+		state: "NV",
+		zip_code: "89123",
 	},
 
 	phone_numbers: [
-		{ number: '702-123-4567', type: 'cell' },
-		{ number: '702-987-6543', type: 'work' },
+		{ number: "702-123-4567", type: "cell" },
+		{ number: "702-987-6543", type: "work" },
 	],
-	notes: '',
+	notes: "",
 };
 ```
 
@@ -410,13 +410,13 @@ To set messages for individual form controls, add them to that control's node in
 ```javascript
 const yourFormLayout = [
 	{
-		key: 'name',
-		title: 'Enter your name',
+		key: "name",
+		title: "Enter your name",
 		validationMessages: {
 			// Put your error messages for the 'name' field here
 		},
 	},
-	{ type: 'submit', title: 'Submit' },
+	{ type: "submit", title: "Submit" },
 ];
 ```
 

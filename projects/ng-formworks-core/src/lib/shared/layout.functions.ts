@@ -1,4 +1,4 @@
-import { cloneDeep, isPlainObject, uniqueId } from './native.functions';
+import { cloneDeep, isPlainObject, uniqueId } from "./native.functions";
 import {
 	checkInlineType,
 	convertJSONSchemaIfToCondition,
@@ -7,9 +7,9 @@ import {
 	isInputRequired,
 	removeRecursiveReferences,
 	updateInputOptions,
-} from './json-schema.functions';
-import { JsonPointer } from './jsonpointer.functions';
-import { copy, fixTitle, forEach, hasOwn } from './utility.functions';
+} from "./json-schema.functions";
+import { JsonPointer } from "./jsonpointer.functions";
+import { copy, fixTitle, forEach, hasOwn } from "./utility.functions";
 import {
 	inArray,
 	isArray,
@@ -18,7 +18,7 @@ import {
 	isNumber,
 	isObject,
 	isString,
-} from './validator.functions';
+} from "./validator.functions";
 import type {
 	DataObject,
 	JsonSchema,
@@ -26,9 +26,9 @@ import type {
 	LayoutNode,
 	TitleMapItem,
 	ValidationMessages,
-} from './types';
-import type { JsonSchemaFormService } from '../json-schema-form.service';
-import type { WidgetLibraryService } from '../widget-library/widget-library.service';
+} from "./types";
+import type { JsonSchemaFormService } from "../json-schema-form.service";
+import type { WidgetLibraryService } from "../widget-library/widget-library.service";
 
 /** Form-data node value passed while building layout from schema. */
 type DataNodeValue = DataObject | JsonValue | boolean;
@@ -58,7 +58,7 @@ export function buildLayout_original(
 	jsf: JsonSchemaFormService,
 	widgetLibrary: WidgetLibraryService,
 ) {
-	let hasSubmitButton = !JsonPointer.get(jsf, '/formOptions/addSubmit');
+	let hasSubmitButton = !JsonPointer.get(jsf, "/formOptions/addSubmit");
 	const formLayout = mapLayout(jsf.layout, (layoutItem, index, layoutPointer) => {
 		const newNode: LayoutNode = {
 			_id: uniqueId(),
@@ -70,94 +70,94 @@ export function buildLayout_original(
 				.filter(
 					(option) =>
 						!inArray(option, [
-							'_id',
-							'$ref',
-							'arrayItem',
-							'arrayItemType',
-							'dataPointer',
-							'dataType',
-							'items',
-							'key',
-							'name',
-							'options',
-							'recursiveReference',
-							'type',
-							'widget',
+							"_id",
+							"$ref",
+							"arrayItem",
+							"arrayItemType",
+							"dataPointer",
+							"dataType",
+							"items",
+							"key",
+							"name",
+							"options",
+							"recursiveReference",
+							"type",
+							"widget",
 						]),
 				)
 				.forEach((option) => {
 					newNode.options![option] = newNode[option];
 					delete newNode[option];
 				});
-			if (!hasOwn(newNode, 'type') && isString(newNode.widget)) {
+			if (!hasOwn(newNode, "type") && isString(newNode.widget)) {
 				newNode.type = newNode.widget;
 				delete newNode.widget;
 			}
-			if (!hasOwn(newNode.options!, 'title')) {
-				if (hasOwn(newNode.options!, 'legend')) {
+			if (!hasOwn(newNode.options!, "title")) {
+				if (hasOwn(newNode.options!, "legend")) {
 					newNode.options!.title = newNode.options!.legend;
 					delete newNode.options!.legend;
 				}
 			}
-			if (!hasOwn(newNode.options!, 'validationMessages')) {
-				if (hasOwn(newNode.options!, 'errorMessages')) {
+			if (!hasOwn(newNode.options!, "validationMessages")) {
+				if (hasOwn(newNode.options!, "errorMessages")) {
 					newNode.options!.validationMessages = newNode.options!.errorMessages;
 					delete newNode.options!.errorMessages;
 
 					// Convert Angular Schema Form (AngularJS) 'validationMessage' to
 					// Angular JSON Schema Form 'validationMessages'
 					// TV4 codes from https://github.com/geraintluff/tv4/blob/master/source/api.js
-				} else if (hasOwn(newNode.options!, 'validationMessage')) {
-					if (typeof newNode.options!.validationMessage === 'string') {
+				} else if (hasOwn(newNode.options!, "validationMessage")) {
+					if (typeof newNode.options!.validationMessage === "string") {
 						newNode.options!.validationMessages = newNode.options!
 							.validationMessage as unknown as ValidationMessages;
 					} else {
 						newNode.options!.validationMessages = {};
 						Object.keys(newNode.options!.validationMessage).forEach((key) => {
-							const code = key + '';
+							const code = key + "";
 							const newKey =
-								code === '0'
-									? 'type'
-									: code === '1'
-										? 'enum'
-										: code === '100'
-											? 'multipleOf'
-											: code === '101'
-												? 'minimum'
-												: code === '102'
-													? 'exclusiveMinimum'
-													: code === '103'
-														? 'maximum'
-														: code === '104'
-															? 'exclusiveMaximum'
-															: code === '200'
-																? 'minLength'
-																: code === '201'
-																	? 'maxLength'
-																	: code === '202'
-																		? 'pattern'
-																		: code === '300'
-																			? 'minProperties'
-																			: code === '301'
-																				? 'maxProperties'
-																				: code === '302'
-																					? 'required'
-																					: code === '304'
-																						? 'dependencies'
+								code === "0"
+									? "type"
+									: code === "1"
+										? "enum"
+										: code === "100"
+											? "multipleOf"
+											: code === "101"
+												? "minimum"
+												: code === "102"
+													? "exclusiveMinimum"
+													: code === "103"
+														? "maximum"
+														: code === "104"
+															? "exclusiveMaximum"
+															: code === "200"
+																? "minLength"
+																: code === "201"
+																	? "maxLength"
+																	: code === "202"
+																		? "pattern"
+																		: code === "300"
+																			? "minProperties"
+																			: code === "301"
+																				? "maxProperties"
+																				: code === "302"
+																					? "required"
+																					: code === "304"
+																						? "dependencies"
 																						: code ===
-																							  '400'
-																							? 'minItems'
+																							  "400"
+																							? "minItems"
 																							: code ===
-																								  '401'
-																								? 'maxItems'
+																								  "401"
+																								? "maxItems"
 																								: code ===
-																									  '402'
-																									? 'uniqueItems'
+																									  "402"
+																									? "uniqueItems"
 																									: code ===
-																										  '500'
-																										? 'format'
+																										  "500"
+																										? "format"
 																										: code +
-																											'';
+																											"";
 							newNode.options!.validationMessages![newKey] =
 								newNode.options!.validationMessage[key];
 						});
@@ -170,40 +170,40 @@ export function buildLayout_original(
 		} else if (isString(layoutItem)) {
 			newNode.key = layoutItem;
 		} else {
-			console.error('buildLayout error: Form layout element not recognized:');
+			console.error("buildLayout error: Form layout element not recognized:");
 			console.error(layoutItem);
 			return null;
 		}
 		let nodeSchema: JsonSchema | null = null;
 
 		// If newNode does not have a dataPointer, try to find an equivalent
-		if (!hasOwn(newNode, 'dataPointer')) {
+		if (!hasOwn(newNode, "dataPointer")) {
 			// If newNode has a key, change it to a dataPointer
-			if (hasOwn(newNode, 'key')) {
+			if (hasOwn(newNode, "key")) {
 				newNode.dataPointer =
-					newNode.key === '*'
+					newNode.key === "*"
 						? newNode.key
-						: JsonPointer.compile(JsonPointer.parseObjectPath(newNode.key), '-')!;
+						: JsonPointer.compile(JsonPointer.parseObjectPath(newNode.key), "-")!;
 				delete newNode.key;
 
 				// If newNode is an array, search for dataPointer in child nodes
-			} else if (hasOwn(newNode, 'type') && newNode.type!.slice(-5) === 'array') {
+			} else if (hasOwn(newNode, "type") && newNode.type!.slice(-5) === "array") {
 				const findDataPointer = (items: LayoutNode): string | undefined => {
-					if (items === null || typeof items !== 'object') {
+					if (items === null || typeof items !== "object") {
 						return;
 					}
-					if (hasOwn(items, 'dataPointer')) {
+					if (hasOwn(items, "dataPointer")) {
 						return items.dataPointer;
 					}
 					if (isArray(items.items)) {
 						for (const item of items.items) {
 							if (
-								hasOwn(item, 'dataPointer') &&
-								item.dataPointer!.indexOf('/-') !== -1
+								hasOwn(item, "dataPointer") &&
+								item.dataPointer!.indexOf("/-") !== -1
 							) {
 								return item.dataPointer;
 							}
-							if (hasOwn(item, 'items')) {
+							if (hasOwn(item, "items")) {
 								const searchItem = findDataPointer(item);
 								if (searchItem) {
 									return searchItem;
@@ -216,19 +216,19 @@ export function buildLayout_original(
 				if (childDataPointer) {
 					newNode.dataPointer = childDataPointer.slice(
 						0,
-						childDataPointer.lastIndexOf('/-'),
+						childDataPointer.lastIndexOf("/-"),
 					);
 				}
 			}
 		}
 
-		if (hasOwn(newNode, 'dataPointer')) {
-			if (newNode.dataPointer === '*') {
+		if (hasOwn(newNode, "dataPointer")) {
+			if (newNode.dataPointer === "*") {
 				return buildLayoutFromSchema(jsf, widgetLibrary, jsf.formValues);
 			}
 			const nodeValue = JsonPointer.get(
 				jsf.formValues,
-				newNode.dataPointer!.replace(/\/-/g, '/1'),
+				newNode.dataPointer!.replace(/\/-/g, "/1"),
 			);
 
 			// TODO: Create function getFormValues(jsf, dataPointer, forRefLibrary)
@@ -237,7 +237,7 @@ export function buildLayout_original(
 
 			newNode.dataPointer = JsonPointer.toGenericPointer(newNode.dataPointer, jsf.arrayMap);
 			const LastKey = JsonPointer.toKey(newNode.dataPointer);
-			if (!newNode.name && isString(LastKey) && LastKey !== '-') {
+			if (!newNode.name && isString(LastKey) && LastKey !== "-") {
 				newNode.name = LastKey;
 			}
 			const shortDataPointer = removeRecursiveReferences(
@@ -251,16 +251,16 @@ export function buildLayout_original(
 				jsf.dataMap.set(shortDataPointer, new Map());
 			}
 			const nodeDataMap = jsf.dataMap.get(shortDataPointer)!;
-			if (nodeDataMap.has('schemaPointer')) {
-				schemaPointer = nodeDataMap.get('schemaPointer');
+			if (nodeDataMap.has("schemaPointer")) {
+				schemaPointer = nodeDataMap.get("schemaPointer");
 			} else {
 				schemaPointer = JsonPointer.toSchemaPointer(shortDataPointer, jsf.schema) as string;
-				nodeDataMap.set('schemaPointer', schemaPointer);
+				nodeDataMap.set("schemaPointer", schemaPointer);
 			}
 
 			nodeSchema = JsonPointer.get(jsf.schema, schemaPointer);
 			if (nodeSchema) {
-				if (!hasOwn(newNode, 'type')) {
+				if (!hasOwn(newNode, "type")) {
 					newNode.type = getInputType(nodeSchema, newNode);
 				} else if (!widgetLibrary.hasWidget(newNode.type!)) {
 					const oldWidgetType = newNode.type;
@@ -272,17 +272,17 @@ export function buildLayout_original(
 				} else {
 					newNode.type = checkInlineType(newNode.type!, nodeSchema, newNode);
 				}
-				if (nodeSchema.type === 'object' && isArray(nodeSchema.required)) {
-					nodeDataMap.set('required', nodeSchema.required);
+				if (nodeSchema.type === "object" && isArray(nodeSchema.required)) {
+					nodeDataMap.set("required", nodeSchema.required);
 				}
 				newNode.dataType =
-					(nodeSchema.type as string) || (hasOwn(nodeSchema, '$ref') ? '$ref' : null);
+					(nodeSchema.type as string) || (hasOwn(nodeSchema, "$ref") ? "$ref" : null);
 				updateInputOptions(newNode, nodeSchema, jsf);
-				nodeDataMap.set('disabled', !!newNode.options!.disabled);
+				nodeDataMap.set("disabled", !!newNode.options!.disabled);
 				// Present checkboxes as single control, rather than array
-				if (newNode.type === 'checkboxes' && hasOwn(nodeSchema, 'items')) {
+				if (newNode.type === "checkboxes" && hasOwn(nodeSchema, "items")) {
 					updateInputOptions(newNode, nodeSchema.items as JsonSchema, jsf);
-				} else if (newNode.dataType === 'array') {
+				} else if (newNode.dataType === "array") {
 					newNode.options!.maxItems = Math.min(
 						nodeSchema.maxItems || 1000,
 						newNode.options!.maxItems || 1000,
@@ -314,11 +314,11 @@ export function buildLayout_original(
 						newNode.options!.listItems =
 							newNode.options!.minItems - newNode.options!.tupleItems;
 					}
-					if (!nodeDataMap.has('maxItems')) {
-						nodeDataMap.set('maxItems', newNode.options!.maxItems);
-						nodeDataMap.set('minItems', newNode.options!.minItems);
-						nodeDataMap.set('tupleItems', newNode.options!.tupleItems);
-						nodeDataMap.set('listItems', newNode.options!.listItems);
+					if (!nodeDataMap.has("maxItems")) {
+						nodeDataMap.set("maxItems", newNode.options!.maxItems);
+						nodeDataMap.set("minItems", newNode.options!.minItems);
+						nodeDataMap.set("tupleItems", newNode.options!.tupleItems);
+						nodeDataMap.set("listItems", newNode.options!.listItems);
 					}
 					if (!jsf.arrayMap.has(shortDataPointer)) {
 						jsf.arrayMap.set(shortDataPointer, newNode.options!.tupleItems);
@@ -337,34 +337,34 @@ export function buildLayout_original(
 				newNode.options!.title = fixTitle(newNode.name!);
 			}
 
-			if (hasOwn(newNode.options!, 'copyValueTo')) {
-				if (typeof newNode.options!.copyValueTo === 'string') {
+			if (hasOwn(newNode.options!, "copyValueTo")) {
+				if (typeof newNode.options!.copyValueTo === "string") {
 					newNode.options!.copyValueTo = [newNode.options!.copyValueTo];
 				}
 				if (isArray(newNode.options!.copyValueTo)) {
 					newNode.options!.copyValueTo = newNode.options!.copyValueTo.map((item) =>
-						JsonPointer.compile(JsonPointer.parseObjectPath(item), '-')!,
+						JsonPointer.compile(JsonPointer.parseObjectPath(item), "-")!,
 					);
 				}
 			}
 
 			newNode.widget = widgetLibrary.getWidget(newNode.type);
-			nodeDataMap.set('inputType', newNode.type);
-			nodeDataMap.set('widget', newNode.widget);
+			nodeDataMap.set("inputType", newNode.type);
+			nodeDataMap.set("widget", newNode.widget);
 
 			if (
-				newNode.dataType === 'array' &&
-				(hasOwn(newNode, 'items') || hasOwn(newNode, 'additionalItems'))
+				newNode.dataType === "array" &&
+				(hasOwn(newNode, "items") || hasOwn(newNode, "additionalItems"))
 			) {
 				const itemRefPointer = removeRecursiveReferences(
-					newNode.dataPointer + '/-',
+					newNode.dataPointer + "/-",
 					jsf.dataRecursiveRefMap,
 					jsf.arrayMap,
 				);
 				if (!jsf.dataMap.has(itemRefPointer)) {
 					jsf.dataMap.set(itemRefPointer, new Map());
 				}
-				jsf.dataMap.get(itemRefPointer)!.set('inputType', 'section');
+				jsf.dataMap.get(itemRefPointer)!.set("inputType", "section");
 
 				// Fix insufficiently nested array item groups
 				if (newNode.items!.length > 1) {
@@ -372,19 +372,19 @@ export function buildLayout_original(
 					for (let i = newNode.items!.length - 1; i >= 0; i--) {
 						const subItem = newNode.items![i];
 						if (
-							hasOwn(subItem, 'dataPointer') &&
+							hasOwn(subItem, "dataPointer") &&
 							subItem.dataPointer!.slice(0, itemRefPointer.length) === itemRefPointer
 						) {
 							const arrayItem = newNode.items!.splice(i, 1)[0];
 							arrayItem.dataPointer =
 								newNode.dataPointer +
-								'/-' +
+								"/-" +
 								arrayItem.dataPointer!.slice(itemRefPointer.length);
 							arrayItemGroup.unshift(arrayItem);
 						} else {
 							subItem.arrayItem = true;
 							// TODO: Check schema to get arrayItemType and removable
-							subItem.arrayItemType = 'list';
+							subItem.arrayItemType = "list";
 							subItem.removable = newNode.options!.removable !== false;
 						}
 					}
@@ -394,13 +394,13 @@ export function buildLayout_original(
 							arrayItem: true,
 							arrayItemType:
 								newNode.options!.tupleItems! > newNode.items!.length
-									? 'tuple'
-									: 'list',
+									? "tuple"
+									: "list",
 							items: arrayItemGroup,
 							options: { removable: newNode.options!.removable !== false },
-							dataPointer: newNode.dataPointer + '/-',
-							type: 'section',
-							widget: widgetLibrary.getWidget('section'),
+							dataPointer: newNode.dataPointer + "/-",
+							type: "section",
+							widget: widgetLibrary.getWidget("section"),
 						});
 					}
 				} else {
@@ -412,24 +412,24 @@ export function buildLayout_original(
 							jsf.arrayMap,
 						);
 					}
-					if (!JsonPointer.has(newNode, '/items/0/options/removable')) {
+					if (!JsonPointer.has(newNode, "/items/0/options/removable")) {
 						newNode.items![0].options!.removable = true;
 					}
 					if (newNode.options!.orderable === false) {
 						newNode.items![0].options!.orderable = false;
 					}
 					newNode.items![0].arrayItemType = newNode.options!.tupleItems
-						? 'tuple'
-						: 'list';
+						? "tuple"
+						: "list";
 				}
 
 				if (isArray(newNode.items!)) {
 					const arrayListItems =
-						newNode.items!.filter((item) => item.type !== '$ref').length -
+						newNode.items!.filter((item) => item.type !== "$ref").length -
 						newNode.options!.tupleItems!;
 					if (arrayListItems > newNode.options!.listItems!) {
 						newNode.options!.listItems = arrayListItems;
-						nodeDataMap.set('listItems', arrayListItems);
+						nodeDataMap.set("listItems", arrayListItems);
 					}
 				}
 
@@ -443,18 +443,18 @@ export function buildLayout_original(
 					forEach(
 						jsf.layoutRefLibrary[itemRefPointer],
 						(item, key) => {
-							if (hasOwn(item, '_id')) {
+							if (hasOwn(item, "_id")) {
 								item._id = null;
 							}
 							if (recursive) {
-								if (hasOwn(item, 'dataPointer')) {
+								if (hasOwn(item, "dataPointer")) {
 									item.dataPointer = item.dataPointer.slice(
 										itemRefPointer.length,
 									);
 								}
 							}
 						},
-						'top-down',
+						"top-down",
 					);
 				}
 
@@ -486,18 +486,18 @@ export function buildLayout_original(
 				if (
 					newNode.options!.addable !== false &&
 					newNode.options!.minItems! < newNode.options!.maxItems! &&
-					(newNode.items![newNode.items!.length - 1] || {}).type !== '$ref'
+					(newNode.items![newNode.items!.length - 1] || {}).type !== "$ref"
 				) {
-					let buttonText = 'Add';
+					let buttonText = "Add";
 					if (newNode.options!.title) {
 						if (/^add\b/i.test(newNode.options!.title)) {
 							buttonText = newNode.options!.title;
 						} else {
-							buttonText += ' ' + newNode.options!.title;
+							buttonText += " " + newNode.options!.title;
 						}
 					} else if (newNode.name && !/^\d+$/.test(newNode.name)) {
 						if (/^add\b/i.test(newNode.name)) {
-							buttonText += ' ' + fixTitle(newNode.name);
+							buttonText += " " + fixTitle(newNode.name);
 						} else {
 							buttonText = fixTitle(newNode.name);
 						}
@@ -507,21 +507,21 @@ export function buildLayout_original(
 						const parentSchema = getFromSchema(
 							jsf.schema,
 							newNode.dataPointer!,
-							'parentSchema',
+							"parentSchema",
 						) as JsonSchema;
-						if (hasOwn(parentSchema, 'title')) {
-							buttonText += ' to ' + parentSchema.title;
+						if (hasOwn(parentSchema, "title")) {
+							buttonText += " to " + parentSchema.title;
 						} else {
 							const pointerArray = JsonPointer.parse(newNode.dataPointer);
 							buttonText +=
-								' to ' + fixTitle(pointerArray![pointerArray!.length - 2]);
+								" to " + fixTitle(pointerArray![pointerArray!.length - 2]);
 						}
 					}
 					newNode.items!.push({
 						_id: uniqueId(),
 						arrayItem: true,
-						arrayItemType: 'list',
-						dataPointer: newNode.dataPointer + '/-',
+						arrayItemType: "list",
+						dataPointer: newNode.dataPointer + "/-",
 						options: {
 							listItems: newNode.options!.listItems,
 							maxItems: newNode.options!.maxItems,
@@ -531,11 +531,11 @@ export function buildLayout_original(
 							tupleItems: newNode.options!.tupleItems,
 						},
 						recursiveReference: recursive,
-						type: '$ref',
-						widget: widgetLibrary.getWidget('$ref'),
+						type: "$ref",
+						widget: widgetLibrary.getWidget("$ref"),
 						$ref: itemRefPointer,
 					});
-					if (isString(JsonPointer.get(newNode, '/style/add'))) {
+					if (isString(JsonPointer.get(newNode, "/style/add"))) {
 						newNode.items![newNode.items!.length - 1].options!.fieldStyle =
 							newNode.style!.add;
 						delete newNode.style!.add;
@@ -547,44 +547,44 @@ export function buildLayout_original(
 			} else {
 				newNode.arrayItem = false;
 			}
-		} else if (hasOwn(newNode, 'type') || hasOwn(newNode, 'items')) {
+		} else if (hasOwn(newNode, "type") || hasOwn(newNode, "items")) {
 			const parentType: string = JsonPointer.get(jsf.layout, layoutPointer, 0, -2).type;
-			if (!hasOwn(newNode, 'type')) {
-				newNode.type = inArray(parentType, ['tabs', 'tabarray']) ? 'tab' : 'array';
+			if (!hasOwn(newNode, "type")) {
+				newNode.type = inArray(parentType, ["tabs", "tabarray"]) ? "tab" : "array";
 			}
-			newNode.arrayItem = parentType === 'array';
+			newNode.arrayItem = parentType === "array";
 			newNode.widget = widgetLibrary.getWidget(newNode.type);
 			updateInputOptions(newNode, {}, jsf);
 		}
-		if (newNode.type === 'submit') {
+		if (newNode.type === "submit") {
 			hasSubmitButton = true;
 		}
 		return newNode;
 	});
 	if (jsf.hasRootReference) {
 		const fullLayout = cloneDeep(formLayout);
-		if (fullLayout[fullLayout.length - 1].type === 'submit') {
+		if (fullLayout[fullLayout.length - 1].type === "submit") {
 			fullLayout.pop();
 		}
-		jsf.layoutRefLibrary[''] = {
+		jsf.layoutRefLibrary[""] = {
 			_id: null,
-			dataPointer: '',
-			dataType: 'object',
+			dataPointer: "",
+			dataType: "object",
 			items: fullLayout,
-			name: '',
+			name: "",
 			options: cloneDeep(jsf.formOptions.defaultWidgetOptions),
 			recursiveReference: true,
 			required: false,
-			type: 'section',
-			widget: widgetLibrary.getWidget('section'),
+			type: "section",
+			widget: widgetLibrary.getWidget("section"),
 		};
 	}
 	if (!hasSubmitButton) {
 		formLayout.push({
 			_id: uniqueId(),
-			options: { title: 'Submit' },
-			type: 'submit',
-			widget: widgetLibrary.getWidget('submit'),
+			options: { title: "Submit" },
+			type: "submit",
+			widget: widgetLibrary.getWidget("submit"),
 		});
 	}
 	return formLayout;
@@ -617,21 +617,21 @@ export function fixNestedArrayLayout(options: {
 		if (isArray(obj)) {
 			onValue && onValue(obj, path);
 			obj.forEach((item, ind) => {
-				onValue && onValue(item, path + '/' + ind);
-				traverseObj(item, path + '/' + ind, onValue);
+				onValue && onValue(item, path + "/" + ind);
+				traverseObj(item, path + "/" + ind, onValue);
 			});
 			return;
 		}
 		if (isPlainObject(obj)) {
 			onValue && onValue(obj, path);
 			Object.keys(obj).forEach((key) => {
-				onValue && onValue(obj[key], path + '/' + key);
-				traverseObj(obj[key], path + '/' + key, onValue);
+				onValue && onValue(obj[key], path + "/" + key);
+				traverseObj(obj[key], path + "/" + key, onValue);
 			});
 			return;
 		}
 	};
-	traverseObj(formData, '', (value, path) => {
+	traverseObj(formData, "", (value, path) => {
 		if (isArray(value)) {
 			arrLengths[path] = arrLengths[path] || value.length;
 		}
@@ -642,22 +642,22 @@ export function fixNestedArrayLayout(options: {
 		let dashCount = 0;
 		let dpInstance = dataPointer
 			.substring(1)
-			.split('/')
+			.split("/")
 			.map((part, pind) => {
-				if (part == '-' && indexArray[dashCount] != undefined) {
+				if (part == "-" && indexArray[dashCount] != undefined) {
 					return indexArray[dashCount++];
 				}
 				return part;
 			})
-			.join('/');
-		dpInstance = '/' + dpInstance;
+			.join("/");
+		dpInstance = "/" + dpInstance;
 		const arrSize = arrLengths[dpInstance];
 		return arrSize;
 	};
 	//still too buggy
 	const createNonRefItem = (nodeWithRef: LayoutNode) => {
 		const templateNode: LayoutNode = {
-			type: 'section', //check this could also be array?
+			type: "section", //check this could also be array?
 			recursiveReference: false, //check this
 			items: [],
 		};
@@ -690,7 +690,7 @@ export function fixNestedArrayLayout(options: {
 			return;
 		}
 
-		const dataTypes = ['array']; //check only array for now
+		const dataTypes = ["array"]; //check only array for now
 		//for now added condition to ignore recursive references
 		if (
 			builtLayout.items! &&
@@ -706,7 +706,7 @@ export function fixNestedArrayLayout(options: {
 			//check if there's ref items, if so ignore it and therefore
 			//decrement the item count
 			builtLayout.items.forEach((item) => {
-				if (item.type && item.type == '$ref') {
+				if (item.type && item.type == "$ref") {
 					numActualItems--;
 				}
 			});
@@ -724,11 +724,11 @@ export function fixNestedArrayLayout(options: {
 					//node must not be of type "type": "$ref"
 					//if it is then manufacture our own
 					const isRefNode =
-						builtLayout.items[0].type && builtLayout.items[0].type == '$ref';
+						builtLayout.items[0].type && builtLayout.items[0].type == "$ref";
 					const newItem = isRefNode
 						? createNonRefItem(builtLayout.items[0])
 						: cloneDeep(builtLayout.items[0]); //copy first
-					newItem._id = uniqueId('new_');
+					newItem._id = uniqueId("new_");
 					builtLayout.items.unshift(newItem);
 				}
 			} else if (numActualItems > Math.max(numDataItems, numListItems)) {
@@ -795,13 +795,13 @@ export function buildLayoutFromSchema(
 	jsf: JsonSchemaFormService,
 	widgetLibrary: WidgetLibraryService,
 	nodeValue: DataNodeValue = null,
-	schemaPointer = '',
-	dataPointer = '',
+	schemaPointer = "",
+	dataPointer = "",
 	arrayItem = false,
-	arrayItemType: 'tuple' | 'list' | null = null,
+	arrayItemType: "tuple" | "list" | null = null,
 	removable: boolean | null = null,
 	forRefLibrary = false,
-	dataPointerPrefix = '',
+	dataPointerPrefix = "",
 	jsonSchema?: JsonSchema,
 ): LayoutNode | LayoutNode[] | null {
 	function applyITEConditions(
@@ -834,7 +834,7 @@ export function buildLayoutFromSchema(
 						builtLayout,
 					);
 				});
-			} else if (hasOwn(builtLayout, 'items')) {
+			} else if (hasOwn(builtLayout, "items")) {
 				applyITEConditions(
 					builtLayout.items!,
 					schPointer,
@@ -853,12 +853,12 @@ export function buildLayoutFromSchema(
 	const jsSchema = jsonSchema || jsf.schema;
 	const schema: JsonSchema = JsonPointer.get(jsSchema, schemaPointer);
 	if (
-		!hasOwn(schema, 'type') &&
-		!hasOwn(schema, '$ref') &&
-		!hasOwn(schema, 'x-schema-form') &&
-		!hasOwn(schema, 'if') &&
-		!hasOwn(schema, 'then') &&
-		!hasOwn(schema, 'else')
+		!hasOwn(schema, "type") &&
+		!hasOwn(schema, "$ref") &&
+		!hasOwn(schema, "x-schema-form") &&
+		!hasOwn(schema, "if") &&
+		!hasOwn(schema, "then") &&
+		!hasOwn(schema, "else")
 	) {
 		return null;
 	}
@@ -866,22 +866,22 @@ export function buildLayoutFromSchema(
 	if (
 		!isDefined(nodeValue) &&
 		(jsf.formOptions.setSchemaDefaults === true ||
-			(jsf.formOptions.setSchemaDefaults === 'auto' && isEmpty(jsf.formValues)))
+			(jsf.formOptions.setSchemaDefaults === "auto" && isEmpty(jsf.formValues)))
 	) {
-		nodeValue = JsonPointer.get(jsSchema, schemaPointer + '/default');
+		nodeValue = JsonPointer.get(jsSchema, schemaPointer + "/default");
 	}
 	let newNode: LayoutNode = {
 		_id: forRefLibrary ? null : uniqueId(),
 		arrayItem: arrayItem,
 		dataPointer: JsonPointer.toGenericPointer(dataPointer, jsf.arrayMap),
-		dataType: (schema.type as string) || (hasOwn(schema, '$ref') ? '$ref' : null),
+		dataType: (schema.type as string) || (hasOwn(schema, "$ref") ? "$ref" : null),
 		options: {},
 		required: isInputRequired(jsSchema, schemaPointer),
 		type: newNodeType,
 		widget: widgetLibrary.getWidget(newNodeType),
 	};
 	const lastDataKey = JsonPointer.toKey(newNode.dataPointer);
-	if (lastDataKey !== '-') {
+	if (lastDataKey !== "-") {
 		newNode.name = lastDataKey;
 	}
 	if (newNode.arrayItem) {
@@ -900,30 +900,30 @@ export function buildLayoutFromSchema(
 	}
 	updateInputOptions(newNode, schema, jsf);
 	const nodeDataMap = jsf.dataMap.get(shortDataPointer)!;
-	if (!nodeDataMap.has('inputType')) {
-		nodeDataMap.set('schemaPointer', schemaPointer);
-		nodeDataMap.set('inputType', newNode.type);
-		nodeDataMap.set('widget', newNode.widget);
-		nodeDataMap.set('disabled', !!newNode.options!.disabled);
+	if (!nodeDataMap.has("inputType")) {
+		nodeDataMap.set("schemaPointer", schemaPointer);
+		nodeDataMap.set("inputType", newNode.type);
+		nodeDataMap.set("widget", newNode.widget);
+		nodeDataMap.set("disabled", !!newNode.options!.disabled);
 	}
 	//updateInputOptions(newNode, schema, jsf);
 	if (!newNode.options!.title && newNode.name && !/^\d+$/.test(newNode.name)) {
 		newNode.options!.title = fixTitle(newNode.name);
 	}
 
-	if (newNode.dataType === 'object') {
-		if (isArray(schema.required) && !nodeDataMap.has('required')) {
-			nodeDataMap.set('required', schema.required);
+	if (newNode.dataType === "object") {
+		if (isArray(schema.required) && !nodeDataMap.has("required")) {
+			nodeDataMap.set("required", schema.required);
 		}
 		if (isObject(schema.properties)) {
 			const newSection: LayoutNode[] = [];
-			const propertyKeys: string[] = schema['ui:order'] || Object.keys(schema.properties!);
-			if (propertyKeys.includes('*') && !hasOwn(schema.properties, '*')) {
+			const propertyKeys: string[] = schema["ui:order"] || Object.keys(schema.properties!);
+			if (propertyKeys.includes("*") && !hasOwn(schema.properties, "*")) {
 				const unnamedKeys = Object.keys(schema.properties!).filter(
 					(key) => !propertyKeys.includes(key),
 				);
 				for (let i = propertyKeys.length - 1; i >= 0; i--) {
-					if (propertyKeys[i] === '*') {
+					if (propertyKeys[i] === "*") {
 						propertyKeys.splice(i, 1, ...unnamedKeys);
 					}
 				}
@@ -931,18 +931,18 @@ export function buildLayoutFromSchema(
 			propertyKeys
 				.filter(
 					(key) =>
-						hasOwn(schema.properties, key) || hasOwn(schema, 'additionalProperties'),
+						hasOwn(schema.properties, key) || hasOwn(schema, "additionalProperties"),
 				)
 				.forEach((key) => {
 					const keySchemaPointer = hasOwn(schema.properties, key)
-						? '/properties/' + key
-						: '/additionalProperties';
+						? "/properties/" + key
+						: "/additionalProperties";
 					const innerItem = buildLayoutFromSchema(
 						jsf,
 						widgetLibrary,
 						isObject(nodeValue) ? (nodeValue as DataObject)[key] : null,
 						schemaPointer + keySchemaPointer,
-						dataPointer + '/' + key,
+						dataPointer + "/" + key,
 						false,
 						null,
 						null,
@@ -951,7 +951,7 @@ export function buildLayoutFromSchema(
 					) as LayoutNode | null;
 					if (innerItem) {
 						innerItem.schemaPointer = schemaPointer + keySchemaPointer;
-						if (isInputRequired(schema, '/' + key)) {
+						if (isInputRequired(schema, "/" + key)) {
 							innerItem.options!.required = true;
 							jsf.fieldsRequired = true;
 						}
@@ -961,16 +961,16 @@ export function buildLayoutFromSchema(
 
 			//treat allOf the same as any of but need to add an extra
 			//condition for which anyOf item is to be rendered
-			['allOf', 'anyOf', 'oneOf'].forEach((ofType) => {
+			["allOf", "anyOf", "oneOf"].forEach((ofType) => {
 				if (hasOwn(schema, ofType) && isArray(schema[ofType])) {
 					let outerOneOfItem: LayoutNode;
 
-					if (ofType == 'oneOf') {
+					if (ofType == "oneOf") {
 						outerOneOfItem = buildLayoutFromSchema(
 							jsf,
 							widgetLibrary,
 							schema.oneOf, //{type:"tabarray",items:schema.oneOf},
-							'/', //schemaPointer + `/${ofType}`,
+							"/", //schemaPointer + `/${ofType}`,
 							dataPointer,
 							false,
 							null,
@@ -979,7 +979,7 @@ export function buildLayoutFromSchema(
 							dataPointerPrefix,
 							//{type:"tabarray",items:schema.oneOf,oneOf:schema.oneOf}
 							{
-								type: 'one-of',
+								type: "one-of",
 								items: schema.oneOf,
 								oneOf: schema.oneOf,
 							} as unknown as JsonSchema,
@@ -1001,21 +1001,21 @@ export function buildLayoutFromSchema(
 							false,
 							null,
 							null,
-							ofType == 'oneOf' /*forRefLibrary*/,
+							ofType == "oneOf" /*forRefLibrary*/,
 							dataPointerPrefix,
 						);
 						if (innerItem) {
 							//newSection.push(innerItem);
 							if (!isArray(innerItem) && innerItem.items) {
 								innerItem.items.forEach((innerItemLevel2) => {
-									const l2SchemaPointer = hasOwn(ofItem, 'properties')
-										? '/properties/' + innerItemLevel2.name
+									const l2SchemaPointer = hasOwn(ofItem, "properties")
+										? "/properties/" + innerItemLevel2.name
 										: innerItemLevel2.name;
 									//innerItemLevel2.oneOfPointer =  schemaPointer + keySchemaPointer + l2SchemaPointer;
 									// innerItemLevel2.schemaPointer=innerItemLevel2.schemaPointer;
 									const ofPointerKeys: Record<string, string> = {
-										anyOf: 'anyOfPointer',
-										oneOf: 'oneOfPointer',
+										anyOf: "anyOfPointer",
+										oneOf: "oneOfPointer",
 									};
 									const ofPointer = ofPointerKeys[ofType];
 									innerItemLevel2[ofPointer] = ofPointer
@@ -1028,10 +1028,10 @@ export function buildLayoutFromSchema(
 								const outerOneOfItemTpl = cloneDeep(newNode);
 								outerOneOfItemTpl;
 								innerItem.forEach((item: LayoutNode) => {
-									const l2SchemaPointer = hasOwn(ofItem, 'properties')
-										? '/properties/' + item.name
+									const l2SchemaPointer = hasOwn(ofItem, "properties")
+										? "/properties/" + item.name
 										: item.name;
-									if (ofType == 'anyOf') {
+									if (ofType == "anyOf") {
 										item.anyOfPointer = item.schemaPointer;
 									}
 									if (outerOneOfItem) {
@@ -1057,8 +1057,8 @@ export function buildLayoutFromSchema(
 							} else {
 								if (outerOneOfItem) {
 									const ofPointerKeys: Record<string, string> = {
-										anyOf: 'anyOfPointer',
-										oneOf: 'oneOfPointer',
+										anyOf: "anyOfPointer",
+										oneOf: "oneOfPointer",
 									};
 									const ofPointer = ofPointerKeys[ofType];
 									innerItem[ofPointer] = ofPointer
@@ -1076,11 +1076,11 @@ export function buildLayoutFromSchema(
 				}
 			});
 
-			if (hasOwn(schema, 'if')) {
-				['then', 'else'].forEach((con) => {
+			if (hasOwn(schema, "if")) {
+				["then", "else"].forEach((con) => {
 					if (hasOwn(schema, con)) {
 						const keySchemaPointer = `/${con}`;
-						const negateClause = con == 'else';
+						const negateClause = con == "else";
 						const innerItem = buildLayoutFromSchema(
 							jsf,
 							widgetLibrary,
@@ -1112,7 +1112,7 @@ export function buildLayoutFromSchema(
 				});
 			}
 
-			if (dataPointer === '' && !forRefLibrary) {
+			if (dataPointer === "" && !forRefLibrary) {
 				return newSection;
 			} else {
 				newNode.items = newSection;
@@ -1120,7 +1120,7 @@ export function buildLayoutFromSchema(
 		}
 		// TODO: Add patternProperties and additionalProperties inputs?
 		// ... possibly provide a way to enter both key names and values?
-	} else if (newNode.dataType === 'array') {
+	} else if (newNode.dataType === "array") {
 		newNode.items = [];
 		newNode.options!.maxItems = Math.min(
 			schema.maxItems || 1000,
@@ -1130,7 +1130,7 @@ export function buildLayoutFromSchema(
 		if (!newNode.options!.minItems && isInputRequired(jsSchema, schemaPointer)) {
 			newNode.options!.minItems = 1;
 		}
-		if (!hasOwn(newNode.options!, 'listItems')) {
+		if (!hasOwn(newNode.options!, "listItems")) {
 			newNode.options!.listItems = 1;
 		}
 		newNode.options!.tupleItems = isArray(schema.items) ? schema.items.length : 0;
@@ -1148,11 +1148,11 @@ export function buildLayoutFromSchema(
 		) {
 			newNode.options!.listItems = newNode.options!.minItems - newNode.options!.tupleItems;
 		}
-		if (!nodeDataMap.has('maxItems')) {
-			nodeDataMap.set('maxItems', newNode.options!.maxItems);
-			nodeDataMap.set('minItems', newNode.options!.minItems);
-			nodeDataMap.set('tupleItems', newNode.options!.tupleItems);
-			nodeDataMap.set('listItems', newNode.options!.listItems);
+		if (!nodeDataMap.has("maxItems")) {
+			nodeDataMap.set("maxItems", newNode.options!.maxItems);
+			nodeDataMap.set("minItems", newNode.options!.minItems);
+			nodeDataMap.set("tupleItems", newNode.options!.tupleItems);
+			nodeDataMap.set("listItems", newNode.options!.listItems);
 		}
 		if (!jsf.arrayMap.has(shortDataPointer)) {
 			jsf.arrayMap.set(shortDataPointer, newNode.options!.tupleItems);
@@ -1166,12 +1166,12 @@ export function buildLayoutFromSchema(
 			for (let i = 0; i < newNode.options!.tupleItems; i++) {
 				let newItem: LayoutNode;
 				const itemRefPointer = removeRecursiveReferences(
-					shortDataPointer + '/' + i,
+					shortDataPointer + "/" + i,
 					jsf.dataRecursiveRefMap,
 					jsf.arrayMap,
 				);
 				const itemRecursive =
-					!itemRefPointer.length || itemRefPointer !== shortDataPointer + '/' + i;
+					!itemRefPointer.length || itemRefPointer !== shortDataPointer + "/" + i;
 
 				// If removable, add tuple item layout to layoutRefLibrary
 				if (removable && i >= newNode.options!.minItems) {
@@ -1185,13 +1185,13 @@ export function buildLayoutFromSchema(
 							jsf,
 							widgetLibrary,
 							isArray(nodeValue) ? nodeValue[i] : null,
-							schemaPointer + '/items/' + i,
-							itemRecursive ? '' : dataPointer + '/' + i,
+							schemaPointer + "/items/" + i,
+							itemRecursive ? "" : dataPointer + "/" + i,
 							true,
-							'tuple',
+							"tuple",
 							true,
 							true,
-							itemRecursive ? dataPointer + '/' + i : '',
+							itemRecursive ? dataPointer + "/" + i : "",
 						) as LayoutNode;
 						templateRefToUse = conditionalRefPointer;
 					}
@@ -1202,13 +1202,13 @@ export function buildLayoutFromSchema(
 							jsf,
 							widgetLibrary,
 							isArray(nodeValue) ? nodeValue[i] : null,
-							schemaPointer + '/items/' + i,
-							itemRecursive ? '' : dataPointer + '/' + i,
+							schemaPointer + "/items/" + i,
+							itemRecursive ? "" : dataPointer + "/" + i,
 							true,
-							'tuple',
+							"tuple",
 							true,
 							true,
-							itemRecursive ? dataPointer + '/' + i : '',
+							itemRecursive ? dataPointer + "/" + i : "",
 						) as LayoutNode;
 						if (itemRecursive) {
 							jsf.layoutRefLibrary[itemRefPointer].recursiveReference = true;
@@ -1219,7 +1219,7 @@ export function buildLayoutFromSchema(
 					newItem = getLayoutNode(
 						{
 							$ref: templateRefToUse,
-							dataPointer: dataPointer + '/' + i,
+							dataPointer: dataPointer + "/" + i,
 							recursiveReference: itemRecursive,
 						},
 						jsf,
@@ -1231,10 +1231,10 @@ export function buildLayoutFromSchema(
 						jsf,
 						widgetLibrary,
 						isArray(nodeValue) ? nodeValue[i] : null,
-						schemaPointer + '/items/' + i,
-						dataPointer + '/' + i,
+						schemaPointer + "/items/" + i,
+						dataPointer + "/" + i,
 						true,
-						'tuple',
+						"tuple",
 						false,
 						forRefLibrary,
 						dataPointerPrefix,
@@ -1247,22 +1247,22 @@ export function buildLayoutFromSchema(
 
 			// If 'additionalItems' is an object = additional list items, after tuple items
 			if (isObject(schema.additionalItems)) {
-				additionalItemsSchemaPointer = schemaPointer + '/additionalItems';
+				additionalItemsSchemaPointer = schemaPointer + "/additionalItems";
 			}
 
 			// If 'items' is an object = list items only (no tuple items)
 		} else if (isObject(schema.items)) {
-			additionalItemsSchemaPointer = schemaPointer + '/items';
+			additionalItemsSchemaPointer = schemaPointer + "/items";
 		}
 
 		if (additionalItemsSchemaPointer) {
 			const itemRefPointer = removeRecursiveReferences(
-				shortDataPointer + '/-',
+				shortDataPointer + "/-",
 				jsf.dataRecursiveRefMap,
 				jsf.arrayMap,
 			);
 			const itemRecursive =
-				!itemRefPointer.length || itemRefPointer !== shortDataPointer + '/-';
+				!itemRefPointer.length || itemRefPointer !== shortDataPointer + "/-";
 			const itemSchemaPointer = removeRecursiveReferences(
 				additionalItemsSchemaPointer,
 				jsf.schemaRecursiveRefMap,
@@ -1279,12 +1279,12 @@ export function buildLayoutFromSchema(
 					widgetLibrary,
 					null,
 					itemSchemaPointer,
-					itemRecursive ? '' : dataPointer + '/-',
+					itemRecursive ? "" : dataPointer + "/-",
 					true,
-					'list',
+					"list",
 					removable,
 					true,
-					itemRecursive ? dataPointer + '/-' : '',
+					itemRecursive ? dataPointer + "/-" : "",
 				) as LayoutNode;
 				templateRefToUse = conditionalRefPointer;
 			}
@@ -1297,12 +1297,12 @@ export function buildLayoutFromSchema(
 					widgetLibrary,
 					null,
 					itemSchemaPointer,
-					itemRecursive ? '' : dataPointer + '/-',
+					itemRecursive ? "" : dataPointer + "/-",
 					true,
-					'list',
+					"list",
 					removable,
 					true,
-					itemRecursive ? dataPointer + '/-' : '',
+					itemRecursive ? dataPointer + "/-" : "",
 				) as LayoutNode;
 				if (itemRecursive) {
 					jsf.layoutRefLibrary[itemRefPointer].recursiveReference = true;
@@ -1327,7 +1327,7 @@ export function buildLayoutFromSchema(
 							getLayoutNode(
 								{
 									$ref: templateRefToUse,
-									dataPointer: dataPointer + '/-',
+									dataPointer: dataPointer + "/-",
 									recursiveReference: itemRecursive,
 								},
 								jsf,
@@ -1343,10 +1343,10 @@ export function buildLayoutFromSchema(
 			if (
 				newNode.options!.addable !== false &&
 				newNode.options!.minItems < newNode.options!.maxItems &&
-				(newNode.items![newNode.items!.length - 1] || {}).type !== '$ref'
+				(newNode.items![newNode.items!.length - 1] || {}).type !== "$ref"
 			) {
 				let buttonText = ((jsf.layoutRefLibrary[itemRefPointer] || {}).options || {}).title;
-				const prefix = buttonText ? 'Add ' : 'Add to ';
+				const prefix = buttonText ? "Add " : "Add to ";
 				if (!buttonText) {
 					buttonText = schema.title || fixTitle(JsonPointer.toKey(dataPointer)!);
 				}
@@ -1356,8 +1356,8 @@ export function buildLayoutFromSchema(
 				newNode.items!.push({
 					_id: uniqueId(),
 					arrayItem: true,
-					arrayItemType: 'list',
-					dataPointer: newNode.dataPointer + '/-',
+					arrayItemType: "list",
+					dataPointer: newNode.dataPointer + "/-",
 					options: {
 						listItems: newNode.options!.listItems,
 						maxItems: newNode.options!.maxItems,
@@ -1367,36 +1367,36 @@ export function buildLayoutFromSchema(
 						tupleItems: newNode.options!.tupleItems,
 					},
 					recursiveReference: itemRecursive,
-					type: '$ref',
-					widget: widgetLibrary.getWidget('$ref'),
+					type: "$ref",
+					widget: widgetLibrary.getWidget("$ref"),
 					$ref: templateRefToUse, //itemRefPointer,
 				});
 			}
 		}
-	} else if (newNode.dataType === '$ref') {
+	} else if (newNode.dataType === "$ref") {
 		const schemaRef = JsonPointer.compile(schema.$ref!);
 		const dataRef = JsonPointer.toDataPointer(schemaRef, jsSchema);
-		let buttonText = '';
+		let buttonText = "";
 
 		// Get newNode title
 		if (newNode.options!.add) {
 			buttonText = newNode.options!.add;
 		} else if (newNode.name && !/^\d+$/.test(newNode.name)) {
-			buttonText = (/^add\b/i.test(newNode.name) ? '' : 'Add ') + fixTitle(newNode.name);
+			buttonText = (/^add\b/i.test(newNode.name) ? "" : "Add ") + fixTitle(newNode.name);
 
 			// If newNode doesn't have a title, look for title of parent array item
 		} else {
 			const parentSchema: JsonSchema = JsonPointer.get(jsSchema, schemaPointer, 0, -1);
-			if (hasOwn(parentSchema, 'title')) {
-				buttonText = 'Add to ' + parentSchema.title;
+			if (hasOwn(parentSchema, "title")) {
+				buttonText = "Add to " + parentSchema.title;
 			} else {
 				const pointerArray = JsonPointer.parse(newNode.dataPointer);
-				buttonText = 'Add to ' + fixTitle(pointerArray![pointerArray!.length - 2]);
+				buttonText = "Add to " + fixTitle(pointerArray![pointerArray!.length - 2]);
 			}
 		}
 		Object.assign(newNode, {
 			recursiveReference: true,
-			widget: widgetLibrary.getWidget('$ref'),
+			widget: widgetLibrary.getWidget("$ref"),
 			$ref: dataRef,
 		});
 		Object.assign(newNode.options!, {
@@ -1417,7 +1417,7 @@ export function buildLayoutFromSchema(
 					widgetLibrary,
 					null,
 					schemaRef!,
-					'',
+					"",
 					newNode.arrayItem,
 					newNode.arrayItemType,
 					true,
@@ -1434,12 +1434,12 @@ export function buildLayoutFromSchema(
 				jsf.layoutRefLibrary[dataRef]!.recursiveReference = true;
 			}
 		}
-	} else if (newNode.type === 'if') {
+	} else if (newNode.type === "if") {
 		const newSection: LayoutNode[] = [];
-		['then', 'else'].forEach((con) => {
+		["then", "else"].forEach((con) => {
 			if (hasOwn(schema, con)) {
 				const keySchemaPointer = `/${con}`;
-				const negateClause = con == 'else';
+				const negateClause = con == "else";
 				const innerItem = buildLayoutFromSchema(
 					jsf,
 					widgetLibrary,
@@ -1495,27 +1495,27 @@ export function buildLayoutFromSchema(
 export function mapLayout(
 	layout: DataObject | unknown[],
 	fn: (v: any, i?: number, l?: any, p?: any) => any,
-	layoutPointer = '',
+	layoutPointer = "",
 	rootLayout: DataObject | unknown[] = layout,
 ): LayoutNode[] {
 	let indexPad = 0;
 	let newLayout: LayoutNode[] = [];
 	forEach(layout, (item, index) => {
 		const realIndex = +index! + indexPad;
-		const newLayoutPointer = layoutPointer + '/' + realIndex;
+		const newLayoutPointer = layoutPointer + "/" + realIndex;
 		let newNode: any = copy(item);
 		let itemsArray: any[] = [];
 		if (isObject(item)) {
-			if (hasOwn(item, 'tabs')) {
+			if (hasOwn(item, "tabs")) {
 				item.items = item.tabs;
 				delete item.tabs;
 			}
-			if (hasOwn(item, 'items')) {
+			if (hasOwn(item, "items")) {
 				itemsArray = isArray(item.items) ? item.items : [item.items];
 			}
 		}
 		if (itemsArray.length) {
-			newNode.items = mapLayout(itemsArray, fn, newLayoutPointer + '/items', rootLayout);
+			newNode.items = mapLayout(itemsArray, fn, newLayoutPointer + "/items", rootLayout);
 		}
 		newNode = fn(newNode, realIndex, newLayoutPointer, rootLayout);
 		if (!isDefined(newNode)) {
@@ -1554,11 +1554,11 @@ export function getLayoutNode(
 		}
 		Object.assign(newLayoutNode, {
 			recursiveReference: true,
-			widget: widgetLibrary.getWidget('$ref'),
+			widget: widgetLibrary.getWidget("$ref"),
 		});
 		Object.assign(newLayoutNode.options, {
 			removable: false,
-			title: 'Add ' + newLayoutNode.$ref,
+			title: "Add " + newLayoutNode.$ref,
 		});
 		return newLayoutNode;
 
@@ -1583,13 +1583,13 @@ export function getLayoutNode(
 			newLayoutNode = cloneDeep(newLayoutNode);
 			JsonPointer.forEachDeep(newLayoutNode, (subNode, pointer) => {
 				// Reset all _id's in newLayoutNode to unique values
-				if (hasOwn(subNode, '_id')) {
+				if (hasOwn(subNode, "_id")) {
 					subNode._id = uniqueId();
 				}
 
 				// If adding a recursive item, prefix current dataPointer
 				// to all dataPointers in new layoutNode
-				if (refNode.recursiveReference && hasOwn(subNode, 'dataPointer')) {
+				if (refNode.recursiveReference && hasOwn(subNode, "dataPointer")) {
 					subNode.dataPointer = refNode.dataPointer + subNode.dataPointer;
 				}
 			});
@@ -1689,19 +1689,19 @@ export function buildTitleMap(
 	} else {
 		// If no titleMap and no enum list, return default map of boolean values
 		newTitleMap = [
-			{ name: 'True', value: true },
-			{ name: 'False', value: false },
+			{ name: "True", value: true },
+			{ name: "False", value: false },
 		];
 	}
 
 	// Does titleMap have groups?
-	if (newTitleMap.some((title) => hasOwn(title, 'group'))) {
+	if (newTitleMap.some((title) => hasOwn(title, "group"))) {
 		hasEmptyValue = false;
 
 		// If flatList = true, flatten items & update name to group: name
 		if (flatList) {
 			newTitleMap = newTitleMap.reduce<TitleMapItem[]>((groupTitleMap, title) => {
-				if (hasOwn(title, 'group')) {
+				if (hasOwn(title, "group")) {
 					if (isArray(title.items)) {
 						groupTitleMap = [
 							...groupTitleMap,
@@ -1718,7 +1718,7 @@ export function buildTitleMap(
 							hasEmptyValue = true;
 						}
 					}
-					if (hasOwn(title, 'name') && hasOwn(title, 'value')) {
+					if (hasOwn(title, "name") && hasOwn(title, "value")) {
 						title.name = `${title.group}: ${title.name}`;
 						delete title.group;
 						groupTitleMap.push(title);
@@ -1738,11 +1738,11 @@ export function buildTitleMap(
 			// If flatList = false, combine items from matching groups
 		} else {
 			newTitleMap = newTitleMap.reduce<TitleMapItem[]>((groupTitleMap, title) => {
-				if (hasOwn(title, 'group')) {
+				if (hasOwn(title, "group")) {
 					if (title.group !== (groupTitleMap[groupTitleMap.length - 1] || {}).group) {
 						groupTitleMap.push({ group: title.group, items: title.items || [] });
 					}
-					if (hasOwn(title, 'name') && hasOwn(title, 'value')) {
+					if (hasOwn(title, "name") && hasOwn(title, "value")) {
 						groupTitleMap[groupTitleMap.length - 1].items!.push({
 							name: title.name,
 							value: title.value,
@@ -1762,7 +1762,7 @@ export function buildTitleMap(
 		}
 	}
 	if (!fieldRequired && !hasEmptyValue) {
-		newTitleMap.unshift({ name: '<em>None</em>', value: null });
+		newTitleMap.unshift({ name: "<em>None</em>", value: null });
 	}
 	return newTitleMap;
 }

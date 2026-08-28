@@ -38,7 +38,7 @@ export {
 	toObservable,
 	toSchemaType,
 	xor,
-} from './validator.functions';
+} from "./validator.functions";
 
 export {
 	cloneDeep,
@@ -48,7 +48,7 @@ export {
 	omit,
 	pick,
 	uniqueId,
-} from './native.functions';
+} from "./native.functions";
 
 export {
 	addClasses,
@@ -62,9 +62,9 @@ export {
 	mergeFilteredObject,
 	toTitleCase,
 	uniqueItems,
-} from './utility.functions';
+} from "./utility.functions";
 
-export { JsonPointer, Pointer } from './jsonpointer.functions';
+export { JsonPointer, Pointer } from "./jsonpointer.functions";
 
 export {
 	DataObject,
@@ -87,9 +87,9 @@ export {
 	WidgetLibraryMap,
 	WidgetOptions,
 	WidgetType,
-} from './types';
+} from "./types";
 
-export { JsonValidators } from './json.validators';
+export { JsonValidators } from "./json.validators";
 
 export {
 	buildSchemaFromData,
@@ -106,11 +106,11 @@ export {
 	removeRecursiveReferences,
 	resolveSchemaReferences,
 	updateInputOptions,
-} from './json-schema.functions';
+} from "./json-schema.functions";
 
-export { convertSchemaToDraft6 } from './convert-schema-to-draft6.function';
+export { convertSchemaToDraft6 } from "./convert-schema-to-draft6.function";
 
-export { mergeSchemas } from './merge-schemas.function';
+export { mergeSchemas } from "./merge-schemas.function";
 
 export {
 	buildFormGroup,
@@ -120,7 +120,7 @@ export {
 	path2ControlKey,
 	setControl,
 	setRequiredFields,
-} from './form-group.functions';
+} from "./form-group.functions";
 
 export {
 	buildLayout,
@@ -128,4 +128,4 @@ export {
 	buildTitleMap,
 	getLayoutNode,
 	mapLayout,
-} from './layout.functions';
+} from "./layout.functions";

@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient } from "@angular/common/http";
 import {
 	ChangeDetectionStrategy,
 	Component,
@@ -8,12 +8,12 @@ import {
 	linkedSignal,
 	signal,
 	viewChild,
-} from '@angular/core';
-import { environment } from '../environments/environment';
-import { PLAYGROUND_EXAMPLES } from './example-schemas.model';
-import { AceEditorDirective } from './ace-editor.directive';
-import { JsonSchemaFormModule } from '@ng-formworks/core';
-import { TailwindFrameworkModule } from '@ng-formworks/tailwindcss';
+} from "@angular/core";
+import { environment } from "../environments/environment";
+import { PLAYGROUND_EXAMPLES } from "./example-schemas.model";
+import { AceEditorDirective } from "./ace-editor.directive";
+import { JsonSchemaFormModule } from "@ng-formworks/core";
+import { TailwindFrameworkModule } from "@ng-formworks/tailwindcss";
 
 const DEFAULT_SCHEMA = `{
   "type": "object",
@@ -39,26 +39,26 @@ interface DemoFormOptions {
 }
 
 @Component({
-	selector: 'demo',
-	templateUrl: 'demo.component.html',
+	selector: "demo",
+	templateUrl: "demo.component.html",
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [AceEditorDirective, JsonSchemaFormModule, TailwindFrameworkModule],
 })
 export class DemoComponent {
 	private http = inject(HttpClient);
-	private aceHost = viewChild('aceHost', { read: AceEditorDirective });
+	private aceHost = viewChild("aceHost", { read: AceEditorDirective });
 
 	envVersion = environment.version;
 	examples = PLAYGROUND_EXAMPLES;
 
-	readonly selectedExample = signal('');
-	readonly framework = signal<'tailwindcss' | 'no-framework'>('tailwindcss');
+	readonly selectedExample = signal("");
+	readonly framework = signal<"tailwindcss" | "no-framework">("tailwindcss");
 	readonly frameworks: {
-		value: 'tailwindcss' | 'no-framework';
+		value: "tailwindcss" | "no-framework";
 		label: string;
 	}[] = [
-		{ value: 'tailwindcss', label: 'Tailwind' },
-		{ value: 'no-framework', label: 'Plain' },
+		{ value: "tailwindcss", label: "Tailwind" },
+		{ value: "no-framework", label: "Plain" },
 	];
 	readonly loadedSchema = signal<string | null>(null);
 
@@ -80,7 +80,7 @@ export class DemoComponent {
 	});
 	readonly parseError = computed(() => {
 		const p = this.parsedSchema();
-		return p.ok ? '' : p.error;
+		return p.ok ? "" : p.error;
 	});
 	readonly jsonFormObject = computed<object | undefined>(() => {
 		const p = this.parsedSchema();
@@ -91,9 +91,9 @@ export class DemoComponent {
 	readonly validationErrorList = signal<ValidationIssue[]>([]);
 	readonly prettyValidationErrors = computed(() =>
 		this.validationErrorList()
-			.map((error) => (typeof error === 'string' ? error : (error?.message ?? '')))
+			.map((error) => (typeof error === "string" ? error : (error?.message ?? "")))
 			.filter(Boolean)
-			.join(', '),
+			.join(", "),
 	);
 
 	readonly liveFormData = signal<unknown>({});
@@ -108,6 +108,9 @@ export class DemoComponent {
 		returnEmptyFields: false,
 		defaultWidgetOptions: { feedback: true },
 	};
+
+	// Hoisted so the [options] binding keeps a stable identity across CD cycles
+	readonly aceOptions = { printMargin: false };
 
 	constructor() {
 		// Ace <-> signal bridge: push schemaText into the editor whenever they diverge
@@ -127,7 +130,7 @@ export class DemoComponent {
 		this.selectedExample.set(file);
 		this.http
 			.get(`assets/example-schemas/${file}.json`, {
-				responseType: 'text',
+				responseType: "text",
 			})
 			.subscribe({
 				next: (schema) => this.loadedSchema.set(schema),
@@ -151,6 +154,24 @@ export class DemoComponent {
 		const issues = Array.isArray(event)
 			? (event as ValidationIssue[])
 			: (Object.values(event ?? {}) as ValidationIssue[]);
-		this.validationErrorList.set(issues);
+		// NB: validationErrorChanges can be emitted synchronously during change
+		// detection (e.g. on example switch); deferring the signal write avoids
+		// re-marking already-refreshed views mid-refresh (NG0103)
+		queueMicrotask(() => this.validationErrorList.set(issues));
+	}
+
+	// All form output handlers defer their signal writes: an emission can
+	// originate mid-change-detection (ngOnChanges → activateForm), and writing
+	// signals mid-refresh re-marks refreshed views (NG0103 infinite loop)
+	onFormChanges(data: unknown) {
+		queueMicrotask(() => this.liveFormData.set(data));
+	}
+
+	onFormSubmit(data: unknown) {
+		queueMicrotask(() => this.submittedFormData.set(data));
+	}
+
+	onFormValid(isValid: unknown) {
+		queueMicrotask(() => this.formIsValid.set(isValid === true));
 	}
 }

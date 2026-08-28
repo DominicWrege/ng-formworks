@@ -1,10 +1,10 @@
-import { Component, OnInit, input, inject } from '@angular/core';
-import type { LayoutNode, WidgetOptions } from '../shared/types';
-import { JsonSchemaFormService } from '../json-schema-form.service';
+import { Component, OnInit, input, inject } from "@angular/core";
+import type { LayoutNode, WidgetOptions } from "../shared/types";
+import { JsonSchemaFormService } from "../json-schema-form.service";
 
 @Component({
-	selector: 'message-widget',
-	templateUrl: './message.component.html',
+	selector: "message-widget",
+	templateUrl: "./message.component.html",
 })
 export class MessageComponent implements OnInit {
 	private jsf = inject(JsonSchemaFormService);

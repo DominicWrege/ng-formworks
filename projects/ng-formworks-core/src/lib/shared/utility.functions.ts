@@ -9,7 +9,7 @@ import {
 	isSet,
 	isString,
 	PlainObject,
-} from './validator.functions';
+} from "./validator.functions";
 
 /**
  * Utility function library:
@@ -36,10 +36,10 @@ export function addClasses(
 		return oldClasses;
 	}
 	if (badType(oldClasses)) {
-		oldClasses = '';
+		oldClasses = "";
 	}
 	const toSet = (i: string | string[] | Set<string>) =>
-		isSet(i) ? i : isArray(i) ? new Set(i) : new Set(i.split(' '));
+		isSet(i) ? i : isArray(i) ? new Set(i) : new Set(i.split(" "));
 	const combinedSet = toSet(oldClasses);
 	const newSet = toSet(newClasses);
 	newSet.forEach((c) => combinedSet.add(c));
@@ -49,7 +49,7 @@ export function addClasses(
 	if (isArray(oldClasses)) {
 		return Array.from(combinedSet);
 	}
-	return Array.from(combinedSet).join(' ');
+	return Array.from(combinedSet).join(" ");
 }
 
 /**
@@ -64,7 +64,7 @@ export function addClasses(
  * // {Object|Array|string|number|boolean|null} - The copied object
  */
 export function copy<T>(object: T, errors = false): T {
-	if (typeof object !== 'object' || object === null) {
+	if (typeof object !== "object" || object === null) {
 		return object;
 	}
 	if (isMap(object)) {
@@ -80,7 +80,7 @@ export function copy<T>(object: T, errors = false): T {
 		return { ...(object as object) } as T;
 	}
 	if (errors) {
-		console.error('copy error: Object to copy must be a JavaScript object or value.');
+		console.error("copy error: Object to copy must be a JavaScript object or value.");
 	}
 	return object;
 }
@@ -116,26 +116,26 @@ export function forEach(
 	if (isEmpty(object)) {
 		return;
 	}
-	if ((isObject(object) || isArray(object)) && typeof fn === 'function') {
+	if ((isObject(object) || isArray(object)) && typeof fn === "function") {
 		for (const key of Object.keys(object)) {
 			const value = object[key];
-			if (recurse === 'bottom-up' && (isObject(value) || isArray(value))) {
+			if (recurse === "bottom-up" && (isObject(value) || isArray(value))) {
 				forEach(value, fn, recurse, rootObject);
 			}
 			fn(value, key, object, rootObject);
-			if (recurse === 'top-down' && (isObject(value) || isArray(value))) {
+			if (recurse === "top-down" && (isObject(value) || isArray(value))) {
 				forEach(value, fn, recurse, rootObject);
 			}
 		}
 	}
 	if (errors) {
-		if (typeof fn !== 'function') {
-			console.error('forEach error: Iterator must be a function.');
-			console.error('function', fn);
+		if (typeof fn !== "function") {
+			console.error("forEach error: Iterator must be a function.");
+			console.error("function", fn);
 		}
 		if (!isObject(object) && !isArray(object)) {
-			console.error('forEach error: Input object must be an object or array.');
-			console.error('object', object);
+			console.error("forEach error: Input object must be an object or array.");
+			console.error("object", object);
 		}
 	}
 }
@@ -163,7 +163,7 @@ export function forEachCopy(
 	if (!hasValue(object)) {
 		return;
 	}
-	if ((isObject(object) || isArray(object)) && typeof object !== 'function') {
+	if ((isObject(object) || isArray(object)) && typeof object !== "function") {
 		const newObject: any = isArray(object) ? [] : {};
 		for (const key of Object.keys(object)) {
 			newObject[key] = fn(object[key], key, object);
@@ -171,13 +171,13 @@ export function forEachCopy(
 		return newObject;
 	}
 	if (errors) {
-		if (typeof fn !== 'function') {
-			console.error('forEachCopy error: Iterator must be a function.');
-			console.error('function', fn);
+		if (typeof fn !== "function") {
+			console.error("forEachCopy error: Iterator must be a function.");
+			console.error("function", fn);
 		}
 		if (!isObject(object) && !isArray(object)) {
-			console.error('forEachCopy error: Input object must be an object or array.');
-			console.error('object', object);
+			console.error("forEachCopy error: Input object must be an object or array.");
+			console.error("object", object);
 		}
 	}
 }
@@ -194,7 +194,7 @@ export function forEachCopy(
 export function hasOwn(object: unknown, property: string | number): boolean {
 	if (
 		!object ||
-		!['number', 'string', 'symbol'].includes(typeof property) ||
+		!["number", "string", "symbol"].includes(typeof property) ||
 		(!isObject(object) && !isArray(object) && !isMap(object) && !isSet(object))
 	) {
 		return false;
@@ -202,11 +202,11 @@ export function hasOwn(object: unknown, property: string | number): boolean {
 	if (isMap(object) || isSet(object)) {
 		return object.has(property);
 	}
-	if (typeof property === 'number') {
+	if (typeof property === "number") {
 		if (isArray(object)) {
 			return object[property];
 		}
-		property = property + '';
+		property = property + "";
 	}
 	return (object as Object).hasOwnProperty(property);
 }
@@ -227,11 +227,11 @@ export enum ExpressionType {
  * // {expressionCandidate} expressionCandidate - potential expression
  */
 export function getExpressionType(expressionCandidate: string): ExpressionType {
-	if (expressionCandidate.indexOf('==') !== -1) {
+	if (expressionCandidate.indexOf("==") !== -1) {
 		return ExpressionType.EQUALS;
 	}
 
-	if (expressionCandidate.toString().indexOf('!=') !== -1) {
+	if (expressionCandidate.toString().indexOf("!=") !== -1) {
 		return ExpressionType.NOT_EQUALS;
 	}
 
@@ -258,11 +258,11 @@ export function isNotExpression(expressionType: ExpressionType): boolean {
  */
 export function getKeyAndValueByExpressionType(expressionType: ExpressionType, key: string) {
 	if (isEqual(expressionType)) {
-		return key.split('==', 2);
+		return key.split("==", 2);
 	}
 
 	if (isNotEqual(expressionType)) {
-		return key.split('!=', 2);
+		return key.split("!=", 2);
 	}
 
 	return null;
@@ -270,7 +270,7 @@ export function getKeyAndValueByExpressionType(expressionType: ExpressionType, k
 
 export function cleanValueOfQuotes(keyAndValue: string): string {
 	if (keyAndValue.charAt(0) === "'" && keyAndValue.charAt(keyAndValue.length - 1) === "'") {
-		return keyAndValue.replace("'", '').replace("'", '');
+		return keyAndValue.replace("'", "").replace("'", "");
 	}
 	return keyAndValue;
 }
@@ -361,7 +361,7 @@ export function commonItems(...arrays: (string | string[])[]): string[] {
  * // {string} -
  */
 export function fixTitle(name: string): string {
-	return name && toTitleCase(name.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/_/g, ' '));
+	return name && toTitleCase(name.replace(/([a-z])([A-Z])/g, "$1 $2").replace(/_/g, " "));
 }
 
 /**
@@ -385,39 +385,39 @@ export function toTitleCase(input: string, forceWords?: string | string[]): stri
 		return input;
 	}
 	let forceArray: string[] = [
-		'a',
-		'an',
-		'and',
-		'as',
-		'at',
-		'but',
-		'by',
-		'en',
-		'for',
-		'if',
-		'in',
-		'nor',
-		'of',
-		'on',
-		'or',
-		'per',
-		'the',
-		'to',
-		'v',
-		'v.',
-		'vs',
-		'vs.',
-		'via',
+		"a",
+		"an",
+		"and",
+		"as",
+		"at",
+		"but",
+		"by",
+		"en",
+		"for",
+		"if",
+		"in",
+		"nor",
+		"of",
+		"on",
+		"or",
+		"per",
+		"the",
+		"to",
+		"v",
+		"v.",
+		"vs",
+		"vs.",
+		"via",
 	];
 	if (isString(forceWords)) {
-		forceWords = forceWords.split('|');
+		forceWords = forceWords.split("|");
 	}
 	if (isArray(forceWords)) {
 		forceArray = forceArray.concat(forceWords);
 	}
 	const forceArrayLower = forceArray.map((w) => w.toLowerCase());
 	const noInitialCase: boolean = input === input.toUpperCase() || input === input.toLowerCase();
-	let prevLastChar = '';
+	let prevLastChar = "";
 	input = input.trim();
 	return input.replace(/[A-Za-z0-9\u00C0-\u00FF]+[^\s-]*/g, (word, idx) => {
 		if (!noInitialCase && word.slice(1).search(/[A-Z]|\../) !== -1) {
@@ -439,9 +439,9 @@ export function toTitleCase(input: string, forceWords?: string | string[]): stri
 				forceWord === forceWord.toLowerCase() &&
 				(idx === 0 ||
 					idx + word.length === input.length ||
-					prevLastChar === ':' ||
+					prevLastChar === ":" ||
 					input[idx - 1].search(/[^\s-]/) !== -1 ||
-					(input[idx - 1] !== '-' && input[idx + word.length] === '-'))
+					(input[idx - 1] !== "-" && input[idx + word.length] === "-"))
 			) {
 				newWord = forceWord[0].toUpperCase() + forceWord.slice(1);
 			} else {
@@ -469,7 +469,7 @@ export function toTitleCase(input: string, forceWords?: string | string[]): stri
  */
 export function hasNonNullValue(obj: Record<string, any>): boolean {
 	// If the object is null or not an object, return false immediately
-	if (obj === null || typeof obj !== 'object') {
+	if (obj === null || typeof obj !== "object") {
 		return false;
 	}
 
@@ -497,7 +497,7 @@ export function hasNonNullValue(obj: Record<string, any>): boolean {
  * console.log(compareObjectArraySizes(obj1,obj1));  // Output: false
  * mismatch will be on path b/c
  */
-export function compareObjectArraySizes(obj1: unknown, obj2: unknown, comparePath = ''): boolean {
+export function compareObjectArraySizes(obj1: unknown, obj2: unknown, comparePath = ""): boolean {
 	if (isArray(obj1) && isArray(obj2)) {
 		if (obj1.length != obj2.length) {
 			console.log(`size mismatch at ${comparePath}`);
@@ -548,7 +548,7 @@ export function compareObjectArraySizes(obj1: unknown, obj2: unknown, comparePat
   };
   */
 class ConditionParser {
-	private static predefinedFunctions = ['equals', 'greaterThan', 'contains', 'or', 'and'];
+	private static predefinedFunctions = ["equals", "greaterThan", "contains", "or", "and"];
 
 	static parseFunctionBody(functionBody: string): any[] {
 		const regex = /(\w+)\s*\(([^)]+)\)/g;
@@ -557,7 +557,7 @@ class ConditionParser {
 
 		while ((match = regex.exec(functionBody)) !== null) {
 			const functionName = match[1];
-			const params = match[2].split(',').map((param) => param.trim());
+			const params = match[2].split(",").map((param) => param.trim());
 
 			if (!this.predefinedFunctions.includes(functionName)) {
 				throw new Error(`Invalid function: ${functionName}`);
@@ -565,7 +565,7 @@ class ConditionParser {
 
 			// Recursively parse the parameters if they are function calls (e.g., in 'or' or 'and')
 			const parsedParams = params.map((param) => {
-				if (param.startsWith('or(') || param.startsWith('and(')) {
+				if (param.startsWith("or(") || param.startsWith("and(")) {
 					return this.parseFunctionBody(param); // Handle nested conditions
 				}
 				return param;
@@ -586,12 +586,12 @@ class ConditionParser {
 
 	static buildParameters(functionName: string, params: any[]): any {
 		switch (functionName) {
-			case 'equals':
-			case 'greaterThan':
-			case 'contains':
+			case "equals":
+			case "greaterThan":
+			case "contains":
 				return { src: params[0], trg: params[1] };
-			case 'or':
-			case 'and':
+			case "or":
+			case "and":
 				return { conditions: params };
 			default:
 				throw new Error(`Unsupported function: ${functionName}`);
@@ -639,12 +639,12 @@ class ConditionEvaluator {
 		if (this.predefinedFunctions[conditionName]) {
 			// Evaluate basic conditions
 			return this.predefinedFunctions[conditionName](parameters.src, parameters.trg);
-		} else if (conditionName === 'or' || conditionName === 'and') {
+		} else if (conditionName === "or" || conditionName === "and") {
 			// Evaluate logical conditions
 			const subResults = parameters.conditions.map((subCond: any) =>
 				this.evaluateCondition(subCond),
 			);
-			return this.predefinedFunctions[conditionName === 'or' ? 'or' : 'and'](subResults);
+			return this.predefinedFunctions[conditionName === "or" ? "or" : "and"](subResults);
 		}
 
 		return false;
@@ -671,43 +671,43 @@ class ExpressionAnalyzer {
 	// Regex to detect boolean literals (e.g., true, false)
 	private static booleanLiteralPattern = /^(true|false)$/;
 
-	static isVariableOrLiteral(value: string): 'variable' | 'literal' {
+	static isVariableOrLiteral(value: string): "variable" | "literal" {
 		// Check if the value is a string literal
 		if (this.stringLiteralPattern.test(value)) {
-			return 'literal';
+			return "literal";
 		}
 
 		// Check if the value is a numeric literal
 		if (this.numericLiteralPattern.test(value)) {
-			return 'literal';
+			return "literal";
 		}
 
 		// Check if the value is a boolean literal
 		if (this.booleanLiteralPattern.test(value)) {
-			return 'literal';
+			return "literal";
 		}
 
 		// If it matches variable-like pattern, then it's a variable
 		if (this.variablePattern.test(value)) {
-			return 'variable';
+			return "variable";
 		}
 
-		return 'literal'; // Default to literal if no matches are found
+		return "literal"; // Default to literal if no matches are found
 	}
 
 	// To check if a parameter is a literal or contains variables (e.g., "model.devices[arrayIndices].accessoryType")
-	static checkIfVariableOrLiteral(value: string): 'literal' | 'variable' {
+	static checkIfVariableOrLiteral(value: string): "literal" | "variable" {
 		// Remove white spaces and check each part of the expression (split by dots and brackets)
 		const parts = value
-			.split('.')
-			.flatMap((part) => part.split('[').map((subPart) => subPart.replace(']', '')));
+			.split(".")
+			.flatMap((part) => part.split("[").map((subPart) => subPart.replace("]", "")));
 
 		for (const part of parts) {
-			if (this.isVariableOrLiteral(part) === 'variable') {
-				return 'variable'; // If any part is a variable, return 'variable'
+			if (this.isVariableOrLiteral(part) === "variable") {
+				return "variable"; // If any part is a variable, return 'variable'
 			}
 		}
 
-		return 'literal'; // If no part is a variable, return 'literal'
+		return "literal"; // If no part is a variable, return 'literal'
 	}
 }

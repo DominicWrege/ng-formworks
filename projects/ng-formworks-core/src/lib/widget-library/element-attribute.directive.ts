@@ -1,7 +1,7 @@
-import { Directive, ElementRef, Renderer2, SimpleChanges, input, inject } from '@angular/core';
+import { Directive, ElementRef, Renderer2, SimpleChanges, input, inject } from "@angular/core";
 
 @Directive({
-	selector: '[attributes]',
+	selector: "[attributes]",
 })
 export class ElementAttributeDirective {
 	private renderer = inject(Renderer2);

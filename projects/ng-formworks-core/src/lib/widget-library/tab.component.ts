@@ -1,12 +1,12 @@
-import { Component, OnInit, input, inject } from '@angular/core';
-import type { LayoutNode, WidgetOptions } from '../shared/types';
-import { JsonSchemaFormService } from '../json-schema-form.service';
-import { RootComponent } from './root.component';
+import { Component, OnInit, input, inject } from "@angular/core";
+import type { LayoutNode, WidgetOptions } from "../shared/types";
+import { JsonSchemaFormService } from "../json-schema-form.service";
+import { RootComponent } from "./root.component";
 
 @Component({
 	imports: [RootComponent],
-	selector: 'tab-widget',
-	templateUrl: './tab.component.html',
+	selector: "tab-widget",
+	templateUrl: "./tab.component.html",
 })
 export class TabComponent implements OnInit {
 	private jsf = inject(JsonSchemaFormService);

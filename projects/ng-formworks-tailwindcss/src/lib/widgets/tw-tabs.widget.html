@@ -1,9 +1,9 @@
 <ul [class]="options?.labelHtmlClass || tw.tabBar">
 	@for (item of layoutNode()?.items; track item; let i = $index) {
 	<li role="presentation" data-tabs>
-		@if (showAddTab || item.type !== '$ref') {
+		@if (showAddTab() || item.type !== '$ref') {
 		<a
-			[class]="(selectedItem === i ? tw.tabActive : tw.tab) + ' ' + (options?.itemLabelHtmlClass || '')"
+			[class]="`${selectedItem() === i ? tw.tabActive : tw.tab} ${options?.itemLabelHtmlClass || ''}`"
 			(click)="select(i)"
 		>
 			@if (options?.tabMode=='oneOfMode') {
@@ -22,21 +22,21 @@
 	}
 </ul>
 
-@for (layoutItem of layoutNode()?.items; track layoutItem; let i = $index) {
+@for (panel of tabPanels(); track panel.layoutItem; let i = $index) {
 <div
-	[class]="((options?.htmlClass || '') + ' ' + tw.tabPanel).trim() + (selectedItem != i ? ' ngf-hidden' : '')"
+	[class]="`${((options?.htmlClass || '') + ' ' + tw.tabPanel).trim()}${selectedItem() != i ? ' ngf-hidden' : ''}`"
 >
-	@if (options?.tabMode=='oneOfMode') { @if (selectedItem === i) {
+	@if (options?.tabMode=='oneOfMode') { @if (selectedItem() === i) {
 	<select-framework-widget
-		[dataIndex]="layoutNode()?.dataType === 'array' ? (dataIndex() || []).concat(i) : dataIndex()"
-		[layoutIndex]="(layoutIndex() || []).concat(i)"
-		[layoutNode]="panelNode(layoutItem)"
+		[dataIndex]="panel.dataIndex"
+		[layoutIndex]="panel.layoutIndex"
+		[layoutNode]="panel.panelNode"
 	></select-framework-widget>
 	} } @if (options?.tabMode !='oneOfMode') {
 	<select-framework-widget
-		[dataIndex]="layoutNode()?.dataType === 'array' ? (dataIndex() || []).concat(i) : dataIndex()"
-		[layoutIndex]="(layoutIndex() || []).concat(i)"
-		[layoutNode]="panelNode(layoutItem)"
+		[dataIndex]="panel.dataIndex"
+		[layoutIndex]="panel.layoutIndex"
+		[layoutNode]="panel.panelNode"
 	></select-framework-widget>
 	}
 </div>

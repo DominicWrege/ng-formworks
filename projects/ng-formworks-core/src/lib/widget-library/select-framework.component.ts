@@ -1,37 +1,60 @@
 import {
-	ChangeDetectorRef,
 	Component,
 	ComponentRef,
-	OnChanges,
 	OnDestroy,
 	OnInit,
-	SimpleChanges,
 	ViewContainerRef,
+	effect,
 	inject,
 	input,
 	viewChild,
-} from '@angular/core';
-import { Subscription } from 'rxjs';
+} from "@angular/core";
+import { Subscription } from "rxjs";
 
-import type { LayoutNode } from '../shared/types';
-import { JsonSchemaFormService } from '../json-schema-form.service';
+import type { LayoutNode } from "../shared/types";
+import { JsonSchemaFormService } from "../json-schema-form.service";
 
 @Component({
-	selector: 'select-framework-widget',
-	templateUrl: './select-framework.component.html',
+	selector: "select-framework-widget",
+	templateUrl: "./select-framework.component.html",
 })
-export class SelectFrameworkComponent implements OnChanges, OnInit, OnDestroy {
+export class SelectFrameworkComponent implements OnInit, OnDestroy {
 	private jsf = inject(JsonSchemaFormService);
-	private changeDetectorRef = inject(ChangeDetectorRef);
 	private dataChangesSubs!: Subscription;
+	// Last values pushed into the created component; skipping writes for
+	// unchanged references avoids re-marking the child dirty on every cycle
+	private lastInputs = new Map<string, unknown>();
 	newComponent: ComponentRef<unknown> | null = null;
 	readonly layoutNode = input<LayoutNode | undefined>(undefined);
 	readonly layoutIndex = input<number[] | undefined>(undefined);
 	readonly dataIndex = input<number[] | undefined>(undefined);
-	readonly widgetContainer = viewChild('widgetContainer', { read: ViewContainerRef });
+	readonly widgetContainer = viewChild("widgetContainer", { read: ViewContainerRef });
+
+	constructor() {
+		// Creates the framework component once the container is available and
+		// re-syncs its inputs whenever the layout inputs change (replaces the
+		// former ngOnInit/ngOnChanges updateComponent() calls)
+		effect(() => this.updateComponent());
+	}
+
+	private updateComponent() {
+		const widgetContainer = this.widgetContainer();
+		if (!widgetContainer || !this.jsf.framework) return;
+		if (!this.newComponent) {
+			this.newComponent = widgetContainer.createComponent(this.jsf.framework);
+			this.lastInputs.clear();
+		}
+		const names = ["layoutNode", "layoutIndex", "dataIndex"] as const;
+		const self = this as unknown as Record<string, () => unknown>;
+		for (const name of names) {
+			const value = self[name]();
+			if (this.lastInputs.get(name) === value) continue;
+			this.lastInputs.set(name, value);
+			this.newComponent.setInput(name, value);
+		}
+	}
 
 	ngOnInit() {
-		this.updateComponent();
 		// OnPush bridge: the created framework component has no reactive link to
 		// form data changes, so re-mark it whenever form data changes
 		this.dataChangesSubs = this.jsf.dataChanges.subscribe(() => {
@@ -41,24 +64,5 @@ export class SelectFrameworkComponent implements OnChanges, OnInit, OnDestroy {
 
 	ngOnDestroy(): void {
 		this.dataChangesSubs?.unsubscribe();
-	}
-
-	ngOnChanges(changes: SimpleChanges) {
-		this.updateComponent();
-	}
-
-	updateComponent() {
-		const widgetContainer = this.widgetContainer();
-		if (widgetContainer && !this.newComponent && this.jsf.framework) {
-			this.newComponent = widgetContainer.createComponent(this.jsf.framework);
-		}
-		if (this.newComponent) {
-			for (const inp of ['layoutNode', 'layoutIndex', 'dataIndex']) {
-				this.newComponent.setInput(
-					inp,
-					(this as unknown as Record<string, () => unknown>)[inp](),
-				);
-			}
-		}
 	}
 }

@@ -1,13 +1,13 @@
-import { Component, inject, input, OnDestroy, OnInit } from '@angular/core';
-import { AbstractControl } from '@angular/forms';
-import type { FormValue, LayoutNode, WidgetOptions } from '../shared/types';
-import { JsonSchemaFormService } from '../json-schema-form.service';
-import { StopPropagationDirective } from './stop-propagation.directive';
+import { Component, inject, input, OnDestroy, OnInit } from "@angular/core";
+import { AbstractControl } from "@angular/forms";
+import type { FormValue, LayoutNode, WidgetOptions } from "../shared/types";
+import { JsonSchemaFormService } from "../json-schema-form.service";
+import { StopPropagationDirective } from "./stop-propagation.directive";
 
 @Component({
 	imports: [StopPropagationDirective],
-	selector: 'button-widget',
-	templateUrl: './button.component.html',
+	selector: "button-widget",
+	templateUrl: "./button.component.html",
 })
 export class ButtonComponent implements OnInit, OnDestroy {
 	private jsf = inject(JsonSchemaFormService);
@@ -28,7 +28,7 @@ export class ButtonComponent implements OnInit, OnDestroy {
 	}
 
 	updateValue(event: Event) {
-		if (typeof this.options.onClick === 'function') {
+		if (typeof this.options.onClick === "function") {
 			this.options.onClick(event);
 		} else {
 			this.jsf.updateValue(this, (event.target as HTMLInputElement).value);

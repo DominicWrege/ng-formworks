@@ -9,14 +9,14 @@ import {
 	inject,
 	input,
 	viewChild,
-} from '@angular/core';
-import { Subscription } from 'rxjs';
-import type { LayoutNode } from '../shared/types';
-import { JsonSchemaFormService } from '../json-schema-form.service';
+} from "@angular/core";
+import { Subscription } from "rxjs";
+import type { LayoutNode } from "../shared/types";
+import { JsonSchemaFormService } from "../json-schema-form.service";
 
 @Component({
-	selector: 'template-widget',
-	templateUrl: './template.component.html',
+	selector: "template-widget",
+	templateUrl: "./template.component.html",
 })
 export class TemplateComponent implements OnInit, OnChanges, OnDestroy {
 	private jsf = inject(JsonSchemaFormService);
@@ -26,7 +26,7 @@ export class TemplateComponent implements OnInit, OnChanges, OnDestroy {
 	readonly layoutNode = input<LayoutNode | undefined>(undefined);
 	readonly layoutIndex = input<number[] | undefined>(undefined);
 	readonly dataIndex = input<number[] | undefined>(undefined);
-	readonly widgetContainer = viewChild('widgetContainer', { read: ViewContainerRef });
+	readonly widgetContainer = viewChild("widgetContainer", { read: ViewContainerRef });
 
 	ngOnInit() {
 		this.updateComponent();
@@ -54,7 +54,7 @@ export class TemplateComponent implements OnInit, OnChanges, OnDestroy {
 			);
 		}
 		if (this.newComponent) {
-			for (const input of ['layoutNode', 'layoutIndex', 'dataIndex']) {
+			for (const input of ["layoutNode", "layoutIndex", "dataIndex"]) {
 				(this.newComponent.instance as Record<string, unknown>)[input] = (
 					this as unknown as Record<string, unknown>
 				)[input];

@@ -1,13 +1,13 @@
-import { Component, inject, input, OnDestroy, OnInit } from '@angular/core';
-import { AbstractControl } from '@angular/forms';
-import type { FormValue, LayoutNode, WidgetOptions } from '../shared/types';
-import { JsonSchemaFormService } from '../json-schema-form.service';
+import { Component, inject, input, OnDestroy, OnInit } from "@angular/core";
+import { AbstractControl } from "@angular/forms";
+import type { FormValue, LayoutNode, WidgetOptions } from "../shared/types";
+import { JsonSchemaFormService } from "../json-schema-form.service";
 
 // TODO: Add this control
 
 @Component({
-	selector: 'file-widget',
-	templateUrl: './file.component.html',
+	selector: "file-widget",
+	templateUrl: "./file.component.html",
 })
 export class FileComponent implements OnInit, OnDestroy {
 	private jsf = inject(JsonSchemaFormService);

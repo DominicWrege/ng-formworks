@@ -1,10 +1,10 @@
-import { HttpClient } from '@angular/common/http';
-import { Injectable, Type, inject } from '@angular/core';
-import { Observable, Subject, lastValueFrom } from 'rxjs';
-import { hasOwn } from '../shared/utility.functions';
-import type { WidgetLibraryMap } from '../shared/types';
-import { WidgetLibraryService } from '../widget-library/widget-library.service';
-import { Framework } from './framework';
+import { HttpClient } from "@angular/common/http";
+import { Injectable, Type, inject } from "@angular/core";
+import { Observable, Subject, lastValueFrom } from "rxjs";
+import { hasOwn } from "../shared/utility.functions";
+import type { WidgetLibraryMap } from "../shared/types";
+import { WidgetLibraryService } from "../widget-library/widget-library.service";
+import { Framework } from "./framework";
 
 // Possible future frameworks:
 // - Foundation 6:
@@ -15,7 +15,7 @@ import { Framework } from './framework';
 //   https://github.com/vladotesanovic/ngSemantic
 
 @Injectable({
-	providedIn: 'root',
+	providedIn: "root",
 })
 export class FrameworkLibraryService {
 	private frameworks = inject(Framework) as unknown as Framework[];
@@ -53,9 +53,9 @@ export class FrameworkLibraryService {
 		loadExternalAssets = this.loadExternalAssets,
 	): boolean {
 		this.activeFramework =
-			typeof framework === 'string' && this.hasFramework(framework)
+			typeof framework === "string" && this.hasFramework(framework)
 				? this.frameworkLibrary[framework]
-				: typeof framework === 'object' && hasOwn(framework, 'framework')
+				: typeof framework === "object" && hasOwn(framework, "framework")
 					? framework
 					: this.frameworkLibrary[this.defaultFramework];
 		if (this.activeFramework.name != this.activeFrameworkName) {
@@ -66,7 +66,7 @@ export class FrameworkLibraryService {
 	}
 
 	registerFrameworkWidgets(framework: Framework): boolean {
-		return hasOwn(framework, 'widgets')
+		return hasOwn(framework, "widgets")
 			? this.widgetLibrary.registerFrameworkWidgets(framework.widgets!)
 			: this.widgetLibrary.unRegisterFrameworkWidgets();
 	}
@@ -77,7 +77,7 @@ export class FrameworkLibraryService {
 
 	public getFramework(): Type<unknown> | null {
 		if (!this.activeFramework) {
-			this.setFramework('default', true);
+			this.setFramework("default", true);
 		}
 		return this.activeFramework?.framework ?? null;
 	}
@@ -120,7 +120,7 @@ export class FrameworkLibraryService {
 		// TODO: move this into config
 		const assetConfigPath = `assets/${actFramework.name}/cssframework`;
 		const assetConfigURL = `${assetConfigPath}/assets.json`;
-		let subs = this.http.get(assetConfigURL, { responseType: 'text' });
+		let subs = this.http.get(assetConfigURL, { responseType: "text" });
 		//.subscribe(assetConfig => {
 		//  assetConfig
 		//})
@@ -130,7 +130,7 @@ export class FrameworkLibraryService {
 			if (useAssetRelPath) {
 				assetCfg.stylesheets = assetCfg.stylesheets.map((styleLink: string) => {
 					//ignore relative path if url starts with known protocol or //
-					let nonRelPrefixes = ['/', '//', 'http:', 'https:']; //"//" list for completeness
+					let nonRelPrefixes = ["/", "//", "http:", "https:"]; //"//" list for completeness
 					let isNonRel = false;
 					nonRelPrefixes.forEach((prefix) => {
 						isNonRel = isNonRel || styleLink.indexOf(prefix) == 0;

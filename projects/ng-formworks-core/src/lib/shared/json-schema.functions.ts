@@ -1,7 +1,7 @@
-import { cloneDeep, omit } from './native.functions';
-import { JsonPointer } from './jsonpointer.functions';
-import { mergeSchemas } from './merge-schemas.function';
-import { forEach, hasOwn, mergeFilteredObject } from './utility.functions';
+import { cloneDeep, omit } from "./native.functions";
+import { JsonPointer } from "./jsonpointer.functions";
+import { mergeSchemas } from "./merge-schemas.function";
+import { forEach, hasOwn, mergeFilteredObject } from "./utility.functions";
 import {
 	getType,
 	hasValue,
@@ -11,7 +11,7 @@ import {
 	isNumber,
 	isObject,
 	isString,
-} from './validator.functions';
+} from "./validator.functions";
 import type {
 	FunctionCondition,
 	JsonSchema,
@@ -19,9 +19,9 @@ import type {
 	LayoutNode,
 	SchemaTypeName,
 	TitleMapItem,
-} from './types';
-import type { JsonSchemaFormService } from '../json-schema-form.service';
-import type { WidgetLibraryService } from '../widget-library/widget-library.service';
+} from "./types";
+import type { JsonSchemaFormService } from "../json-schema-form.service";
+import type { WidgetLibraryService } from "../widget-library/widget-library.service";
 
 /**
  * JSON Schema function library:
@@ -85,22 +85,22 @@ export function buildSchemaFromData(
 	const newSchema: JsonSchema = {};
 	const getFieldType = (value: unknown): SchemaTypeName => {
 		const fieldTypeAliases: Partial<Record<SchemaTypeName, SchemaTypeName>> = {
-			integer: 'number',
-			null: 'string',
+			integer: "number",
+			null: "string",
 		};
-		const fieldType = getType(value, 'strict');
+		const fieldType = getType(value, "strict");
 		if (fieldType === null) {
-			return 'string';
+			return "string";
 		}
 		return fieldTypeAliases[fieldType] || fieldType;
 	};
 	const buildSubSchema = (value: DataNode | DataNode[]) =>
 		buildSchemaFromData(value, requireAllFields, false);
 	if (isRoot) {
-		newSchema.$schema = 'http://json-schema.org/draft-06/schema#';
+		newSchema.$schema = "http://json-schema.org/draft-06/schema#";
 	}
 	newSchema.type = getFieldType(data);
-	if (newSchema.type === 'object') {
+	if (newSchema.type === "object") {
 		newSchema.properties = {};
 		if (requireAllFields) {
 			newSchema.required = [];
@@ -113,7 +113,7 @@ export function buildSchemaFromData(
 				newSchema.required!.push(key);
 			}
 		}
-	} else if (newSchema.type === 'array') {
+	} else if (newSchema.type === "array") {
 		newSchema.items = (data as DataNode[]).map(buildSubSchema);
 		// If all items are the same type, use an object for items instead of an array
 		if (new Set((data as DataNode[]).map(getFieldType)).size === 1) {
@@ -151,7 +151,7 @@ interface DataNode {
 export function getFromSchema(
 	schema: JsonSchema,
 	dataPointer: string,
-	returnType = 'schema',
+	returnType = "schema",
 ): JsonSchema | string[] {
 	const dataPointerArray = JsonPointer.parse(dataPointer);
 	if (dataPointerArray === null) {
@@ -161,55 +161,55 @@ export function getFromSchema(
 	let subSchema: JsonSchema = schema;
 	const schemaPointer: string[] = [];
 	const length = dataPointerArray.length;
-	if (returnType.slice(0, 6) === 'parent') {
+	if (returnType.slice(0, 6) === "parent") {
 		dataPointerArray.length--;
 	}
 	for (let i = 0; i < length; ++i) {
 		const parentSchema = subSchema;
 		const key = dataPointerArray[i];
 		let subSchemaFound = false;
-		if (typeof subSchema !== 'object') {
+		if (typeof subSchema !== "object") {
 			console.error(`getFromSchema error: Unable to find "${key}" key in schema.`);
 			console.error(schema);
 			console.error(dataPointer);
 			return null as unknown as JsonSchema;
 		}
-		if (subSchema.type === 'array' && (!isNaN(+key) || key === '-')) {
-			if (hasOwn(subSchema, 'items')) {
+		if (subSchema.type === "array" && (!isNaN(+key) || key === "-")) {
+			if (hasOwn(subSchema, "items")) {
 				if (isObject(subSchema.items)) {
 					subSchemaFound = true;
 					subSchema = subSchema.items as JsonSchema;
-					schemaPointer.push('items');
+					schemaPointer.push("items");
 				} else if (isArray(subSchema.items)) {
 					if (!isNaN(+key) && subSchema.items.length >= +key) {
 						subSchemaFound = true;
 						subSchema = subSchema.items[+key];
-						schemaPointer.push('items', key);
+						schemaPointer.push("items", key);
 					}
 				}
 			}
 			if (!subSchemaFound && isObject(subSchema.additionalItems)) {
 				subSchemaFound = true;
 				subSchema = subSchema.additionalItems as JsonSchema;
-				schemaPointer.push('additionalItems');
+				schemaPointer.push("additionalItems");
 			} else if (subSchema.additionalItems !== false) {
 				subSchemaFound = true;
 				subSchema = {};
-				schemaPointer.push('additionalItems');
+				schemaPointer.push("additionalItems");
 			}
-		} else if (subSchema.type === 'object') {
+		} else if (subSchema.type === "object") {
 			if (isObject(subSchema.properties) && hasOwn(subSchema.properties, key)) {
 				subSchemaFound = true;
 				subSchema = subSchema.properties![key];
-				schemaPointer.push('properties', key);
+				schemaPointer.push("properties", key);
 			} else if (isObject(subSchema.additionalProperties)) {
 				subSchemaFound = true;
 				subSchema = subSchema.additionalProperties as JsonSchema;
-				schemaPointer.push('additionalProperties');
+				schemaPointer.push("additionalProperties");
 			} else if (subSchema.additionalProperties !== false) {
 				subSchemaFound = true;
 				subSchema = {};
-				schemaPointer.push('additionalProperties');
+				schemaPointer.push("additionalProperties");
 			}
 		}
 		if (!subSchemaFound) {
@@ -219,7 +219,7 @@ export function getFromSchema(
 			return undefined as unknown as JsonSchema;
 		}
 	}
-	return returnType.slice(-7) === 'Pointer' ? schemaPointer : subSchema;
+	return returnType.slice(-7) === "Pointer" ? schemaPointer : subSchema;
 }
 
 /**
@@ -251,10 +251,10 @@ export function removeRecursiveReferences(
 	arrayMap: Map<string, number> = new Map(),
 ): string {
 	if (!pointer) {
-		return '';
+		return "";
 	}
 	let genericPointer = JsonPointer.toGenericPointer(JsonPointer.compile(pointer), arrayMap)!;
-	if (genericPointer.indexOf('/') === -1) {
+	if (genericPointer.indexOf("/") === -1) {
 		return genericPointer;
 	}
 	let possibleReferences = true;
@@ -286,11 +286,11 @@ export function getInputType(schema: JsonSchema, layoutNode: LayoutNode | null =
 	// x-schema-form = Angular Schema Form compatibility
 	// widget & component = React Jsonschema Form compatibility
 	const controlType = JsonPointer.getFirst([
-		[schema, '/x-schema-form/type'],
-		[schema, '/x-schema-form/widget/component'],
-		[schema, '/x-schema-form/widget'],
-		[schema, '/widget/component'],
-		[schema, '/widget'],
+		[schema, "/x-schema-form/type"],
+		[schema, "/x-schema-form/widget/component"],
+		[schema, "/x-schema-form/widget"],
+		[schema, "/widget/component"],
+		[schema, "/widget"],
 	]);
 	if (isString(controlType)) {
 		return checkInlineType(controlType, schema, layoutNode);
@@ -300,95 +300,95 @@ export function getInputType(schema: JsonSchema, layoutNode: LayoutNode | null =
 		if (isArray(schemaType)) {
 			// If multiple types listed, use most inclusive type
 			schemaType =
-				inArray('object', schemaType) && hasOwn(schema, 'properties')
-					? 'object'
-					: inArray('array', schemaType) && hasOwn(schema, 'items')
-						? 'array'
-						: inArray('array', schemaType) && hasOwn(schema, 'additionalItems')
-							? 'array'
-							: inArray('string', schemaType)
-								? 'string'
-								: inArray('number', schemaType)
-									? 'number'
-									: inArray('integer', schemaType)
-										? 'integer'
-										: inArray('boolean', schemaType)
-											? 'boolean'
-											: 'unknown';
+				inArray("object", schemaType) && hasOwn(schema, "properties")
+					? "object"
+					: inArray("array", schemaType) && hasOwn(schema, "items")
+						? "array"
+						: inArray("array", schemaType) && hasOwn(schema, "additionalItems")
+							? "array"
+							: inArray("string", schemaType)
+								? "string"
+								: inArray("number", schemaType)
+									? "number"
+									: inArray("integer", schemaType)
+										? "integer"
+										: inArray("boolean", schemaType)
+											? "boolean"
+											: "unknown";
 		}
-		if (schemaType === 'boolean') {
-			return 'checkbox';
+		if (schemaType === "boolean") {
+			return "checkbox";
 		}
-		if (schemaType === 'object') {
-			if (hasOwn(schema, 'properties') || hasOwn(schema, 'additionalProperties')) {
-				return 'section';
+		if (schemaType === "object") {
+			if (hasOwn(schema, "properties") || hasOwn(schema, "additionalProperties")) {
+				return "section";
 			}
 			// TODO: Figure out how to handle additionalProperties
-			if (hasOwn(schema, '$ref')) {
-				return '$ref';
+			if (hasOwn(schema, "$ref")) {
+				return "$ref";
 			}
 		}
-		if (schemaType === 'array') {
+		if (schemaType === "array") {
 			const itemsObject =
 				JsonPointer.getFirst([
-					[schema, '/items'],
-					[schema, '/additionalItems'],
+					[schema, "/items"],
+					[schema, "/additionalItems"],
 				]) || {};
-			return hasOwn(itemsObject, 'enum') && schema.maxItems !== 1
-				? checkInlineType('checkboxes', schema, layoutNode)
-				: 'array';
+			return hasOwn(itemsObject, "enum") && schema.maxItems !== 1
+				? checkInlineType("checkboxes", schema, layoutNode)
+				: "array";
 		}
-		if (schemaType === 'null') {
-			return 'none';
+		if (schemaType === "null") {
+			return "none";
 		}
 		if (
-			JsonPointer.has(layoutNode, '/options/titleMap') ||
-			hasOwn(schema, 'enum') ||
+			JsonPointer.has(layoutNode, "/options/titleMap") ||
+			hasOwn(schema, "enum") ||
 			getTitleMapFromOneOf(schema, null, true)
 		) {
-			return 'select';
+			return "select";
 		}
-		if (schemaType === 'number' || schemaType === 'integer') {
-			return (schemaType === 'integer' || hasOwn(schema, 'multipleOf')) &&
-				hasOwn(schema, 'maximum') &&
-				hasOwn(schema, 'minimum')
-				? 'range'
+		if (schemaType === "number" || schemaType === "integer") {
+			return (schemaType === "integer" || hasOwn(schema, "multipleOf")) &&
+				hasOwn(schema, "maximum") &&
+				hasOwn(schema, "minimum")
+				? "range"
 				: schemaType;
 		}
-		if (schemaType === 'string') {
+		if (schemaType === "string") {
 			return (
 				{
-					color: 'color',
-					date: 'date',
+					color: "color",
+					date: "date",
 					// ajv 'date-time' requires a timezone, which datetime-local inputs lack
-					'iso-date-time': 'datetime-local',
-					email: 'email',
-					uri: 'url',
-				}[schema.format!] || 'text'
+					"iso-date-time": "datetime-local",
+					email: "email",
+					uri: "url",
+				}[schema.format!] || "text"
 			);
 		}
 	}
-	if (hasOwn(schema, '$ref')) {
-		return '$ref';
+	if (hasOwn(schema, "$ref")) {
+		return "$ref";
 	}
 	if (isArray(schema.oneOf)) {
-		return 'one-of';
+		return "one-of";
 	}
-	if (hasOwn(schema, 'if')) {
-		return 'if';
+	if (hasOwn(schema, "if")) {
+		return "if";
 	}
-	if (hasOwn(schema, 'then')) {
-		return 'then';
+	if (hasOwn(schema, "then")) {
+		return "then";
 	}
-	if (hasOwn(schema, 'else')) {
-		return 'else';
+	if (hasOwn(schema, "else")) {
+		return "else";
 	}
 	console.error(`getInputType error: Unable to determine input type for ${schemaType}`);
-	console.error('schema', schema);
+	console.error("schema", schema);
 	if (layoutNode) {
-		console.error('layoutNode', layoutNode);
+		console.error("layoutNode", layoutNode);
 	}
-	return 'none';
+	return "none";
 }
 
 /**
@@ -409,26 +409,26 @@ export function checkInlineType(
 ): string {
 	if (
 		!isString(controlType) ||
-		(controlType.slice(0, 8) !== 'checkbox' && controlType.slice(0, 5) !== 'radio')
+		(controlType.slice(0, 8) !== "checkbox" && controlType.slice(0, 5) !== "radio")
 	) {
 		return controlType;
 	}
 	if (
 		JsonPointer.getFirst([
-			[layoutNode, '/inline'],
-			[layoutNode, '/options/inline'],
-			[schema, '/inline'],
-			[schema, '/x-schema-form/inline'],
-			[schema, '/x-schema-form/options/inline'],
-			[schema, '/x-schema-form/widget/inline'],
-			[schema, '/x-schema-form/widget/component/inline'],
-			[schema, '/x-schema-form/widget/component/options/inline'],
-			[schema, '/widget/inline'],
-			[schema, '/widget/component/inline'],
-			[schema, '/widget/component/options/inline'],
+			[layoutNode, "/inline"],
+			[layoutNode, "/options/inline"],
+			[schema, "/inline"],
+			[schema, "/x-schema-form/inline"],
+			[schema, "/x-schema-form/options/inline"],
+			[schema, "/x-schema-form/widget/inline"],
+			[schema, "/x-schema-form/widget/component/inline"],
+			[schema, "/x-schema-form/widget/component/options/inline"],
+			[schema, "/widget/inline"],
+			[schema, "/widget/component/inline"],
+			[schema, "/widget/component/options/inline"],
 		]) === true
 	) {
-		return controlType.slice(0, 5) === 'radio' ? 'radios-inline' : 'checkboxes-inline';
+		return controlType.slice(0, 5) === "radio" ? "radios-inline" : "checkboxes-inline";
 	} else {
 		return controlType;
 	}
@@ -445,7 +445,7 @@ export function checkInlineType(
  */
 export function isInputRequired(schema: JsonSchema, schemaPointer: string): boolean {
 	if (!isObject(schema)) {
-		console.error('isInputRequired error: Input schema must be an object.');
+		console.error("isInputRequired error: Input schema must be an object.");
 		return false;
 	}
 	const listPointerArray = JsonPointer.parse(schemaPointer);
@@ -457,11 +457,11 @@ export function isInputRequired(schema: JsonSchema, schemaPointer: string): bool
 		const nextToLastKey = listPointerArray[listPointerArray.length - 1];
 		if (
 			[
-				'properties',
-				'additionalProperties',
-				'patternProperties',
-				'items',
-				'additionalItems',
+				"properties",
+				"additionalProperties",
+				"patternProperties",
+				"items",
+				"additionalItems",
 			].includes(nextToLastKey)
 		) {
 			listPointerArray.pop();
@@ -470,9 +470,9 @@ export function isInputRequired(schema: JsonSchema, schemaPointer: string): bool
 		if (isArray(parentSchema.required)) {
 			return parentSchema.required.includes(keyName);
 		}
-		if (parentSchema.type === 'array') {
+		if (parentSchema.type === "array") {
 			return (
-				hasOwn(parentSchema, 'minItems') &&
+				hasOwn(parentSchema, "minItems") &&
 				isNumber(keyName) &&
 				+parentSchema.minItems > +keyName!
 			);
@@ -501,70 +501,70 @@ export function updateInputOptions(
 	// Set all option values in layoutNode.options
 	const newOptions: Record<string, any> = {};
 	const fixUiKeys = (key: string) =>
-		key.slice(0, 3).toLowerCase() === 'ui:' ? key.slice(3) : key;
+		key.slice(0, 3).toLowerCase() === "ui:" ? key.slice(3) : key;
 	mergeFilteredObject(newOptions, jsf.formOptions.defaultWidgetOptions!, [], fixUiKeys);
 	[
-		[JsonPointer.get(schema, '/ui:widget/options'), []],
-		[JsonPointer.get(schema, '/ui:widget'), []],
+		[JsonPointer.get(schema, "/ui:widget/options"), []],
+		[JsonPointer.get(schema, "/ui:widget"), []],
 		[
 			schema,
 			[
-				'additionalProperties',
-				'additionalItems',
-				'properties',
-				'items',
-				'required',
-				'type',
-				'x-schema-form',
-				'$ref',
+				"additionalProperties",
+				"additionalItems",
+				"properties",
+				"items",
+				"required",
+				"type",
+				"x-schema-form",
+				"$ref",
 			],
 		],
-		[JsonPointer.get(schema, '/x-schema-form/options'), []],
-		[JsonPointer.get(schema, '/x-schema-form'), ['items', 'options']],
+		[JsonPointer.get(schema, "/x-schema-form/options"), []],
+		[JsonPointer.get(schema, "/x-schema-form"), ["items", "options"]],
 		[
 			layoutNode,
 			[
-				'_id',
-				'$ref',
-				'arrayItem',
-				'arrayItemType',
-				'dataPointer',
-				'dataType',
-				'items',
-				'key',
-				'name',
-				'options',
-				'recursiveReference',
-				'type',
-				'widget',
+				"_id",
+				"$ref",
+				"arrayItem",
+				"arrayItemType",
+				"dataPointer",
+				"dataType",
+				"items",
+				"key",
+				"name",
+				"options",
+				"recursiveReference",
+				"type",
+				"widget",
 			],
 		],
 		[layoutNode.options, []],
 	].forEach(([object, excludeKeys]) =>
 		mergeFilteredObject(newOptions, object, excludeKeys, fixUiKeys),
 	);
-	if (!hasOwn(newOptions, 'titleMap')) {
+	if (!hasOwn(newOptions, "titleMap")) {
 		let newTitleMap: TitleMapItem[] | boolean | null = null;
 		newTitleMap = getTitleMapFromOneOf(schema, newOptions.flatList);
 		if (newTitleMap) {
 			newOptions.titleMap = newTitleMap;
 		}
 		if (
-			!hasOwn(newOptions, 'titleMap') &&
-			!hasOwn(newOptions, 'enum') &&
-			hasOwn(schema, 'items')
+			!hasOwn(newOptions, "titleMap") &&
+			!hasOwn(newOptions, "enum") &&
+			hasOwn(schema, "items")
 		) {
-			if (JsonPointer.has(schema, '/items/titleMap')) {
+			if (JsonPointer.has(schema, "/items/titleMap")) {
 				newOptions.titleMap = (schema.items as JsonSchema).titleMap;
-			} else if (JsonPointer.has(schema, '/items/enum')) {
+			} else if (JsonPointer.has(schema, "/items/enum")) {
 				newOptions.enum = (schema.items as JsonSchema).enum;
 				if (
-					!hasOwn(newOptions, 'enumNames') &&
-					JsonPointer.has(schema, '/items/enumNames')
+					!hasOwn(newOptions, "enumNames") &&
+					JsonPointer.has(schema, "/items/enumNames")
 				) {
 					newOptions.enumNames = (schema.items as JsonSchema).enumNames;
 				}
-			} else if (JsonPointer.has(schema, '/items/oneOf')) {
+			} else if (JsonPointer.has(schema, "/items/oneOf")) {
 				newTitleMap = getTitleMapFromOneOf(schema.items as JsonSchema, newOptions.flatList);
 				if (newTitleMap) {
 					newOptions.titleMap = newTitleMap;
@@ -574,16 +574,16 @@ export function updateInputOptions(
 	}
 
 	// If schema type is integer, enforce by setting multipleOf = 1
-	if (schema.type === 'integer' && !hasValue(newOptions.multipleOf)) {
+	if (schema.type === "integer" && !hasValue(newOptions.multipleOf)) {
 		newOptions.multipleOf = 1;
 	}
 
 	// Copy any typeahead word lists to options.typeahead.source
-	if (JsonPointer.has(newOptions, '/autocomplete/source')) {
+	if (JsonPointer.has(newOptions, "/autocomplete/source")) {
 		newOptions.typeahead = newOptions.autocomplete;
-	} else if (JsonPointer.has(newOptions, '/tagsinput/source')) {
+	} else if (JsonPointer.has(newOptions, "/tagsinput/source")) {
 		newOptions.typeahead = newOptions.tagsinput;
-	} else if (JsonPointer.has(newOptions, '/tagsinput/typeahead/source')) {
+	} else if (JsonPointer.has(newOptions, "/tagsinput/typeahead/source")) {
 		newOptions.typeahead = newOptions.tagsinput.typeahead;
 	}
 
@@ -621,7 +621,7 @@ export function getTitleMapFromOneOf(
 		// if flatList !== false and some items have colons, make grouped map
 		if (
 			flatList !== false &&
-			(titleMap || []).filter((title) => ((title || {}).name || '').indexOf(': ')).length > 1
+			(titleMap || []).filter((title) => ((title || {}).name || "").indexOf(": ")).length > 1
 		) {
 			// Split name on first colon to create grouped map (name -> group: name)
 			const newTitleMap = titleMap!.map((title) => {
@@ -635,7 +635,7 @@ export function getTitleMapFromOneOf(
 				newTitleMap.some(
 					(title, index) =>
 						index &&
-						hasOwn(title, 'group') &&
+						hasOwn(title, "group") &&
 						title.group === newTitleMap[index - 1].group,
 				)
 			) {
@@ -657,40 +657,40 @@ export function getControlValidators(schema: JsonSchema): Record<string, unknown
 		return null;
 	}
 	const validators: Record<string, unknown[]> = {};
-	if (hasOwn(schema, 'type')) {
+	if (hasOwn(schema, "type")) {
 		switch (schema.type) {
-			case 'string':
-				forEach(['pattern', 'format', 'minLength', 'maxLength'], (prop) => {
+			case "string":
+				forEach(["pattern", "format", "minLength", "maxLength"], (prop) => {
 					if (hasOwn(schema, prop)) {
 						validators[prop] = [schema[prop]];
 					}
 				});
 				break;
-			case 'number':
-			case 'integer':
-				forEach(['Minimum', 'Maximum'], (ucLimit) => {
-					const eLimit = 'exclusive' + ucLimit;
+			case "number":
+			case "integer":
+				forEach(["Minimum", "Maximum"], (ucLimit) => {
+					const eLimit = "exclusive" + ucLimit;
 					const limit = ucLimit.toLowerCase();
 					if (hasOwn(schema, limit)) {
 						const exclusive = hasOwn(schema, eLimit) && schema[eLimit] === true;
 						validators[limit] = [schema[limit], exclusive];
 					}
 				});
-				forEach(['multipleOf', 'type'], (prop) => {
+				forEach(["multipleOf", "type"], (prop) => {
 					if (hasOwn(schema, prop)) {
 						validators[prop] = [schema[prop]];
 					}
 				});
 				break;
-			case 'object':
-				forEach(['minProperties', 'maxProperties', 'dependencies'], (prop) => {
+			case "object":
+				forEach(["minProperties", "maxProperties", "dependencies"], (prop) => {
 					if (hasOwn(schema, prop)) {
 						validators[prop] = [schema[prop]];
 					}
 				});
 				break;
-			case 'array':
-				forEach(['minItems', 'maxItems', 'uniqueItems'], (prop) => {
+			case "array":
+				forEach(["minItems", "maxItems", "uniqueItems"], (prop) => {
 					if (hasOwn(schema, prop)) {
 						validators[prop] = [schema[prop]];
 					}
@@ -698,7 +698,7 @@ export function getControlValidators(schema: JsonSchema): Record<string, unknown
 				break;
 		}
 	}
-	if (hasOwn(schema, 'enum')) {
+	if (hasOwn(schema, "enum")) {
 		validators.enum = [schema.enum];
 	}
 	return validators;
@@ -725,7 +725,7 @@ export function resolveSchemaReferences(
 	arrayMap: Map<string, number>,
 ): JsonSchema {
 	if (!isObject(schema)) {
-		console.error('resolveSchemaReferences error: schema must be an object.');
+		console.error("resolveSchemaReferences error: schema must be an object.");
 		return undefined as unknown as JsonSchema;
 	}
 	const refLinks = new Set<string>();
@@ -736,10 +736,10 @@ export function resolveSchemaReferences(
 
 	// Search schema for all $ref links, and build full refLibrary
 	JsonPointer.forEachDeep(schema, (subSchema, subSchemaPointer) => {
-		if (hasOwn(subSchema, '$ref') && isString(subSchema['$ref'])) {
-			const refPointer = JsonPointer.compile(subSchema['$ref'])!;
+		if (hasOwn(subSchema, "$ref") && isString(subSchema["$ref"])) {
+			const refPointer = JsonPointer.compile(subSchema["$ref"])!;
 			refLinks.add(refPointer);
-			refMapSet.add(subSchemaPointer + '~~' + refPointer);
+			refMapSet.add(subSchemaPointer + "~~" + refPointer);
 			refMap.set(subSchemaPointer!, refPointer);
 		}
 	});
@@ -756,10 +756,10 @@ export function resolveSchemaReferences(
 					([fromRef2, toRef2]) =>
 						JsonPointer.isSubPointer(toRef1, fromRef2, true) &&
 						!JsonPointer.isSubPointer(toRef2, toRef1, true) &&
-						!refMapSet.has(fromRef1 + fromRef2.slice(toRef1.length) + '~~' + toRef2),
+						!refMapSet.has(fromRef1 + fromRef2.slice(toRef1.length) + "~~" + toRef2),
 				)
 				.forEach(([fromRef2, toRef2]) => {
-					refMapSet.add(fromRef1 + fromRef2.slice(toRef1.length) + '~~' + toRef2);
+					refMapSet.add(fromRef1 + fromRef2.slice(toRef1.length) + "~~" + toRef2);
 					checkRefLinks = true;
 				}),
 		);
@@ -768,7 +768,7 @@ export function resolveSchemaReferences(
 	// Build full recursiveRefMap
 	// First pass - save all internally recursive refs from refMapSet
 	Array.from(refMapSet)
-		.map((refLink) => refLink.split('~~'))
+		.map((refLink) => refLink.split("~~"))
 		.filter(([fromRef, toRef]) => JsonPointer.isSubPointer(toRef, fromRef))
 		.forEach(([fromRef, toRef]) => recursiveRefMap.set(fromRef, toRef));
 	// Second pass - create recursive versions of any other refs that link to recursive refs
@@ -798,20 +798,20 @@ export function resolveSchemaReferences(
 	// thieir linked schemas and, where possible, combining schemas in allOf arrays.
 	let compiledSchema = { ...schema };
 	delete compiledSchema.definitions;
-	compiledSchema = getSubSchema(compiledSchema, '', refLibrary, recursiveRefMap);
+	compiledSchema = getSubSchema(compiledSchema, "", refLibrary, recursiveRefMap);
 
 	// Make sure all remaining schema $refs are recursive, and build final
 	// schemaRefLibrary, schemaRecursiveRefMap, dataRecursiveRefMap, & arrayMap
 	JsonPointer.forEachDeep(
 		compiledSchema,
 		(subSchema, subSchemaPointer) => {
-			if (isString(subSchema['$ref'])) {
-				let refPointer = JsonPointer.compile(subSchema['$ref'])!;
+			if (isString(subSchema["$ref"])) {
+				let refPointer = JsonPointer.compile(subSchema["$ref"])!;
 				if (!JsonPointer.isSubPointer(refPointer, subSchemaPointer, true)) {
 					refPointer = removeRecursiveReferences(subSchemaPointer!, recursiveRefMap);
 					JsonPointer.set(compiledSchema, subSchemaPointer, { $ref: `#${refPointer}` });
 				}
-				if (!hasOwn(schemaRefLibrary, 'refPointer')) {
+				if (!hasOwn(schemaRefLibrary, "refPointer")) {
 					schemaRefLibrary[refPointer] = !refPointer.length
 						? compiledSchema
 						: getSubSchema(
@@ -831,8 +831,8 @@ export function resolveSchemaReferences(
 				}
 			}
 			if (
-				subSchema.type === 'array' &&
-				(hasOwn(subSchema, 'items') || hasOwn(subSchema, 'additionalItems'))
+				subSchema.type === "array" &&
+				(hasOwn(subSchema, "items") || hasOwn(subSchema, "additionalItems"))
 			) {
 				const dataPointer = JsonPointer.toDataPointer(subSchemaPointer!, compiledSchema)!;
 				if (!arrayMap.has(dataPointer)) {
@@ -866,12 +866,12 @@ export function getSubSchema(
 	if (!schemaRefLibrary || !schemaRecursiveRefMap) {
 		return JsonPointer.getCopy(schema, pointer);
 	}
-	if (typeof pointer !== 'string') {
+	if (typeof pointer !== "string") {
 		pointer = JsonPointer.compile(pointer)!;
 	}
 	usedPointers = [...usedPointers, pointer];
 	let newSchema: JsonSchema | null = null;
-	if (pointer === '') {
+	if (pointer === "") {
 		newSchema = cloneDeep(schema);
 	} else {
 		const shortPointer = removeRecursiveReferences(pointer, schemaRecursiveRefMap);
@@ -922,7 +922,7 @@ export function getSubSchema(
 				}
 
 				// Fix incorrectly placed array object required lists
-				if (subSchema.type === 'array' && isArray(subSchema.required)) {
+				if (subSchema.type === "array" && isArray(subSchema.required)) {
 					return fixRequiredArrayProperties(subSchema);
 				}
 			}
@@ -963,7 +963,7 @@ export function combineAllOf(schema: JsonSchema): JsonSchema {
 		.filter((item): item is JsonSchema => !isEmpty(item));
 	//adapted to accommodate ITE by merging all non ITE field
 	//then re-adding the allOf key with only ITE
-	let schemaITEOmitted = omitKeys(schema.allOf, ['if', 'then', 'else']);
+	let schemaITEOmitted = omitKeys(schema.allOf, ["if", "then", "else"]);
 	let mergedSchema = mergeSchemas(...schemaITEOmitted);
 	if (Object.keys(schema).length > 1) {
 		const extraKeys = { ...schema };
@@ -988,16 +988,16 @@ export function combineAllOf(schema: JsonSchema): JsonSchema {
  * //  - converted schema object
  */
 export function fixRequiredArrayProperties(schema: JsonSchema): JsonSchema {
-	if (schema.type === 'array' && isArray(schema.required)) {
-		const itemsObject = hasOwn(schema.items, 'properties')
-			? 'items'
-			: hasOwn(schema.additionalItems, 'properties')
-				? 'additionalItems'
+	if (schema.type === "array" && isArray(schema.required)) {
+		const itemsObject = hasOwn(schema.items, "properties")
+			? "items"
+			: hasOwn(schema.additionalItems, "properties")
+				? "additionalItems"
 				: null;
 		if (
 			itemsObject &&
-			!hasOwn(schema[itemsObject], 'required') &&
-			(hasOwn(schema[itemsObject], 'additionalProperties') ||
+			!hasOwn(schema[itemsObject], "required") &&
+			(hasOwn(schema[itemsObject], "additionalProperties") ||
 				schema.required.every((key) =>
 					hasOwn((schema[itemsObject] as JsonSchema).properties, key),
 				))
@@ -1058,9 +1058,9 @@ export function convertJSONSchemaIfToCondition(
 	layoutNode: LayoutNode,
 	negate = false,
 ): FunctionCondition {
-	let conditionFun = '';
+	let conditionFun = "";
 	let condition: FunctionCondition = {};
-	let notOp = negate ? '!' : '';
+	let notOp = negate ? "!" : "";
 	// expects "dataPointer" to be like "/a/b/c"
 	// TODO: test
 	//dataPointer can be something like /cities/-/name
@@ -1072,26 +1072,26 @@ export function convertJSONSchemaIfToCondition(
 	//and uses arrayIndices as the last index only -check?
 	let parentPath = layoutNode.dataPointer
 		? layoutNode.dataPointer
-				.split('/')
+				.split("/")
 				.slice(1, -1)
 				.map((part, ind) => {
-					let sep = ind == 0 ? '' : '.';
-					let ret = part == '-' ? '[arrayIndices]' : sep + part;
+					let sep = ind == 0 ? "" : ".";
+					let ret = part == "-" ? "[arrayIndices]" : sep + part;
 					return ret;
 				})
-				.join('')
-		: '';
-	let modelPath = parentPath ? `model.${parentPath}` : 'model';
-	let checkPath = modelPath.replace(/\[/g, '.[').split('.').join('?.');
+				.join("")
+		: "";
+	let modelPath = parentPath ? `model.${parentPath}` : "model";
+	let checkPath = modelPath.replace(/\[/g, ".[").split(".").join("?.");
 	if (schema.if) {
 		Object.keys(schema.if.properties!).forEach((ifProp, ind) => {
-			let amper = ind > 0 ? '&' : '';
+			let amper = ind > 0 ? "&" : "";
 			//Note the model value is first converted to string and so is the condition
 			//so that booleans and numbers can also be compared
 			//changed to an includesList to handle cases such as
-			const includesList = hasOwn(schema.if!.properties![ifProp], 'const')
+			const includesList = hasOwn(schema.if!.properties![ifProp], "const")
 				? [schema.if!.properties![ifProp].const]
-				: hasOwn(schema.if!.properties![ifProp], 'enum')
+				: hasOwn(schema.if!.properties![ifProp], "enum")
 					? schema.if!.properties![ifProp].enum!
 					: [];
 			const includesListAsStr = includesList.map((val) => {
@@ -1101,6 +1101,6 @@ export function convertJSONSchemaIfToCondition(
 			//conditionFun+=`${amper} ${checkPath} && ${modelPath}.${ifProp}+""=='${schema.if.properties[ifProp].const}'`
 		});
 	}
-	condition['functionBody'] = `return ${notOp}(${conditionFun})`;
+	condition["functionBody"] = `return ${notOp}(${conditionFun})`;
 	return condition;
 }

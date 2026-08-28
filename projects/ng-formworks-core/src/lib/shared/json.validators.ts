@@ -1,10 +1,10 @@
-import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
-import { forkJoin, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { JsonSchemaFormatNames, jsonSchemaFormatTests } from './format-regex.constants';
-import { deepEqual } from './native.functions';
-import { forEachCopy } from './utility.functions';
-import type { DataObject, FormValue, JsonValue } from './types';
+import { AbstractControl, ValidationErrors, ValidatorFn } from "@angular/forms";
+import { forkJoin, Observable } from "rxjs";
+import { map } from "rxjs/operators";
+import { JsonSchemaFormatNames, jsonSchemaFormatTests } from "./format-regex.constants";
+import { deepEqual } from "./native.functions";
+import { forEachCopy } from "./utility.functions";
+import type { DataObject, FormValue, JsonValue } from "./types";
 import {
 	_executeAsyncValidators,
 	_executeValidators,
@@ -26,7 +26,7 @@ import {
 	toJavaScriptType,
 	toObservable,
 	xor,
-} from './validator.functions';
+} from "./validator.functions";
 
 /**
  * 'JsonValidators' class
@@ -214,8 +214,8 @@ export class JsonValidators {
 				enumValue === inputValue ||
 				(isNumber(enumValue) &&
 					+(<string | number>inputValue) === +(<string | number>enumValue)) ||
-				(isBoolean(enumValue, 'strict') &&
-					toJavaScriptType(inputValue, 'boolean') === enumValue) ||
+				(isBoolean(enumValue, "strict") &&
+					toJavaScriptType(inputValue, "boolean") === enumValue) ||
 				(enumValue === null && !hasValue(inputValue)) ||
 				deepEqual(enumValue, inputValue);
 			const isValid = isArray(currentValue)
@@ -253,8 +253,8 @@ export class JsonValidators {
 				constValue === inputValue ||
 				(isNumber(constValue) &&
 					+(<string | number>inputValue) === +(<string | number>constValue)) ||
-				(isBoolean(constValue, 'strict') &&
-					toJavaScriptType(inputValue, 'boolean') === constValue) ||
+				(isBoolean(constValue, "strict") &&
+					toJavaScriptType(inputValue, "boolean") === constValue) ||
 				(constValue === null && !hasValue(inputValue));
 			const isValid = isEqualVal(requiredValue, currentValue);
 			return xor(isValid, invert) ? null : { const: { requiredValue, currentValue } };
@@ -332,7 +332,7 @@ export class JsonValidators {
 			}
 			let regex: RegExp;
 			let requiredPattern: string;
-			if (typeof pattern === 'string') {
+			if (typeof pattern === "string") {
 				requiredPattern = wholeString ? `^${pattern}$` : pattern;
 				regex = new RegExp(requiredPattern);
 			} else {
@@ -379,12 +379,12 @@ export class JsonValidators {
 				//or new RegExp(formatTest.source, formatTest.flags);
 
 				const formatTest: Function | RegExp = jsonSchemaFormatTests[requiredFormat];
-				if (typeof formatTest === 'object') {
+				if (typeof formatTest === "object") {
 					isValid = new RegExp(
 						(<RegExp>formatTest).source,
 						(<RegExp>formatTest).flags,
 					).test(<string>currentValue);
-				} else if (typeof formatTest === 'function') {
+				} else if (typeof formatTest === "function") {
 					isValid = (<Function>formatTest)(<string>currentValue);
 				} else {
 					console.error(
@@ -395,8 +395,8 @@ export class JsonValidators {
 			} else {
 				// Allow JavaScript Date objects
 				isValid =
-					['date', 'time', 'iso-date-time'].includes(requiredFormat) &&
-					Object.prototype.toString.call(currentValue) === '[object Date]';
+					["date", "time", "iso-date-time"].includes(requiredFormat) &&
+					Object.prototype.toString.call(currentValue) === "[object Date]";
 			}
 			return xor(isValid, invert) ? null : { format: { requiredFormat, currentValue } };
 		};
@@ -598,7 +598,7 @@ export class JsonValidators {
 	 * // {IValidatorFn}
 	 */
 	static dependencies(dependencies: DataObject): IValidatorFn {
-		if (getType(dependencies) !== 'object' || isEmpty(dependencies)) {
+		if (getType(dependencies) !== "object" || isEmpty(dependencies)) {
 			return JsonValidators.nullValidator;
 		}
 		return (control: AbstractControl, invert = false): ValidationErrors | null => {
@@ -613,11 +613,11 @@ export class JsonValidators {
 					let requiringFieldErrors: ValidationErrors = {};
 					let requiredFields: string[];
 					let properties: ValidationErrors = {};
-					if (getType(dependencies[requiringField!]) === 'array') {
+					if (getType(dependencies[requiringField!]) === "array") {
 						requiredFields = dependencies[requiringField!];
-					} else if (getType(dependencies[requiringField!]) === 'object') {
-						requiredFields = dependencies[requiringField!]['required'] || [];
-						properties = dependencies[requiringField!]['properties'] || {};
+					} else if (getType(dependencies[requiringField!]) === "object") {
+						requiredFields = dependencies[requiringField!]["required"] || [];
+						properties = dependencies[requiringField!]["properties"] || {};
 					}
 
 					// Validate property dependencies
@@ -634,15 +634,15 @@ export class JsonValidators {
 							const requiredFieldErrors = _mergeObjects(
 								forEachCopy(requirements, (requirement, parameter) => {
 									let validator: IValidatorFn | null = null;
-									if (requirement === 'maximum' || requirement === 'minimum') {
+									if (requirement === "maximum" || requirement === "minimum") {
 										const exclusive =
-											!!requirements['exclusiveM' + requirement.slice(1)];
+											!!requirements["exclusiveM" + requirement.slice(1)];
 										validator = (<any>JsonValidators)[requirement](
 											parameter,
 											exclusive,
 										);
 									} else if (
-										typeof (<any>JsonValidators)[requirement] === 'function'
+										typeof (<any>JsonValidators)[requirement] === "function"
 									) {
 										validator = (<any>JsonValidators)[requirement](parameter);
 									}

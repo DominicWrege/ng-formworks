@@ -67,7 +67,7 @@
 				#aceHost
 				ace-editor
 				[text]="schemaText()"
-				[options]="{ printMargin: false }"
+				[options]="aceOptions"
 				[readOnly]="false"
 				(textChanged)="onEditorChange($event)"
 				class="flex-1 min-h-[380px] h-[60vh] xl:h-auto w-full overflow-auto"
@@ -84,8 +84,8 @@
 						<p class="text-sm text-gray-400 italic">
 							{{
 								parseError()
-									? 'Fix the JSON error to render the form.'
-									: 'Edit the schema to render a form.'
+									? "Fix the JSON error to render the form."
+									: "Edit the schema to render a form."
 							}}
 						</p>
 					}
@@ -95,9 +95,9 @@
 							[form]="jsonFormObject()"
 							[options]="jsonFormOptions"
 							[framework]="framework()"
-							(onChanges)="liveFormData.set($event)"
-							(onSubmit)="submittedFormData.set($event)"
-							(isValid)="formIsValid.set($event === true)"
+							(onChanges)="onFormChanges($event)"
+							(onSubmit)="onFormSubmit($event)"
+							(isValid)="onFormValid($event)"
 							(validationErrors)="onValidationErrors($event)"
 						>
 						</json-schema-form>

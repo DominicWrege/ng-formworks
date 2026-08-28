@@ -1,7 +1,7 @@
 let uniqueIdCounter = 0;
 
 export function isPlainObject(value: any): boolean {
-	if (value === null || typeof value !== 'object') {
+	if (value === null || typeof value !== "object") {
 		return false;
 	}
 	const proto = Object.getPrototypeOf(value);
@@ -9,7 +9,7 @@ export function isPlainObject(value: any): boolean {
 }
 
 export function cloneDeep<T>(value: T): T {
-	if (value === null || typeof value !== 'object') {
+	if (value === null || typeof value !== "object") {
 		return value;
 	}
 	if (value instanceof Date) {
@@ -32,10 +32,10 @@ export function deepEqual(a: any, b: any): boolean {
 	if (a === b) {
 		return true;
 	}
-	if (typeof a === 'number' && typeof b === 'number') {
+	if (typeof a === "number" && typeof b === "number") {
 		return isNaN(a) && isNaN(b);
 	}
-	if (a === null || b === null || typeof a !== 'object' || typeof b !== 'object') {
+	if (a === null || b === null || typeof a !== "object" || typeof b !== "object") {
 		return false;
 	}
 	if (a instanceof Date && b instanceof Date) {
@@ -54,7 +54,7 @@ export function deepEqual(a: any, b: any): boolean {
 	);
 }
 
-export function uniqueId(prefix = ''): string {
+export function uniqueId(prefix = ""): string {
 	uniqueIdCounter += 1;
 	return `${prefix}${uniqueIdCounter}`;
 }
@@ -81,7 +81,7 @@ export function omit<T extends Record<string, any>>(
 	object: T,
 	keysToOmit: Array<string | number | symbol>,
 ): T {
-	if (!object || typeof object !== 'object') {
+	if (!object || typeof object !== "object") {
 		return object;
 	}
 	const result: any = { ...object };
@@ -95,7 +95,7 @@ export function pick<T extends Record<string, any>>(
 	object: T,
 	keysToPick: Array<string | number | symbol>,
 ): T {
-	if (!object || typeof object !== 'object') {
+	if (!object || typeof object !== "object") {
 		return object;
 	}
 	const result: any = {};

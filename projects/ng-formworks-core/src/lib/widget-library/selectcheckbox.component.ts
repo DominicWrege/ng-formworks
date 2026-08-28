@@ -1,17 +1,17 @@
-import { Component, inject, input, OnDestroy, OnInit } from '@angular/core';
-import { AbstractControl } from '@angular/forms';
-import { FrameworkLibraryService } from '../framework-library/framework-library.service';
-import type { FormValue, LayoutNode, TitleMapItem, WidgetOptions } from '../shared/types';
-import { JsonSchemaFormService } from '../json-schema-form.service';
-import { buildTitleMap, isArray } from '../shared';
-import { FormsModule } from '@angular/forms';
+import { Component, inject, input, OnDestroy, OnInit } from "@angular/core";
+import { AbstractControl } from "@angular/forms";
+import { FrameworkLibraryService } from "../framework-library/framework-library.service";
+import type { FormValue, LayoutNode, TitleMapItem, WidgetOptions } from "../shared/types";
+import { JsonSchemaFormService } from "../json-schema-form.service";
+import { buildTitleMap, isArray } from "../shared";
+import { FormsModule } from "@angular/forms";
 
 //component created as a fallback for the checkbox/sortabljs issue
 //its meant to display a select as a checkbox
 @Component({
 	imports: [FormsModule],
-	selector: 'selectcheckbox-widget',
-	templateUrl: './selectcheckbox.component.html',
+	selector: "selectcheckbox-widget",
+	templateUrl: "./selectcheckbox.component.html",
 	styles: [
 		`
 			/* Style the select element */
@@ -48,7 +48,7 @@ import { FormsModule } from '@angular/forms';
 
 			/* Empty box when unchecked */
 			.unchecked::before {
-				content: '☐'; /* Empty box Unicode */
+				content: "☐"; /* Empty box Unicode */
 				left: 5px;
 				top: 50%;
 				transform: translateY(-50%);
@@ -57,7 +57,7 @@ import { FormsModule } from '@angular/forms';
 
 			/* Checked box when selected */
 			.checked::before {
-				content: '☑'; /* Checked box with tick Unicode */
+				content: "☑"; /* Checked box with tick Unicode */
 				left: 5px;
 				top: 50%;
 				transform: translateY(-50%);
@@ -93,8 +93,8 @@ import { FormsModule } from '@angular/forms';
 				min-block-size: auto;
 				border-radius: 3px;
 			}
-			.bs4-option:checked[type='checkbox'],
-			.bs3-option:checked[type='checkbox'] {
+			.bs4-option:checked[type="checkbox"],
+			.bs3-option:checked[type="checkbox"] {
 				background-image: url(data:image/svg+xml,%3C%3Fxml%20version%3D%221.0%22%20encoding%3D%22utf-8%22%3F%3E%3C!--%20License%3A%20MIT.%20Made%20by%20jaynewey%3A%20https%3A%2F%2Fgithub.com%2Fjaynewey%2Fcharm-icons%20--%3E%3Csvg%20viewBox%3D%220%200%2016%2016%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20version%3D%221.1%22%20fill%3D%22none%22%20stroke%3D%22%23000000%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%222.5%22%3E%3Cpolyline%20points%3D%224%208.75%2C6.25%2012.25%2C13.25%203.5%22%2F%3E%3C%2Fsvg%3E);
 				background-color: darkturquoise;
 			}
@@ -121,28 +121,28 @@ export class SelectCheckboxComponent implements OnInit, OnDestroy {
 
 	frameworkStyles = {
 		daisyui: {
-			selectClass: 'select-box',
-			optionClass: 'checkbox tw:dui-checkbox',
-			optionChecked: 'active',
-			optionUnchecked: '',
+			selectClass: "select-box",
+			optionClass: "checkbox tw:dui-checkbox",
+			optionChecked: "active",
+			optionUnchecked: "",
 		},
-		'bootstrap-3': {
-			selectClass: 'select-box',
-			optionClass: 'bs3-option checkbox display-inline-block',
-			optionChecked: 'active',
-			optionUnchecked: '',
+		"bootstrap-3": {
+			selectClass: "select-box",
+			optionClass: "bs3-option checkbox display-inline-block",
+			optionChecked: "active",
+			optionUnchecked: "",
 		},
-		'bootstrap-4': {
-			selectClass: 'select-box',
-			optionClass: 'bs4-option checkbox display-inline-block',
-			optionChecked: 'active',
-			optionUnchecked: '',
+		"bootstrap-4": {
+			selectClass: "select-box",
+			optionClass: "bs4-option checkbox display-inline-block",
+			optionChecked: "active",
+			optionUnchecked: "",
 		},
-		'bootstrap-5': {
-			selectClass: ' select-box',
-			optionClass: 'form-check-input display-inline-block',
-			optionChecked: 'active',
-			optionUnchecked: '',
+		"bootstrap-5": {
+			selectClass: " select-box",
+			optionClass: "form-check-input display-inline-block",
+			optionChecked: "active",
+			optionUnchecked: "",
 		},
 		//"material-design":{selectClass:" ",optionClass:" "}
 	};

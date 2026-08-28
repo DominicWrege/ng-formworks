@@ -1,7 +1,7 @@
-import { Directive, ElementRef, OnDestroy, OnInit, Renderer2, input, inject } from '@angular/core';
+import { Directive, ElementRef, OnDestroy, OnInit, Renderer2, input, inject } from "@angular/core";
 
 @Directive({
-	selector: '[appStopPropagation]',
+	selector: "[appStopPropagation]",
 })
 
 // TODO(review): stopPropagation used as a workaround
@@ -11,14 +11,14 @@ export class StopPropagationDirective implements OnInit, OnDestroy {
 	private renderer = inject(Renderer2);
 
 	// The input property to receive an array of event names
-	readonly events = input<string[]>([], { alias: 'appStopPropagation' });
+	readonly events = input<string[]>([], { alias: "appStopPropagation" });
 
 	// An array to hold the unsubscribe functions for each event listener
 	private unsubscribeFunctions: Function[] = [];
 
 	ngOnInit() {
 		// If the input array is empty, default to 'mousedown'
-		const eventsToListen = this.events().length > 0 ? this.events() : ['mousedown'];
+		const eventsToListen = this.events().length > 0 ? this.events() : ["mousedown"];
 
 		// Loop through the array of event names and set up a listener for each
 		eventsToListen.forEach((eventName) => {

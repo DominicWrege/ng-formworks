@@ -1,8 +1,8 @@
-import { Component, inject, input, OnDestroy, OnInit } from '@angular/core';
-import { AbstractControl } from '@angular/forms';
-import type { FormValue, LayoutNode, WidgetOptions } from '../shared/types';
-import { JsonSchemaFormService } from '../json-schema-form.service';
-import { ReactiveFormsModule } from '@angular/forms';
+import { Component, inject, input, OnDestroy, OnInit } from "@angular/core";
+import { AbstractControl } from "@angular/forms";
+import type { FormValue, LayoutNode, WidgetOptions } from "../shared/types";
+import { JsonSchemaFormService } from "../json-schema-form.service";
+import { ReactiveFormsModule } from "@angular/forms";
 
 ///NB issue caused by sortablejs when it its destroyed
 //this mainly affects checkboxes coupled with conditions
@@ -11,8 +11,8 @@ import { ReactiveFormsModule } from '@angular/forms';
 //-switched to angular cdk for dnd
 @Component({
 	imports: [ReactiveFormsModule],
-	selector: 'checkbox-widget',
-	templateUrl: './checkbox.component.html',
+	selector: "checkbox-widget",
+	templateUrl: "./checkbox.component.html",
 })
 export class CheckboxComponent implements OnInit, OnDestroy {
 	private jsf = inject(JsonSchemaFormService);

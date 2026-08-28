@@ -1,4 +1,4 @@
-import { Type } from '@angular/core';
+import { Type } from "@angular/core";
 
 /**
  * Shared domain types for ng-formworks.
@@ -37,7 +37,7 @@ export type DataObject = Record<string, any>;
 // ---------------------------------------------------------------------------
 
 export type SchemaTypeName =
-	'string' | 'number' | 'integer' | 'boolean' | 'null' | 'object' | 'array';
+	"string" | "number" | "integer" | "boolean" | "null" | "object" | "array";
 
 /**
  * A JSON Schema node. Standard draft-4 through draft-2019-09 keywords are
@@ -101,8 +101,8 @@ export interface JsonSchema {
 	definitions?: { [key: string]: JsonSchema };
 
 	// UI extensions understood by this library
-	'x-schema-form'?: DataObject;
-	'ui:order'?: string[];
+	"x-schema-form"?: DataObject;
+	"ui:order"?: string[];
 	widget?: DataObject | string;
 
 	[key: string]:
@@ -204,7 +204,7 @@ export interface LayoutNode {
 	anyOfPointer?: string;
 	isITEItem?: boolean;
 	arrayItem?: boolean;
-	arrayItemType?: 'tuple' | 'list' | null;
+	arrayItemType?: "tuple" | "list" | null;
 	$ref?: string;
 	recursiveReference?: boolean;
 	required?: boolean;
@@ -227,7 +227,7 @@ export type Layout = LayoutItem[];
 /** Global options configuring the whole form. */
 export interface FormOptions {
 	autocomplete?: boolean;
-	addSubmit?: boolean | 'auto';
+	addSubmit?: boolean | "auto";
 	debug?: boolean;
 	disableInvalidSubmit?: boolean;
 	formDisabled?: boolean;
@@ -237,9 +237,9 @@ export interface FormOptions {
 	loadExternalAssets?: boolean;
 	pristine?: { errors: boolean; success: boolean };
 	supressPropertyTitles?: boolean;
-	setSchemaDefaults?: boolean | 'auto';
-	setLayoutDefaults?: boolean | 'auto';
-	validateOnRender?: boolean | 'auto';
+	setSchemaDefaults?: boolean | "auto";
+	setLayoutDefaults?: boolean | "auto";
+	validateOnRender?: boolean | "auto";
 	widgets?: WidgetLibraryMap;
 	defaultWidgetOptions?: WidgetOptions;
 	validationDebounceMs?: number;
@@ -271,7 +271,7 @@ export interface FunctionCondition {
 
 /** The recursive template structure produced by `buildFormGroupTemplate`. */
 export interface FormGroupTemplate {
-	controlType?: 'FormGroup' | 'FormArray' | 'FormControl' | 'IfThenElse' | '$ref';
+	controlType?: "FormGroup" | "FormArray" | "FormControl" | "IfThenElse" | "$ref";
 	controls?: Record<string, FormGroupTemplate> | FormGroupTemplate[];
 	validators?: Record<string, unknown[]>;
 	schemaPointer?: string;

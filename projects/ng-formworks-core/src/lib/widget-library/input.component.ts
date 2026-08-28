@@ -1,15 +1,15 @@
-import { Component, OnDestroy, OnInit, inject, input } from '@angular/core';
-import { AbstractControl } from '@angular/forms';
-import type { LayoutNode, WidgetOptions } from '../shared/types';
-import { JsonSchemaFormService } from '../json-schema-form.service';
-import { ReactiveFormsModule } from '@angular/forms';
-import { StopPropagationDirective } from './stop-propagation.directive';
-import { ElementAttributeDirective } from './element-attribute.directive';
+import { Component, OnDestroy, OnInit, inject, input } from "@angular/core";
+import { AbstractControl } from "@angular/forms";
+import type { LayoutNode, WidgetOptions } from "../shared/types";
+import { JsonSchemaFormService } from "../json-schema-form.service";
+import { ReactiveFormsModule } from "@angular/forms";
+import { StopPropagationDirective } from "./stop-propagation.directive";
+import { ElementAttributeDirective } from "./element-attribute.directive";
 
 @Component({
 	imports: [ReactiveFormsModule, StopPropagationDirective, ElementAttributeDirective],
-	selector: 'input-widget',
-	templateUrl: './input.component.html',
+	selector: "input-widget",
+	templateUrl: "./input.component.html",
 })
 export class InputComponent implements OnInit, OnDestroy {
 	private jsf = inject(JsonSchemaFormService);
@@ -27,7 +27,7 @@ export class InputComponent implements OnInit, OnDestroy {
 
 	//needed as templates don't accept something like [attributes]="options?.['x-inputAttributes']"
 	get inputAttributes() {
-		return this.options?.['x-inputAttributes'];
+		return this.options?.["x-inputAttributes"];
 	}
 
 	ngOnInit() {

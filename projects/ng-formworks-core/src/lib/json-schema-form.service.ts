@@ -1,15 +1,15 @@
-import { inject, Injectable, OnDestroy, Signal, Type } from '@angular/core';
+import { inject, Injectable, OnDestroy, Signal, Type } from "@angular/core";
 import {
 	AbstractControl,
 	UntypedFormArray,
 	UntypedFormGroup,
 	ValidationErrors,
-} from '@angular/forms';
+} from "@angular/forms";
 //import Ajv, { ErrorObject, Options } from 'ajv';
-import addFormats from 'ajv-formats';
-import Ajv2019, { ErrorObject, Options, ValidateFunction } from 'ajv/dist/2019';
-import jsonDraft6 from 'ajv/lib/refs/json-schema-draft-06.json';
-import jsonDraft7 from 'ajv/lib/refs/json-schema-draft-07.json';
+import addFormats from "ajv-formats";
+import Ajv2019, { ErrorObject, Options, ValidateFunction } from "ajv/dist/2019";
+import jsonDraft6 from "ajv/lib/refs/json-schema-draft-06.json";
+import jsonDraft7 from "ajv/lib/refs/json-schema-draft-07.json";
 import {
 	BehaviorSubject,
 	debounceTime,
@@ -18,7 +18,7 @@ import {
 	of,
 	Subject,
 	Subscription,
-} from 'rxjs';
+} from "rxjs";
 import {
 	deValidationMessages,
 	enValidationMessages,
@@ -27,7 +27,7 @@ import {
 	itValidationMessages,
 	ptValidationMessages,
 	zhValidationMessages,
-} from './locale';
+} from "./locale";
 import {
 	buildFormGroup,
 	buildFormGroupTemplate,
@@ -52,7 +52,7 @@ import {
 	LayoutNode,
 	removeRecursiveReferences,
 	toTitleCase,
-} from './shared';
+} from "./shared";
 import type {
 	DataObject,
 	ErrorMessages,
@@ -64,12 +64,12 @@ import type {
 	TitleMapItem,
 	ValidationMessages,
 	WidgetOptions,
-} from './shared/types';
+} from "./shared/types";
 
-import { setControl } from './shared/form-group.functions';
+import { setControl } from "./shared/form-group.functions";
 
-import { Eta, type EtaConfig } from 'eta/core';
-import { WidgetLibraryService } from './widget-library/widget-library.service';
+import { Eta, type EtaConfig } from "eta/core";
+import { WidgetLibraryService } from "./widget-library/widget-library.service";
 
 export type {
 	DataObject,
@@ -102,7 +102,7 @@ export type WidgetContext = {
  */
 export type LegacyWidgetContext = Omit<
 	WidgetContext,
-	'layoutNode' | 'layoutIndex' | 'dataIndex'
+	"layoutNode" | "layoutIndex" | "dataIndex"
 > & {
 	layoutNode?: LayoutNode | ContextValue<LayoutNode>;
 	layoutIndex?: number[] | ContextValue<number[]>;
@@ -160,12 +160,12 @@ export class JsonSchemaFormService implements OnDestroy {
 	dataRecursiveRefMap: Map<string, string> = new Map(); // Maps recursive reference points in form data
 	schemaRecursiveRefMap: Map<string, string> = new Map(); // Maps recursive reference points in schema
 	schemaRefLibrary: Record<string, any> = {}; // Library of schemas for resolving schema $refs
-	layoutRefLibrary: Record<string, LayoutNode | null> = { '': null }; // Library of layout nodes for adding to form
+	layoutRefLibrary: Record<string, LayoutNode | null> = { "": null }; // Library of layout nodes for adding to form
 	templateRefLibrary: Record<string, FormGroupTemplate | null> = {}; // Library of formGroup templates for adding to form
 	hasRootReference = false; // Does the form include a recursive reference to itself?
 	fieldsRequired = false; // (set automatically while building layout) Are there required fields?
 
-	language = 'en-US'; // Does the form include a recursive reference to itself?
+	language = "en-US"; // Does the form include a recursive reference to itself?
 
 	// Default global form options
 	defaultFormOptions: FormOptions = {
@@ -178,19 +178,19 @@ export class JsonSchemaFormService implements OnDestroy {
 		formDisabled: false, // Set entire form as disabled? (not editable, and disables outputs)
 		formReadonly: false, // Set entire form as read only? (not editable, but outputs still enabled)
 		fieldsRequired: false, // (set automatically) Are there any required fields in the form?
-		framework: 'no-framework', // The framework to load
+		framework: "no-framework", // The framework to load
 		loadExternalAssets: false, // Load external css and JavaScript for framework?
 		pristine: { errors: true, success: true },
 		supressPropertyTitles: false,
-		setSchemaDefaults: 'auto', // Set fefault values from schema?
+		setSchemaDefaults: "auto", // Set fefault values from schema?
 		// true = always set (unless overridden by layout default or formValues)
 		// false = never set
 		// 'auto' = set in addable components, and everywhere if formValues not set
-		setLayoutDefaults: 'auto', // Set fefault values from layout?
+		setLayoutDefaults: "auto", // Set fefault values from layout?
 		// true = always set (unless overridden by formValues)
 		// false = never set
 		// 'auto' = set in addable components, and everywhere if formValues not set
-		validateOnRender: 'auto', // Validate fields immediately, before they are touched?
+		validateOnRender: "auto", // Validate fields immediately, before they are touched?
 		// true = validate all fields immediately
 		// false = only validate fields after they are touched by user
 		// 'auto' = validate fields with values immediately, empty fields after they are touched
@@ -220,10 +220,10 @@ export class JsonSchemaFormService implements OnDestroy {
 
 	private readonly templateCache = new Map<string, Function>();
 	private readonly etaConfig: Partial<EtaConfig> = {
-		tags: ['{{', '}}'],
+		tags: ["{{", "}}"],
 		cache: true,
 		functionHeader:
-			'const value=it.value, values=it.values,tpldata=it.tpldata,idx=it.idx,$index=it.$index',
+			"const value=it.value, values=it.values,tpldata=it.tpldata,idx=it.idx,$index=it.$index",
 	};
 
 	private evalFunctionCache = new Map<string, Function>();
@@ -268,10 +268,10 @@ export class JsonSchemaFormService implements OnDestroy {
 
 	ajvRegistry: AJVRegistryItem = {};
 
-	getAjvInstance(name = 'default') {
+	getAjvInstance(name = "default") {
 		return this.ajvRegistry[name].ajvInstance;
 	}
-	getAjvValidator(name = 'default') {
+	getAjvValidator(name = "default") {
 		return this.ajvRegistry[name]?.ajvValidator;
 	}
 
@@ -279,15 +279,15 @@ export class JsonSchemaFormService implements OnDestroy {
 	 * Helper function to escape strings for use in a RegExp constructor
 	 */
 	private escapeRegExp(string: string): string {
-		return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the matched whole string
+		return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the matched whole string
 	}
 	constructor() {
 		this.setLanguage(this.language);
 		this.ajv.addMetaSchema(jsonDraft6);
 		this.ajv.addMetaSchema(jsonDraft7);
 		addFormats(this.ajv);
-		this.ajvRegistry['default'] = {
-			name: 'default',
+		this.ajvRegistry["default"] = {
+			name: "default",
 			ajvInstance: this.ajv,
 			ajvValidator: null,
 		};
@@ -301,8 +301,8 @@ this.ajv.addFormat("duration", {
 
 		// Create a RegExp object dynamically using the configured tags for the presence check
 		// We escape the tag strings to ensure they are treated as literals in the regex
-		const openTag = '{{';
-		const closeTag = '}}';
+		const openTag = "{{";
+		const closeTag = "}}";
 		// The regex pattern dynamically matches any character lazily between the configured tags
 		this.tagPresenceRegex = new RegExp(`${openTag}.+?${closeTag}`);
 		this.eta = new Eta(this.etaConfig);
@@ -316,7 +316,7 @@ this.ajv.addFormat("duration", {
 		this.formValueSubscription = null;
 	}
 
-	setLanguage(language: string = 'en-US') {
+	setLanguage(language: string = "en-US") {
 		this.language = language;
 		const languageValidationMessages: Record<string, ValidationMessages> = {
 			de: deValidationMessages,
@@ -372,8 +372,8 @@ this.ajv.addFormat("duration", {
 		this.templateRefLibrary = {};
 		this.formOptions = cloneDeep(this.defaultFormOptions);
 		this.ajvRegistry = {};
-		this.ajvRegistry['default'] = {
-			name: 'default',
+		this.ajvRegistry["default"] = {
+			name: "default",
 			ajvInstance: this.ajv,
 			ajvValidator: null,
 		};
@@ -402,10 +402,10 @@ this.ajv.addFormat("duration", {
 	 */
 	buildRemoteError(errors: ErrorMessages) {
 		forEach(errors, (value, key) => {
-			if (typeof key === 'string' && key in this.formGroup!.controls) {
+			if (typeof key === "string" && key in this.formGroup!.controls) {
 				for (const error of value) {
 					const err: ValidationErrors = {};
-					err[error['code']] = error['message'];
+					err[error["code"]] = error["message"];
 					this.formGroup!.get(key)!.setErrors(err, { emitEvent: true });
 				}
 			}
@@ -415,7 +415,7 @@ this.ajv.addFormat("duration", {
 	validateData(
 		newValue: DataObject,
 		updateSubscriptions = true,
-		ajvInstanceName = 'default',
+		ajvInstanceName = "default",
 	): void {
 		// Format raw form data to correct data types
 		this.data = formatFormData(
@@ -431,7 +431,7 @@ this.ajv.addFormat("duration", {
 			const compiledErrors: Record<string, string[]> = {};
 			(errors || []).forEach((error) => {
 				// TODO(review): of ajv giving '' as instancePath for root objects
-				let errorPath = error.instancePath || 'ROOT';
+				let errorPath = error.instancePath || "ROOT";
 				if (!compiledErrors[errorPath]) {
 					compiledErrors[errorPath] = [];
 				}
@@ -508,22 +508,22 @@ this.ajv.addFormat("duration", {
 
 			// convert disableErrorState / disableSuccessState to enable...
 			const globalDefaults = this.formOptions.defaultWidgetOptions!;
-			['ErrorState', 'SuccessState']
-				.filter((suffix) => hasOwn(globalDefaults, 'disable' + suffix))
+			["ErrorState", "SuccessState"]
+				.filter((suffix) => hasOwn(globalDefaults, "disable" + suffix))
 				.forEach((suffix) => {
-					globalDefaults['enable' + suffix] = !globalDefaults['disable' + suffix];
-					delete globalDefaults['disable' + suffix];
+					globalDefaults["enable" + suffix] = !globalDefaults["disable" + suffix];
+					delete globalDefaults["disable" + suffix];
 				});
 		}
 	}
 
-	compileAjvSchema(ajvInstanceName = 'default') {
+	compileAjvSchema(ajvInstanceName = "default") {
 		let ajvValidator = this.getAjvValidator(ajvInstanceName);
 		if (!ajvValidator) {
 			// if 'ui:order' exists in properties, move it to root before compiling with ajv
-			if (Array.isArray(this.schema.properties!['ui:order'])) {
-				this.schema['ui:order'] = this.schema.properties!['ui:order'];
-				delete this.schema.properties!['ui:order'];
+			if (Array.isArray(this.schema.properties!["ui:order"])) {
+				this.schema["ui:order"] = this.schema.properties!["ui:order"];
+				delete this.schema.properties!["ui:order"];
 			}
 			this.getAjvInstance(ajvInstanceName).removeSchema(this.schema);
 
@@ -554,7 +554,7 @@ this.ajv.addFormat("duration", {
 	 * Parses text templates using the Eta engine, utilizing a cache.
 	 */
 	parseText(
-		text: string = '',
+		text: string = "",
 		value: unknown = {},
 		values: unknown = {},
 		key: IndexKey = null,
@@ -569,18 +569,18 @@ this.ajv.addFormat("duration", {
 		if (!compiledTemplate) {
 			// If not in cache, compile it
 			try {
-				let etaTpl = text.replace(/{{/g, '{{=');
+				let etaTpl = text.replace(/{{/g, "{{=");
 				compiledTemplate = this.eta.compile(etaTpl);
 				// Store the newly compiled function in the cache
 				this.templateCache.set(text, compiledTemplate);
 			} catch (error) {
-				console.error('Error compiling template:', error);
+				console.error("Error compiling template:", error);
 				return text; // Return original text if compilation fails
 			}
 		}
 
 		// --- Execution Logic ---
-		const index = typeof key === 'number' ? key + 1 : key;
+		const index = typeof key === "number" ? key + 1 : key;
 		const dataContext = {
 			value: value,
 			values: values,
@@ -593,7 +593,7 @@ this.ajv.addFormat("duration", {
 			// Execute the function (retrieved from cache or newly compiled)
 			return compiledTemplate.call(this.eta, dataContext, this.etaConfig);
 		} catch (error) {
-			console.error('Error during template execution:', error);
+			console.error("Error during template execution:", error);
 			return text;
 		}
 	}
@@ -610,18 +610,18 @@ this.ajv.addFormat("duration", {
 	//not used-was called by parseText
 	//parseText now uses template engines
 	parseExpression(
-		expression: string = '',
+		expression: string = "",
 		value: unknown = {},
 		values: unknown = {},
 		key: IndexKey = null,
 		tpldata: DataObject | null = null,
 	): string | DataObject | number {
-		if (typeof expression !== 'string' || !expression.trim()) {
-			return '';
+		if (typeof expression !== "string" || !expression.trim()) {
+			return "";
 		}
 
 		// Prepare the same data context as `parseText`
-		const index = typeof key === 'number' ? key + 1 : key;
+		const index = typeof key === "number" ? key + 1 : key;
 		const dataContext = {
 			value: value,
 			values: values,
@@ -644,12 +644,12 @@ this.ajv.addFormat("duration", {
 			if (!compiledTemplate) {
 				// If not in cache, compile it
 				try {
-					let etaTpl = templateWrapper.replace(/{{/g, '{{=');
+					let etaTpl = templateWrapper.replace(/{{/g, "{{=");
 					compiledTemplate = this.eta.compile(etaTpl);
 					// Store the newly compiled function in the cache
 					this.templateCache.set(templateWrapper, compiledTemplate);
 				} catch (error) {
-					console.error('Error compiling template:', error);
+					console.error("Error compiling template:", error);
 					return templateWrapper; // Return original text if compilation fails
 				}
 			}
@@ -658,12 +658,12 @@ this.ajv.addFormat("duration", {
 				// Execute the function (retrieved from cache or newly compiled)
 				return compiledTemplate(dataContext);
 			} catch (error) {
-				console.error('Error during template execution:', error);
+				console.error("Error during template execution:", error);
 				return templateWrapper;
 			}
 		} catch (error) {
 			console.error(`Error evaluating expression "${expression}":`, error);
-			return '';
+			return "";
 		}
 	}
 
@@ -685,32 +685,32 @@ this.ajv.addFormat("duration", {
 			dataIndex: () => number[] | undefined;
 		} = {
 			layoutNode: () => {
-				return typeof parentCtx.layoutNode === 'function'
+				return typeof parentCtx.layoutNode === "function"
 					? parentCtx.layoutNode()
 					: parentCtx.layoutNode;
 			},
 			dataIndex: () => {
-				return typeof parentCtx.dataIndex === 'function'
+				return typeof parentCtx.dataIndex === "function"
 					? parentCtx.dataIndex()
 					: parentCtx.dataIndex;
 			},
 		};
 		const parentNode = parentCtxAsSignals.layoutNode();
 		const parentValues: FormValue = this.getFormControlValue(parentCtxAsSignals);
-		const isArrayItem = (parentNode!.type || '').slice(-5) === 'array' && isArray(parentValues);
+		const isArrayItem = (parentNode!.type || "").slice(-5) === "array" && isArray(parentValues);
 		const text = JsonPointer.getFirst(
-			isArrayItem && childNode!.type !== '$ref'
+			isArrayItem && childNode!.type !== "$ref"
 				? [
-						[childNode, '/options/legend'],
-						[childNode, '/options/title'],
-						[parentNode, '/options/title'],
-						[parentNode, '/options/legend'],
+						[childNode, "/options/legend"],
+						[childNode, "/options/title"],
+						[parentNode, "/options/title"],
+						[parentNode, "/options/legend"],
 					]
 				: [
-						[childNode, '/options/title'],
-						[childNode, '/options/legend'],
-						[parentNode, '/options/title'],
-						[parentNode, '/options/legend'],
+						[childNode, "/options/title"],
+						[childNode, "/options/legend"],
+						[parentNode, "/options/title"],
+						[parentNode, "/options/legend"],
 					],
 		) as string;
 		if (!text) {
@@ -750,25 +750,25 @@ this.ajv.addFormat("duration", {
 			return true; // No condition means the layout node is visible
 		}
 
-		if (typeof condition === 'string') {
+		if (typeof condition === "string") {
 			return this.evaluateStringCondition(condition, dataIndex);
 		}
 
-		if (typeof condition === 'function') {
+		if (typeof condition === "function") {
 			// Direct function execution is safe and standard
 			try {
 				return condition(this.data);
 			} catch (e) {
-				console.error('Condition function errored out:', e);
+				console.error("Condition function errored out:", e);
 				return true; // Default to visible on error
 			}
 		}
 
 		// Check if it matches the FunctionCondition interface structure
 		if (
-			typeof condition === 'object' &&
-			(typeof condition?.functionBody === 'string' ||
-				typeof condition?.functionBodyRaw === 'string')
+			typeof condition === "object" &&
+			(typeof condition?.functionBody === "string" ||
+				typeof condition?.functionBodyRaw === "string")
 		) {
 			// This still uses the potentially insecure new Function approach,
 			// but encapsulated as requested by the original code's structure.
@@ -781,9 +781,9 @@ this.ajv.addFormat("duration", {
 					condition.functionBodyRaw ||
 					condition.functionBody
 						// Add ?. before [ when preceded by letter/underscore/$ (not digits)
-						.replace(/([a-zA-Z_$])(\[)/g, '$1?.[')
+						.replace(/([a-zA-Z_$])(\[)/g, "$1?.[")
 						// Add ?. before . when preceded by letter/underscore/$/] and followed by valid identifier start
-						.replace(/([a-zA-Z_$\]])(\.)(?=[a-zA-Z_$])/g, '$1?.'),
+						.replace(/([a-zA-Z_$\]])(\.)(?=[a-zA-Z_$])/g, "$1?."),
 			};
 
 			return this.evaluateFunctionBodyCondition(condition_nullChecks, dataIndex);
@@ -798,7 +798,7 @@ this.ajv.addFormat("duration", {
 		const arrayIndex = dataIndex?.[dataIndex.length - 1];
 		if (hasValue(arrayIndex)) {
 			// Use string.replace which returns a NEW string (immutable strings)
-			pointer = pointer.replace('[arrayIndex]', `[${arrayIndex}]`);
+			pointer = pointer.replace("[arrayIndex]", `[${arrayIndex}]`);
 		}
 
 		const parsedPointer = JsonPointer.parseObjectPath(pointer);
@@ -823,7 +823,7 @@ this.ajv.addFormat("duration", {
 			return dynFn(this.data, dataIndex);
 		} catch (e) {
 			console.error(
-				'condition functionBody errored out on evaluation: ' + condition.functionBody,
+				"condition functionBody errored out on evaluation: " + condition.functionBody,
 				e,
 			);
 			return true; // Default visibility on error
@@ -844,7 +844,7 @@ this.ajv.addFormat("duration", {
 
 		const cacheKey = `${functionBody}`;
 		if (!this.evalFunctionCache.has(cacheKey)) {
-			const fn = new Function('model', 'arrayIndices', functionBody); // Still using new Function
+			const fn = new Function("model", "arrayIndices", functionBody); // Still using new Function
 			this.evalFunctionCache.set(cacheKey, fn);
 		}
 
@@ -870,9 +870,9 @@ this.ajv.addFormat("duration", {
 			(layoutNode?.schemaPointer && layoutNode!.anyOfPointer)
 		) {
 			//before changing control, need to set the new data type for data formatting
-			const schemaType = this.dataMap.get(layoutNode!.dataPointer!)!.get('schemaType');
+			const schemaType = this.dataMap.get(layoutNode!.dataPointer!)!.get("schemaType");
 			if (schemaType != layoutNode!.dataType) {
-				this.dataMap.get(layoutNode!.dataPointer!)!.set('schemaType', layoutNode!.dataType);
+				this.dataMap.get(layoutNode!.dataPointer!)!.set("schemaType", layoutNode!.dataType);
 			}
 			this.setFormControl(ctx, ctx.formControl);
 		}
@@ -882,16 +882,16 @@ this.ajv.addFormat("duration", {
 			ctx.controlValue = ctx.formControl.value;
 			ctx.controlDisabled = ctx.formControl.disabled;
 			ctx.options!.errorMessage =
-				ctx.formControl.status === 'VALID'
+				ctx.formControl.status === "VALID"
 					? null
 					: this.formatErrors(ctx.formControl.errors, ctx.options!.validationMessages);
 			ctx.options!.showErrors =
 				this.formOptions.validateOnRender === true ||
-				(this.formOptions.validateOnRender === 'auto' && hasValue(ctx.controlValue));
+				(this.formOptions.validateOnRender === "auto" && hasValue(ctx.controlValue));
 			this.fcStatusChangesSubs = ctx.formControl.statusChanges.subscribe(
 				(status) =>
 					(ctx.options!.errorMessage =
-						status === 'VALID'
+						status === "VALID"
 							? null
 							: this.formatErrors(
 									ctx.formControl!.errors,
@@ -919,8 +919,8 @@ this.ajv.addFormat("duration", {
 		//to use for the value
 		// TODO: try maybe marking descendants in applyITEConditions
 		let isITEDescendant = layoutNode?.schemaPointer
-			?.split('/')
-			.some((elt) => ['then', 'else'].includes(elt));
+			?.split("/")
+			.some((elt) => ["then", "else"].includes(elt));
 		if (
 			ctx.options?.condition ||
 			layoutNode?.oneOfPointer ||
@@ -964,33 +964,33 @@ this.ajv.addFormat("duration", {
 		}
 		const addSpaces = (string: string) =>
 			string[0].toUpperCase() +
-			(string.slice(1) || '').replace(/([a-z])([A-Z])/g, '$1 $2').replace(/_/g, ' ');
+			(string.slice(1) || "").replace(/([a-z])([A-Z])/g, "$1 $2").replace(/_/g, " ");
 		const formatError = (error: any): string =>
-			typeof error === 'object'
+			typeof error === "object"
 				? Object.keys(error)
 						.map((key) =>
 							error[key] === true
 								? addSpaces(key)
 								: error[key] === false
-									? 'Not ' + addSpaces(key)
-									: addSpaces(key) + ': ' + formatError(error[key]),
+									? "Not " + addSpaces(key)
+									: addSpaces(key) + ": " + formatError(error[key]),
 						)
-						.join(', ')
+						.join(", ")
 				: addSpaces(error.toString());
 		const messages = [];
 		return (
 			Object.keys(errors!)
 				// Hide 'required' error, unless it is the only one
-				.filter((errorKey) => errorKey !== 'required' || Object.keys(errors!).length === 1)
+				.filter((errorKey) => errorKey !== "required" || Object.keys(errors!).length === 1)
 				.map((errorKey) =>
 					// If validationMessages is a string, return it
-					typeof validationMessages === 'string'
+					typeof validationMessages === "string"
 						? validationMessages
 						: // If custom error message is a function, return function result
-							typeof validationMessages[errorKey] === 'function'
+							typeof validationMessages[errorKey] === "function"
 							? validationMessages[errorKey](errors![errorKey])
 							: // If custom error message is a string, replace placeholders and return
-								typeof validationMessages[errorKey] === 'string'
+								typeof validationMessages[errorKey] === "string"
 								? // Does error message have any {{property}} placeholders?
 									!/{{.+?}}/.test(validationMessages[errorKey])
 									? validationMessages[errorKey]
@@ -998,17 +998,17 @@ this.ajv.addFormat("duration", {
 										Object.keys(errors![errorKey]).reduce(
 											(errorMessage, errorProperty) =>
 												errorMessage.replace(
-													new RegExp('{{' + errorProperty + '}}', 'g'),
+													new RegExp("{{" + errorProperty + "}}", "g"),
 													errors![errorKey][errorProperty],
 												),
 											validationMessages[errorKey],
 										)
 								: // If no custom error message, return formatted error data instead
 									addSpaces(errorKey) +
-									' Error: ' +
+									" Error: " +
 									formatError(errors![errorKey]),
 				)
-				.join('<br>')
+				.join("<br>")
 		);
 	}
 
@@ -1025,7 +1025,7 @@ this.ajv.addFormat("duration", {
 		if (isArray(ctx.options!.copyValueTo)) {
 			for (const item of ctx.options!.copyValueTo) {
 				const targetControl = this.formGroup && getControl(this.formGroup, item);
-				if (isObject(targetControl) && typeof targetControl!.setValue === 'function') {
+				if (isObject(targetControl) && typeof targetControl!.setValue === "function") {
 					targetControl!.setValue(value);
 					targetControl!.markAsDirty();
 				}
@@ -1043,7 +1043,7 @@ this.ajv.addFormat("duration", {
 
 		// Re-add an item for each checked box
 		const refPointer = removeRecursiveReferences(
-			ctx.layoutNode!()!.dataPointer! + '/-',
+			ctx.layoutNode!()!.dataPointer! + "/-",
 			this.dataRecursiveRefMap,
 			this.arrayMap,
 		);
@@ -1089,7 +1089,7 @@ this.ajv.addFormat("duration", {
 			!ctx ||
 			!ctx.layoutNode ||
 			!isDefined(ctx.layoutNode()!.dataPointer) ||
-			ctx.layoutNode()!.type === '$ref'
+			ctx.layoutNode()!.type === "$ref"
 		) {
 			return null!;
 		}
@@ -1109,7 +1109,7 @@ this.ajv.addFormat("duration", {
 			!ctx ||
 			!ctx.layoutNode ||
 			!isDefined(ctx.layoutNode()!.dataPointer) ||
-			ctx.layoutNode()!.type === '$ref'
+			ctx.layoutNode()!.type === "$ref"
 		) {
 			return null!;
 		}
@@ -1122,7 +1122,7 @@ this.ajv.addFormat("duration", {
 			!ctx ||
 			!ctx.layoutNode ||
 			!isDefined(ctx.layoutNode()!.dataPointer) ||
-			ctx.layoutNode()!.type === '$ref' ||
+			ctx.layoutNode()!.type === "$ref" ||
 			this.formGroup == null
 		) {
 			return null!;
@@ -1199,7 +1199,7 @@ this.ajv.addFormat("duration", {
 		if (!hasValue(ctx.layoutIndex!())) {
 			return null!;
 		}
-		return '/' + ctx.layoutIndex!()!.join('/items/');
+		return "/" + ctx.layoutIndex!()!.join("/items/");
 	}
 
 	isControlBound(ctx: WidgetContext): boolean {
@@ -1252,7 +1252,7 @@ this.ajv.addFormat("duration", {
 		}
 		if (name) {
 			newLayoutNode.name = name;
-			newLayoutNode.dataPointer += '/' + JsonPointer.escape(name);
+			newLayoutNode.dataPointer += "/" + JsonPointer.escape(name);
 			newLayoutNode.options!.title = fixTitle(name);
 		}
 
@@ -1380,7 +1380,7 @@ this.ajv.addFormat("duration", {
 					$ref: node.$ref || node.items[0]?.dataPointer,
 					dataPointer: node.items[0]?.dataPointer,
 					arrayItem: true,
-					arrayItemType: 'list',
+					arrayItemType: "list",
 				},
 				[...currLayoutIndex.slice(0, currLayoutIndex.length - 1), node.items.length - 1],
 				[...currDataIndex.slice(0, currDataIndex.length - 1), node.items.length - 1],
@@ -1388,7 +1388,7 @@ this.ajv.addFormat("duration", {
 			const lengthDifference =
 				newData.length -
 				node.items.filter((litem) => {
-					return litem?.type != '$ref';
+					return litem?.type != "$ref";
 				}).length;
 			if (lengthDifference > 0) {
 				// Add missing controls if newData has more items
@@ -1398,7 +1398,7 @@ this.ajv.addFormat("duration", {
 			} else if (lengthDifference < 0) {
 				let numToRemove =
 					node.items.filter((litem) => {
-						return litem?.type != '$ref';
+						return litem?.type != "$ref";
 					}).length - newData.length;
 				// Remove extra controls if newData has fewer items
 				for (let i = 0; i < numToRemove; i++) {

@@ -1,15 +1,15 @@
-import { Component, inject, input, OnDestroy, OnInit } from '@angular/core';
-import { AbstractControl } from '@angular/forms';
-import type { FormValue, LayoutNode, TitleMapItem, WidgetOptions } from '../shared/types';
-import { JsonSchemaFormService } from '../json-schema-form.service';
-import { buildTitleMap, isArray } from '../shared';
-import { FormsModule } from '@angular/forms';
-import { ReactiveFormsModule } from '@angular/forms';
+import { Component, inject, input, OnDestroy, OnInit } from "@angular/core";
+import { AbstractControl } from "@angular/forms";
+import type { FormValue, LayoutNode, TitleMapItem, WidgetOptions } from "../shared/types";
+import { JsonSchemaFormService } from "../json-schema-form.service";
+import { buildTitleMap, isArray } from "../shared";
+import { FormsModule } from "@angular/forms";
+import { ReactiveFormsModule } from "@angular/forms";
 
 @Component({
 	imports: [FormsModule, ReactiveFormsModule],
-	selector: 'select-widget',
-	templateUrl: './select.component.html',
+	selector: "select-widget",
+	templateUrl: "./select.component.html",
 })
 export class SelectComponent implements OnInit, OnDestroy {
 	private jsf = inject(JsonSchemaFormService);

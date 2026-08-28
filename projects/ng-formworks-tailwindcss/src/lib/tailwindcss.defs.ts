@@ -1,4 +1,4 @@
-import { InjectionToken } from '@angular/core';
+import { InjectionToken } from "@angular/core";
 
 /**
  * Class-string map consumed by all Tailwind widgets.
@@ -54,4 +54,4 @@ export interface TailwindFormClasses {
 	removeItemBtn: string;
 }
 
-export const TAILWIND_CFG = new InjectionToken<TailwindFormClasses>('TAILWIND_FORM_CLASSES');
+export const TAILWIND_CFG = new InjectionToken<TailwindFormClasses>("TAILWIND_FORM_CLASSES");

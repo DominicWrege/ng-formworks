@@ -6,17 +6,17 @@ import {
 	SimpleChanges,
 	inject,
 	input,
-} from '@angular/core';
-import { Subscription } from 'rxjs';
-import type { FormValue, LayoutNode, WidgetOptions } from '../shared/types';
-import { JsonSchemaFormService } from '../json-schema-form.service';
-import { RootComponent } from './root.component';
-import { TextTemplatePipe } from './text-template.pipe';
+} from "@angular/core";
+import { Subscription } from "rxjs";
+import type { FormValue, LayoutNode, WidgetOptions } from "../shared/types";
+import { JsonSchemaFormService } from "../json-schema-form.service";
+import { RootComponent } from "./root.component";
+import { TextTemplatePipe } from "./text-template.pipe";
 
 @Component({
 	imports: [RootComponent, TextTemplatePipe],
-	selector: 'section-widget',
-	templateUrl: './section.component.html',
+	selector: "section-widget",
+	templateUrl: "./section.component.html",
 	styles: [
 		`
 			.legend {
@@ -24,13 +24,13 @@ import { TextTemplatePipe } from './text-template.pipe';
 			}
 			.expandable > legend:before,
 			.expandable > label:before {
-				content: '▶';
+				content: "▶";
 				padding-right: 0.3em;
 				font-family: auto;
 			}
 			.expanded > legend:before,
 			.expanded > label:before {
-				content: '▼';
+				content: "▼";
 				padding-right: 0.2em;
 			}
 		`,
@@ -60,21 +60,21 @@ export class SectionComponent implements OnInit, OnDestroy, OnChanges {
 		this.jsf.initializeControl(this);
 		this.options = this.layoutNode()!.options || {};
 		this.expanded =
-			typeof this.options.expanded === 'boolean'
+			typeof this.options.expanded === "boolean"
 				? this.options.expanded
 				: !this.options.expandable;
 		switch (this.layoutNode()!.type) {
-			case 'fieldset':
-			case 'array':
-			case 'tab':
-			case 'advancedfieldset':
-			case 'authfieldset':
-			case 'optionfieldset':
-			case 'selectfieldset':
-				this.containerType = 'fieldset';
+			case "fieldset":
+			case "array":
+			case "tab":
+			case "advancedfieldset":
+			case "authfieldset":
+			case "optionfieldset":
+			case "selectfieldset":
+				this.containerType = "fieldset";
 				break;
 			default: // 'div', 'flex', 'section', 'conditional', 'actions', 'tagsinput'
-				this.containerType = 'div';
+				this.containerType = "div";
 				break;
 		}
 		this.updateTitleContext();
@@ -93,28 +93,28 @@ export class SectionComponent implements OnInit, OnDestroy, OnChanges {
 	// (child attributes are set in root.component)
 	getFlexAttribute(attribute: string) {
 		const flexActive: boolean =
-			this.layoutNode()!.type === 'flex' ||
+			this.layoutNode()!.type === "flex" ||
 			!!this.options.displayFlex ||
-			this.options.display === 'flex';
-		if (attribute !== 'flex' && !flexActive) {
+			this.options.display === "flex";
+		if (attribute !== "flex" && !flexActive) {
 			return null;
 		}
 		switch (attribute) {
-			case 'is-flex':
+			case "is-flex":
 				return flexActive;
-			case 'display':
-				return flexActive ? 'flex' : 'initial';
-			case 'flex-direction':
-			case 'flex-wrap':
-				const index = ['flex-direction', 'flex-wrap'].indexOf(attribute);
+			case "display":
+				return flexActive ? "flex" : "initial";
+			case "flex-direction":
+			case "flex-wrap":
+				const index = ["flex-direction", "flex-wrap"].indexOf(attribute);
 				return (
-					(this.options['flex-flow'] || '').split(/\s+/)[index] ||
+					(this.options["flex-flow"] || "").split(/\s+/)[index] ||
 					this.options[attribute] ||
-					['column', 'nowrap'][index]
+					["column", "nowrap"][index]
 				);
-			case 'justify-content':
-			case 'align-items':
-			case 'align-content':
+			case "justify-content":
+			case "align-items":
+			case "align-content":
 				return this.options[attribute];
 		}
 	}

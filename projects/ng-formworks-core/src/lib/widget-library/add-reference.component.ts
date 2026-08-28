@@ -1,12 +1,12 @@
-import { Component, OnInit, inject, input } from '@angular/core';
-import type { LayoutNode, WidgetOptions } from '../shared/types';
-import { JsonSchemaFormService, type LegacyWidgetContext } from '../json-schema-form.service';
-import { StopPropagationDirective } from './stop-propagation.directive';
+import { Component, OnInit, inject, input } from "@angular/core";
+import type { LayoutNode, WidgetOptions } from "../shared/types";
+import { JsonSchemaFormService, type LegacyWidgetContext } from "../json-schema-form.service";
+import { StopPropagationDirective } from "./stop-propagation.directive";
 
 @Component({
 	imports: [StopPropagationDirective],
-	selector: 'add-reference-widget',
-	templateUrl: './add-reference.component.html',
+	selector: "add-reference-widget",
+	templateUrl: "./add-reference.component.html",
 })
 export class AddReferenceComponent implements OnInit {
 	private jsf = inject(JsonSchemaFormService);

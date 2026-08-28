@@ -1,7 +1,7 @@
-import { Component, inject, input } from '@angular/core';
-import type { LayoutNode } from '@ng-formworks/core';
-import { JsonSchemaFormService } from '@ng-formworks/core';
-import { SelectWidgetComponent } from '@ng-formworks/core';
+import { Component, inject, input } from "@angular/core";
+import type { LayoutNode } from "@ng-formworks/core";
+import { JsonSchemaFormService } from "@ng-formworks/core";
+import { SelectWidgetComponent } from "@ng-formworks/core";
 
 /**
  * Root component for the tailwindcss framework.
@@ -10,8 +10,8 @@ import { SelectWidgetComponent } from '@ng-formworks/core';
  */
 @Component({
 	imports: [SelectWidgetComponent],
-	selector: 'tailwindcss-framework',
-	templateUrl: './tailwindcss.component.html',
+	selector: "tailwindcss-framework",
+	templateUrl: "./tailwindcss.component.html",
 })
 export class TailwindFrameworkComponent {
 	jsf = inject(JsonSchemaFormService);

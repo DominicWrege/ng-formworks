@@ -8,13 +8,13 @@ export const jsonSchemaFormatTests = {
 
 	// Modified to allow incomplete entries, such as
 	// "2000-03-14T01:59:26.535" (needs "Z") or "2000-03-14T01:59" (needs ":00Z")
-	'date-time':
+	"date-time":
 		/^\d\d\d\d-[0-1]\d-[0-3]\d[t\s][0-2]\d:[0-5]\d(?::[0-5]\d)?(?:\.\d+)?(?:z|[+-]\d\d:\d\d)?$/i,
 
 	// "2000-03-14T01:59:26.535" (doesn't need "Z") or "2000-03-14T01:59" (needs ":00Z")
 	//'iso-date-time':^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(Z|([+-]\d{2}:\d{2}))?$
 	//for now same as 'date-time' until better tested
-	'iso-date-time':
+	"iso-date-time":
 		/^\d\d\d\d-[0-1]\d-[0-3]\d[t\s][0-2]\d:[0-5]\d(?::[0-5]\d)?(?:\.\d+)?(?:z|[+-]\d\d:\d\d)?$/i,
 
 	// email (sources from jsen validator):
@@ -34,10 +34,10 @@ export const jsonSchemaFormatTests = {
 	uri: /^(?:[a-z][a-z0-9+-.]*)(?::|\/)\/?[^\s]*$/i,
 
 	// uri fragment: https://tools.ietf.org/html/rfc3986#appendix-A
-	'uri-reference': /^(?:(?:[a-z][a-z0-9+-.]*:)?\/\/)?[^\s]*$/i,
+	"uri-reference": /^(?:(?:[a-z][a-z0-9+-.]*:)?\/\/)?[^\s]*$/i,
 
 	// uri-template: https://tools.ietf.org/html/rfc6570
-	'uri-template':
+	"uri-template":
 		/^(?:(?:[^\x00-\x20"'<>%\\^`{|}]|%[0-9a-f]{2})|\{[+#./;?&=,!@|]?(?:[a-z0-9_]|%[0-9a-f]{2})+(?::[1-9][0-9]{0,3}|\*)?(?:,(?:[a-z0-9_]|%[0-9a-f]{2})+(?::[1-9][0-9]{0,3}|\*)?)*\})*$/i,
 
 	// For the source: https://gist.github.com/dperini/729294
@@ -53,10 +53,10 @@ export const jsonSchemaFormatTests = {
 	color: /^\s*(#(?:[\da-f]{3}){1,2}|rgb\((?:\d{1,3},\s*){2}\d{1,3}\)|rgba\((?:\d{1,3},\s*){3}\d*\.?\d+\)|hsl\(\d{1,3}(?:,\s*\d{1,3}%){2}\)|hsla\(\d{1,3}(?:,\s*\d{1,3}%){2},\s*\d*\.?\d+\))\s*$/gi,
 
 	// JSON-pointer: https://tools.ietf.org/html/rfc6901
-	'json-pointer':
+	"json-pointer":
 		/^(?:\/(?:[^~/]|~0|~1)*)*$|^#(?:\/(?:[a-z0-9_\-.!$&'()*+,;:=@]|%[0-9a-f]{2}|~0|~1)*)*$/i,
 
-	'relative-json-pointer': /^(?:0|[1-9][0-9]*)(?:#|(?:\/(?:[^~/]|~0|~1)*)*)$/,
+	"relative-json-pointer": /^(?:0|[1-9][0-9]*)(?:#|(?:\/(?:[^~/]|~0|~1)*)*)$/,
 
 	duration: /^P(?!$)(\d+Y)?(\d+M)?(\d+D)?(T(\d+H)?(\d+M)?(\d+S)?)?$/,
 
@@ -73,20 +73,20 @@ export const jsonSchemaFormatTests = {
 };
 
 export type JsonSchemaFormatNames =
-	| 'date'
-	| 'time'
-	| 'date-time'
-	| 'email'
-	| 'hostname'
-	| 'ipv4'
-	| 'ipv6'
-	| 'uri'
-	| 'uri-reference'
-	| 'uri-template'
-	| 'url'
-	| 'uuid'
-	| 'color'
-	| 'json-pointer'
-	| 'relative-json-pointer'
-	| 'duration'
-	| 'regex';
+	| "date"
+	| "time"
+	| "date-time"
+	| "email"
+	| "hostname"
+	| "ipv4"
+	| "ipv6"
+	| "uri"
+	| "uri-reference"
+	| "uri-template"
+	| "url"
+	| "uuid"
+	| "color"
+	| "json-pointer"
+	| "relative-json-pointer"
+	| "duration"
+	| "regex";

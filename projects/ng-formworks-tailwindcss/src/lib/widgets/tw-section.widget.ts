@@ -1,8 +1,8 @@
-import { Component } from '@angular/core';
-import { SectionComponent } from '@ng-formworks/core';
-import { injectTw } from '../tw-base';
-import { RootComponent } from '@ng-formworks/core';
-import { TextTemplatePipe } from '@ng-formworks/core';
+import { Component } from "@angular/core";
+import { SectionComponent } from "@ng-formworks/core";
+import { injectTw } from "../tw-base";
+import { RootComponent } from "@ng-formworks/core";
+import { TextTemplatePipe } from "@ng-formworks/core";
 
 /**
  * Tailwind replacement for the generic 'section' widget (object containers,
@@ -12,8 +12,8 @@ import { TextTemplatePipe } from '@ng-formworks/core';
  */
 @Component({
 	imports: [RootComponent, TextTemplatePipe],
-	selector: 'tw-section-widget',
-	templateUrl: './tw-section.widget.html',
+	selector: "tw-section-widget",
+	templateUrl: "./tw-section.widget.html",
 })
 export class TwSectionComponent extends SectionComponent {
 	readonly tw = injectTw();

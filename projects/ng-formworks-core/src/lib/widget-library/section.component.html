@@ -1,4 +1,4 @@
-@if (containerType === 'div') {
+@if (containerType === "div") {
 	<div
 		[class]="options?.htmlClass || ''"
 		[class.expandable]="options?.expandable && !expanded"
@@ -29,7 +29,7 @@
 		></root-widget>
 	</div>
 }
-@if (containerType === 'fieldset') {
+@if (containerType === "fieldset") {
 	<fieldset
 		[class]="options?.htmlClass || ''"
 		[class.expandable]="options?.expandable && !expanded"
@@ -44,7 +44,7 @@
 				(click)="toggleExpanded()"
 			></legend>
 		}
-		@if (options?.messageLocation !== 'bottom') {
+		@if (options?.messageLocation !== "bottom") {
 			<div>
 				@if (options?.description) {
 					<p
@@ -70,7 +70,7 @@
 			[style.flex-wrap]="getFlexAttribute('flex-wrap')"
 			[style.justify-content]="getFlexAttribute('justify-content')"
 		></root-widget>
-		@if (options?.messageLocation === 'bottom') {
+		@if (options?.messageLocation === "bottom") {
 			<div>
 				@if (options?.description) {
 					<p

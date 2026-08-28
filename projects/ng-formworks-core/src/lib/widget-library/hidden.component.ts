@@ -1,13 +1,13 @@
-import { Component, inject, input, OnDestroy, OnInit } from '@angular/core';
-import { AbstractControl } from '@angular/forms';
-import type { FormValue, LayoutNode } from '../shared/types';
-import { JsonSchemaFormService } from '../json-schema-form.service';
-import { ReactiveFormsModule } from '@angular/forms';
+import { Component, inject, input, OnDestroy, OnInit } from "@angular/core";
+import { AbstractControl } from "@angular/forms";
+import type { FormValue, LayoutNode } from "../shared/types";
+import { JsonSchemaFormService } from "../json-schema-form.service";
+import { ReactiveFormsModule } from "@angular/forms";
 
 @Component({
 	imports: [ReactiveFormsModule],
-	selector: 'hidden-widget',
-	templateUrl: './hidden.component.html',
+	selector: "hidden-widget",
+	templateUrl: "./hidden.component.html",
 })
 export class HiddenComponent implements OnInit, OnDestroy {
 	private jsf = inject(JsonSchemaFormService);

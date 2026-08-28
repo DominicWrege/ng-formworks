@@ -1,12 +1,12 @@
-import { Component, inject, input, OnDestroy, OnInit } from '@angular/core';
-import { AbstractControl } from '@angular/forms';
-import type { FormValue, LayoutNode, WidgetOptions } from '../shared/types';
-import { JsonSchemaFormService, TitleMapItem } from '../json-schema-form.service';
-import { buildTitleMap } from '../shared';
+import { Component, inject, input, OnDestroy, OnInit } from "@angular/core";
+import { AbstractControl } from "@angular/forms";
+import type { FormValue, LayoutNode, WidgetOptions } from "../shared/types";
+import { JsonSchemaFormService, TitleMapItem } from "../json-schema-form.service";
+import { buildTitleMap } from "../shared";
 
 @Component({
-	selector: 'checkboxes-widget',
-	templateUrl: './checkboxes.component.html',
+	selector: "checkboxes-widget",
+	templateUrl: "./checkboxes.component.html",
 })
 export class CheckboxesComponent implements OnInit, OnDestroy {
 	private jsf = inject(JsonSchemaFormService);
@@ -28,9 +28,9 @@ export class CheckboxesComponent implements OnInit, OnDestroy {
 		this.options = this.layoutNode()!.options || {};
 		const layoutNode = this.layoutNode()!;
 		this.layoutOrientation =
-			layoutNode.type === 'checkboxes-inline' || layoutNode.type === 'checkboxbuttons'
-				? 'horizontal'
-				: 'vertical';
+			layoutNode.type === "checkboxes-inline" || layoutNode.type === "checkboxbuttons"
+				? "horizontal"
+				: "vertical";
 		this.jsf.initializeControl(this);
 		this.checkboxList = buildTitleMap(
 			this.options.titleMap || this.options.enumNames || null,

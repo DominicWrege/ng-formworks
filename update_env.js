@@ -1,22 +1,22 @@
 //this will update the environment files with the
 //package version info
-var fs = require('fs');
-var pakjson = require('./package.json');
-var pakjsonAng = require('./node_modules/@angular/core/package.json');
+var fs = require("fs");
+var pakjson = require("./package.json");
+var pakjsonAng = require("./node_modules/@angular/core/package.json");
 console.log(`updating environment files with v${pakjson.version}...`);
-const envFiles = ['./demo/environments/environment.ts', './demo/environments/environment.prod.ts'];
+const envFiles = ["./demo/environments/environment.ts", "./demo/environments/environment.prod.ts"];
 
 function backupFiles() {
 	console.log(`backing up files...`);
 	envFiles.forEach((fpath) => {
-		fs.copyFileSync(fpath, fpath + '.bak');
+		fs.copyFileSync(fpath, fpath + ".bak");
 	});
 }
 
 function renameFiles() {
 	console.log(`renaming files...`);
 	envFiles.forEach((fpath) => {
-		let newPath = fpath.split('.ts').join('.mjs');
+		let newPath = fpath.split(".ts").join(".mjs");
 		fs.renameSync(fpath, newPath);
 	});
 }
@@ -47,14 +47,14 @@ function processFile(importPath, outputPath) {
 		console.log(`removing ${importPath}...`);
 		fs.rmSync(importPath);
 		console.log(`removing ${outputPath}.bak...`);
-		fs.rmSync(outputPath + '.bak');
+		fs.rmSync(outputPath + ".bak");
 	});
 }
 
 function processAll() {
 	let mainProm = Promise.resolve(true);
 	envFiles.forEach((fpath) => {
-		let importPath = fpath.split('.ts').join('.mjs');
+		let importPath = fpath.split(".ts").join(".mjs");
 		let outputPath = fpath;
 		mainProm = mainProm.then((tr) => {
 			return processFile(importPath, outputPath);

@@ -1,18 +1,18 @@
-import { Component, inject, input, OnInit } from '@angular/core';
-import { AbstractControl } from '@angular/forms';
+import { Component, inject, input, OnInit } from "@angular/core";
+import { AbstractControl } from "@angular/forms";
 
-import { deepEqual, pick } from '../shared/native.functions';
-import type { FormValue, LayoutNode, WidgetOptions } from '../shared/types';
-import { JsonSchemaFormService } from '../json-schema-form.service';
-import { hasNonNullValue, hasOwn, isObject, JsonPointer, path2ControlKey } from '../shared';
-import { TabsComponent } from './tabs.component';
+import { deepEqual, pick } from "../shared/native.functions";
+import type { FormValue, LayoutNode, WidgetOptions } from "../shared/types";
+import { JsonSchemaFormService } from "../json-schema-form.service";
+import { hasNonNullValue, hasOwn, isObject, JsonPointer, path2ControlKey } from "../shared";
+import { TabsComponent } from "./tabs.component";
 
 // TODO: Add this control
 
 @Component({
 	imports: [TabsComponent],
-	selector: 'one-of-widget',
-	templateUrl: './one-of.component.html',
+	selector: "one-of-widget",
+	templateUrl: "./one-of.component.html",
 })
 export class OneOfComponent implements OnInit {
 	private jsf = inject(JsonSchemaFormService);
@@ -29,7 +29,7 @@ export class OneOfComponent implements OnInit {
 
 	ngOnInit() {
 		this.options = this.layoutNode()!.options || {};
-		this.options.tabMode = 'oneOfMode';
+		this.options.tabMode = "oneOfMode";
 		this.options.selectedTab = this.findSelectedTab();
 		this.jsf.initializeControl(this);
 	}
@@ -66,15 +66,15 @@ export class OneOfComponent implements OnInit {
 							return controlName.startsWith(controlKey);
 						});
 						descendantOneOfControlNames.forEach((controlName) => {
-							let parts = controlName.split('$');
+							let parts = controlName.split("$");
 							let fieldName = parts[parts.length - 1];
 							let controlValue = this.jsf.formGroup!.controls[controlName].value;
-							let controlSchema = JsonPointer.get(this.jsf.schema, parts.join('/'));
-							let schemaPointer = parts.join('/');
+							let controlSchema = JsonPointer.get(this.jsf.schema, parts.join("/"));
+							let schemaPointer = parts.join("/");
 							let dPointer = schemaPointer
-								.replace(/(anyOf|allOf|oneOf|none)\/[\d]+\//g, '')
-								.replace(/(if|then|else|properties)\//g, '')
-								.replace(/\/items\//g, '/-/');
+								.replace(/(anyOf|allOf|oneOf|none)\/[\d]+\//g, "")
+								.replace(/(if|then|else|properties)\//g, "")
+								.replace(/\/items\//g, "/-/");
 							let dVal = JsonPointer.get(this.jsf.formValues, dPointer);
 							let compareVal = dVal;
 							//compare only values that are in the subschema properties

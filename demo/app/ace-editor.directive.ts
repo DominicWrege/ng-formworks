@@ -6,23 +6,23 @@ import {
 	inject,
 	input,
 	output,
-} from '@angular/core';
-import ace, { Editor } from 'brace';
-import 'brace/mode/json';
-import 'brace/theme/sqlserver';
+} from "@angular/core";
+import ace, { Editor } from "brace";
+import "brace/mode/json";
+import "brace/theme/sqlserver";
 
 @Directive({
-	selector: '[ace-editor]',
-	exportAs: 'aceEditor',
+	selector: "[ace-editor]",
+	exportAs: "aceEditor",
 })
 export class AceEditorDirective {
 	readonly options = input<Record<string, unknown>>({});
 	readonly readOnly = input(false, { transform: booleanAttribute });
-	readonly theme = input('sqlserver');
-	readonly mode = input('json');
+	readonly theme = input("sqlserver");
+	readonly mode = input("json");
 	readonly text = input<string>();
 	readonly autoUpdateContent = input(true, { transform: booleanAttribute });
-	readonly textChanged = output<string>({ alias: 'textChanged' });
+	readonly textChanged = output<string>({ alias: "textChanged" });
 
 	private _initialApplied = false;
 	_highlightActiveLine = false;
@@ -45,7 +45,7 @@ export class AceEditorDirective {
 			const text = this.text();
 			if (!this._initialApplied) {
 				this._initialApplied = true;
-				this.setText(text || '');
+				this.setText(text || "");
 			}
 		});
 	}
@@ -58,7 +58,7 @@ export class AceEditorDirective {
 	}
 
 	initEvents() {
-		this.editor.on('change', () => {
+		this.editor.on("change", () => {
 			if (this._suppressChange) {
 				return;
 			}
@@ -68,7 +68,7 @@ export class AceEditorDirective {
 
 	setText(text: string) {
 		if (!text) {
-			text = '';
+			text = "";
 		}
 		this._suppressChange = true;
 		try {

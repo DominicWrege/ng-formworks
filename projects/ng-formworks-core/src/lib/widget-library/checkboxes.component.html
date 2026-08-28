@@ -7,7 +7,7 @@
 }
 
 <!-- 'horizontal' = checkboxes-inline or checkboxbuttons -->
-@if (layoutOrientation === 'horizontal') {
+@if (layoutOrientation === "horizontal") {
 	<div [class]="options?.htmlClass || ''">
 		@for (checkboxItem of checkboxList; track checkboxItem) {
 			<label
@@ -46,7 +46,7 @@
 }
 
 <!-- 'vertical' = regular checkboxes -->
-@if (layoutOrientation === 'vertical') {
+@if (layoutOrientation === "vertical") {
 	<div>
 		@for (checkboxItem of checkboxList; track checkboxItem) {
 			<div [class]="options?.htmlClass || ''">
