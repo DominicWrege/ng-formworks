@@ -1,4 +1,5 @@
 import { Component, OnInit, input, inject } from '@angular/core';
+import type { LayoutNode, WidgetOptions } from '../shared/types';
 import { JsonSchemaFormService } from '../json-schema-form.service';
 
 
@@ -9,9 +10,9 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
 export class MessageComponent implements OnInit {
   private jsf = inject(JsonSchemaFormService);
 
-  options: any;
+  options: WidgetOptions;
   message: string = null;
-  readonly layoutNode = input<any>(undefined);
+  readonly layoutNode = input<LayoutNode | undefined>(undefined);
   readonly layoutIndex = input<number[]>(undefined);
   readonly dataIndex = input<number[]>(undefined);
 

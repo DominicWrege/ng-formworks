@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { hasOwn } from '../shared/utility.functions';
+import type { WidgetLibraryMap, WidgetType } from '../shared/types';
 import { AddReferenceComponent } from './add-reference.component';
 import { ButtonComponent } from './button.component';
 import { CheckboxComponent } from './checkbox.component';
@@ -28,7 +29,7 @@ import { TextareaComponent } from './textarea.component';
 export class WidgetLibraryService {
 
   defaultWidget = 'text';
-  widgetLibrary: any = {
+  widgetLibrary: WidgetLibraryMap = {
 
   // Angular JSON Schema Form administrative widgets
     'none': NoneComponent, // Placeholder, for development - displays nothing
@@ -143,9 +144,9 @@ export class WidgetLibraryService {
     // 'wysihtml5': HTML editor - http://jhollingworth.github.io/bootstrap-wysihtml5
     // 'quill': Quill HTML / rich text editor (?) - https://quilljs.com
   };
-  registeredWidgets: any = { };
-  frameworkWidgets: any = { };
-  activeWidgets: any = { };
+  registeredWidgets: WidgetLibraryMap = { };
+  frameworkWidgets: WidgetLibraryMap = { };
+  activeWidgets: WidgetLibraryMap = { };
 
   constructor() {
     this.setActiveWidgets();
@@ -156,7 +157,7 @@ export class WidgetLibraryService {
       { }, this.widgetLibrary, this.frameworkWidgets, this.registeredWidgets
     );
     for (const widgetName of Object.keys(this.activeWidgets)) {
-      let widget: any = this.activeWidgets[widgetName];
+      let widget: WidgetType | undefined = this.activeWidgets[widgetName];
       // Resolve aliases
       if (typeof widget === 'string') {
         const usedAliases: string[] = [];
@@ -187,7 +188,7 @@ export class WidgetLibraryService {
     return this.hasWidget(type, 'widgetLibrary');
   }
 
-  registerWidget(type: string, widget: any): boolean {
+  registerWidget(type: string, widget: WidgetType): boolean {
     if (!type || !widget || typeof type !== 'string') { return false; }
     this.registeredWidgets[type] = widget;
     return this.setActiveWidgets();
@@ -205,7 +206,7 @@ export class WidgetLibraryService {
     return this.setActiveWidgets();
   }
 
-  registerFrameworkWidgets(widgets: any): boolean {
+  registerFrameworkWidgets(widgets: WidgetLibraryMap): boolean {
     if (widgets === null || typeof widgets !== 'object') { widgets = { }; }
     this.frameworkWidgets = widgets;
     return this.setActiveWidgets();
@@ -219,7 +220,7 @@ export class WidgetLibraryService {
     return false;
   }
 
-  getWidget(type?: string, widgetSet = 'activeWidgets'): any {
+  getWidget(type?: string, widgetSet = 'activeWidgets'): WidgetType | null {
     if (this.hasWidget(type, widgetSet)) {
       return this[widgetSet][type];
     } else if (this.hasWidget(this.defaultWidget, widgetSet)) {
@@ -229,7 +230,12 @@ export class WidgetLibraryService {
     }
   }
 
-  getAllWidgets(): any {
+  getAllWidgets(): {
+    widgetLibrary: WidgetLibraryMap,
+    registeredWidgets: WidgetLibraryMap,
+    frameworkWidgets: WidgetLibraryMap,
+    activeWidgets: WidgetLibraryMap,
+  } {
     return {
       widgetLibrary: this.widgetLibrary,
       registeredWidgets: this.registeredWidgets,

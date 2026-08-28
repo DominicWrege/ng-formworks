@@ -1,5 +1,5 @@
-import { inject, Injectable, OnDestroy, Signal } from '@angular/core';
-import { AbstractControl, UntypedFormArray, UntypedFormGroup } from '@angular/forms';
+import { inject, Injectable, OnDestroy, Signal, Type } from '@angular/core';
+import { AbstractControl, UntypedFormArray, UntypedFormGroup, ValidationErrors } from '@angular/forms';
 //import Ajv, { ErrorObject, Options } from 'ajv';
 import addFormats from "ajv-formats";
 import Ajv2019, { ErrorObject, Options, ValidateFunction } from 'ajv/dist/2019';
@@ -35,25 +35,44 @@ import {
   isEmpty,
   isObject,
   JsonPointer,
+  Layout,
+  LayoutNode,
   removeRecursiveReferences,
   toTitleCase
 } from './shared';
+import type { DataObject, ErrorMessages, FormOptions, FormValue, FunctionCondition, FormGroupTemplate, JsonSchema, TitleMapItem, ValidationMessages, WidgetOptions } from './shared/types';
 
 import { setControl } from './shared/form-group.functions';
 
 import { Eta } from 'eta/core';
+import { WidgetLibraryService } from './widget-library/widget-library.service';
+
+export type { DataObject, ErrorMessages, FormOptions, FormGroupTemplate, TitleMapItem, ValidationMessages, WidgetOptions };
+
+/** Layout nodes and indexes may be plain getters (legacy) or Signals. */
+export type ContextValue<T> = (() => T) | Signal<T>;
 
 export type WidgetContext={
   formControl?:AbstractControl;
-  layoutNode?: Signal<any>;
-  layoutIndex?: Signal<number[]>;
-  dataIndex?: Signal<number[]>;
-  options?:any;
-  controlValue?:any;
+  layoutNode?: ContextValue<LayoutNode>;
+  layoutIndex?: ContextValue<number[]>;
+  dataIndex?: ContextValue<number[]>;
+  options?:WidgetOptions;
+  controlValue?:FormValue;
   boundControl?:boolean;
   controlName?:string;
   controlDisabled?:boolean
 }
+
+/**
+ * Legacy widget context, as accepted by `setArrayItemTitle`: `layoutNode`
+ * and `dataIndex` may either be plain values or Signals.
+ */
+export type LegacyWidgetContext = Omit<WidgetContext, 'layoutNode' | 'layoutIndex' | 'dataIndex'> & {
+  layoutNode?: LayoutNode | ContextValue<LayoutNode>;
+  layoutIndex?: number[] | ContextValue<number[]>;
+  dataIndex?: number[] | ContextValue<number[]>;
+};
 
 export type AJVRegistryItem={
   [name: string]:{
@@ -63,80 +82,62 @@ export type AJVRegistryItem={
   }
 }
 
-export interface TitleMapItem {
-  name?: string;
-  value?: any;
-  checked?: boolean;
-  group?: string;
-  items?: TitleMapItem[];
-}
-export interface ErrorMessages {
-  [control_name: string]: {
-    message: string | Function | Object;
-    code: string;
-  }[];
-}
-
-type DataObject = Record<string, any>;
 type IndexKey = number | string | null;
-interface FunctionCondition {
-  functionBody?: string;
-  functionBodyRaw?: string;
-}
 
 @Injectable()
 export class JsonSchemaFormService implements OnDestroy {
   JsonFormCompatibility = false;
   ReactJsonSchemaFormCompatibility = false;
   AngularSchemaFormCompatibility = false;
-  tpldata: any = {};
+  tpldata: DataObject = {};
 
   ajvOptions: Options = {
     allErrors: true,
     //validateFormats:false,
     strict:false
-  
+
   };
-  ajv:any = new Ajv2019(this.ajvOptions); // AJV: Another JSON Schema Validator
-  
+  ajv: Ajv2019 = new Ajv2019(this.ajvOptions); // AJV: Another JSON Schema Validator
+
   //Being replaced by getAjvValidator()
-  validateFormData: any = null; // Compiled AJV function to validate active form's schema
+  validateFormData: ValidateFunction | null = null; // Compiled AJV function to validate active form's schema
 
-  formValues: any = {}; // Internal form data (may not have correct types)
-  data: any = {}; // Output form data (formValues, formatted with correct data types)
-  schema: any = {}; // Internal JSON Schema
-  layout: any[] = []; // Internal form layout
-  formGroupTemplate: any = {}; // Template used to create formGroup
-  formGroup: any = null; // Angular formGroup, which powers the reactive form
-  framework: any = null; // Active framework component
-  formOptions: any; // Active options, used to configure the form
+  formValues: DataObject = {}; // Internal form data (may not have correct types)
+  data: DataObject = {}; // Output form data (formValues, formatted with correct data types)
+  schema: JsonSchema = {}; // Internal JSON Schema
+  layout: Layout = []; // Internal form layout
+  formGroupTemplate: FormGroupTemplate | null = {}; // Template used to create formGroup
+  formGroup: UntypedFormGroup | null = null; // Angular formGroup, which powers the reactive form
+  framework: Type<unknown> | null = null; // Active framework component
+  formOptions: FormOptions; // Active options, used to configure the form
 
-  validData: any = null; // Valid form data (or null) (=== isValid ? data : null)
-  isValid: boolean = null; // Is current form data valid?
-  ajvErrors: ErrorObject[] = null; // Ajv errors for current data
-  validationErrors: any = null; // Any validation errors for current data
-  dataErrors: any = new Map(); //
-  formValueSubscription: any = null; // Subscription to formGroup.valueChanges observable (for un- and re-subscribing)
-  dataChanges: Subject<any> = new Subject(); // Form data observable
-  isValidChanges: Subject<any> = new Subject(); // isValid observable
-  validationErrorChanges: Subject<any> = new Subject(); // validationErrors observable
+  validData: DataObject | null = null; // Valid form data (or null) (=== isValid ? data : null)
+  isValid: boolean | null = null; // Is current form data valid?
+  ajvErrors: ErrorObject[] | null = null; // Ajv errors for current data
+  validationErrors: Record<string, string[]> | null = null; // Any validation errors for current data
+  dataErrors: Map<string, any> = new Map(); //
+  formValueSubscription: Subscription | null = null; // Subscription to formGroup.valueChanges observable (for un- and re-subscribing)
+  dataChanges: Subject<DataObject> = new Subject(); // Form data observable
+  isValidChanges: Subject<boolean> = new Subject(); // isValid observable
+  validationErrorChanges: Subject<ErrorObject[]> = new Subject(); // validationErrors observable
 
   arrayMap: Map<string, number> = new Map(); // Maps arrays in data object and number of tuple values
-  dataMap: Map<string, any> = new Map(); // Maps paths in form data to schema and formGroup paths
+  dataMap: Map<string, Map<string, any>> = new Map(); // Maps paths in form data to schema and formGroup paths
   dataRecursiveRefMap: Map<string, string> = new Map(); // Maps recursive reference points in form data
   schemaRecursiveRefMap: Map<string, string> = new Map(); // Maps recursive reference points in schema
-  schemaRefLibrary: any = {}; // Library of schemas for resolving schema $refs
-  layoutRefLibrary: any = { '': null }; // Library of layout nodes for adding to form
-  templateRefLibrary: any = {}; // Library of formGroup templates for adding to form
+  schemaRefLibrary: Record<string, any> = {}; // Library of schemas for resolving schema $refs
+  layoutRefLibrary: Record<string, LayoutNode | null> = { '': null }; // Library of layout nodes for adding to form
+  templateRefLibrary: Record<string, FormGroupTemplate | null> = {}; // Library of formGroup templates for adding to form
   hasRootReference = false; // Does the form include a recursive reference to itself?
+  fieldsRequired = false; // (set automatically while building layout) Are there required fields?
 
   language = 'en-US'; // Does the form include a recursive reference to itself?
 
   // Default global form options
-  defaultFormOptions: any = {
+  defaultFormOptions: FormOptions = {
     autocomplete: true, // Allow the web browser to remember previous form submission values as defaults
-    addSubmit: 'auto', // Add a submit button if layout does not have one?
-    // for addSubmit: true = always, false = never,
+    addSubmit: false, // Add a submit button if layout does not have one?
+    // for addSubmit: true = always, false = never (default - hidden),
     // 'auto' = only if layout is undefined (form is built from schema alone)
     debug: false, // Show debugging output?
     disableInvalidSubmit: true, // Disable submit if form invalid?
@@ -184,8 +185,8 @@ export class JsonSchemaFormService implements OnDestroy {
   fcStatusChangesSubs:Subscription;
 
   private readonly templateCache = new Map<string, Function>();
-  private readonly etaConfig:any={ 
-    tags: ["{{", "}}"],
+  private readonly etaConfig = {
+    tags: ["{{", "}}"] as [string, string],
     cache:true,
      functionHeader: "const value=it.value, values=it.values,tpldata=it.tpldata,idx=it.idx,$index=it.$index"
    }
@@ -197,11 +198,11 @@ export class JsonSchemaFormService implements OnDestroy {
 
   // TODO(review): may not be needed as sortablejs replaces dnd
   //this has been added to enable or disable the dragabble state of a component
-  //using the OrderableDirective, mainly when an <input type="range"> 
+  //using the OrderableDirective, mainly when an <input type="range">
   //elements are present, as the draggable attribute makes it difficult to
   //slide the range sliders and end up dragging
   //NB this will be set globally for all OrderableDirective instances
-  //and will only be enabled when/if the caller sets the value back to true 
+  //and will only be enabled when/if the caller sets the value back to true
   private draggableStateSubject = new BehaviorSubject<boolean>(true); // Default value true
   draggableState$ = this.draggableStateSubject.asObservable();
 
@@ -209,15 +210,15 @@ export class JsonSchemaFormService implements OnDestroy {
     this.draggableStateSubject.next(value); // Update the draggable value
   }
 
-  createAjvInstance(ajvOptions){
-    let ajvInstance=new Ajv2019(ajvOptions); 
+  createAjvInstance(ajvOptions: Options) {
+    let ajvInstance=new Ajv2019(ajvOptions);
     ajvInstance.addMetaSchema(jsonDraft6);
     ajvInstance.addMetaSchema(jsonDraft7);
     addFormats(ajvInstance);
     return ajvInstance;
   }
 
-  createAndRegisterAjvInstance(ajvOptions,name?:string){
+  createAndRegisterAjvInstance(ajvOptions: Options, name?: string) {
     const intanceName=name||`ajv_${Date.now()}`;
     if(this.ajvRegistry[intanceName]){
       throw new Error(`ajv instance with name:'${intanceName}' has already been registered`);
@@ -253,7 +254,7 @@ export class JsonSchemaFormService implements OnDestroy {
     addFormats(this.ajv);
     this.ajvRegistry['default']={name:'default',ajvInstance:this.ajv,ajvValidator:null};
     // Add custom 'duration' format using a regex
-/*    
+/*
 this.ajv.addFormat("duration", {
   type: "string",
   validate: (duration) => /^P(?!$)(\d+Y)?(\d+M)?(\d+D)?(T(\d+H)?(\d+M)?(\d+S)?)?$/.test(duration)
@@ -363,15 +364,15 @@ this.ajv.addFormat("duration", {
     forEach(errors, (value, key) => {
       if (key in this.formGroup.controls) {
         for (const error of value) {
-          const err = {};
+          const err: ValidationErrors = {};
           err[error['code']] = error['message'];
-          this.formGroup.get(key).setErrors(err, { emitEvent: true });
+          this.formGroup.get(key as string).setErrors(err, { emitEvent: true });
         }
       }
     });
   }
 
-  validateData(newValue: any, updateSubscriptions = true,ajvInstanceName='default'): void {
+  validateData(newValue: DataObject, updateSubscriptions = true, ajvInstanceName = 'default'): void {
     // Format raw form data to correct data types
     this.data = formatFormData(
       newValue,
@@ -382,8 +383,8 @@ this.ajv.addFormat("duration", {
     );
     this.isValid = this.getAjvValidator(ajvInstanceName)(this.data);
     this.validData = this.isValid ? this.data : null;
-    const compileErrors = (errors:ErrorObject[]) => {
-      const compiledErrors = {};
+    const compileErrors = (errors: ErrorObject[]): Record<string, string[]> => {
+      const compiledErrors: Record<string, string[]> = {};
       (errors || []).forEach(error => {
         // TODO(review): of ajv giving '' as instancePath for root objects
         let errorPath=error.instancePath||"ROOT";
@@ -404,7 +405,7 @@ this.ajv.addFormat("duration", {
     }
   }
 
-  buildFormGroupTemplate(formValues: any = null, setValues = true) {
+  buildFormGroupTemplate(formValues: DataObject | null = null, setValues = true) {
     this.formGroupTemplate = buildFormGroupTemplate(
       this,
       formValues,
@@ -413,7 +414,7 @@ this.ajv.addFormat("duration", {
   }
 
 
-  
+
   buildFormGroup(ajvInstanceName?: string) {
     this.formGroup = <UntypedFormGroup>buildFormGroup(this.formGroupTemplate);
     if (this.formGroup) {
@@ -447,11 +448,11 @@ this.ajv.addFormat("duration", {
     }
   }
 
-  buildLayout(widgetLibrary: any) {
+  buildLayout(widgetLibrary: WidgetLibraryService) {
     this.layout = buildLayout(this, widgetLibrary);
   }
 
-  setOptions(newOptions: any) {
+  setOptions(newOptions: FormOptions) {
     if (isObject(newOptions)) {
       const addOptions = cloneDeep(newOptions);
       // Backward compatibility for 'defaultOptions' (renamed 'defaultWidgetOptions')
@@ -493,28 +494,28 @@ this.ajv.addFormat("duration", {
         delete this.schema.properties['ui:order'];
       }
       this.getAjvInstance(ajvInstanceName).removeSchema(this.schema);
-      
+
       ajvValidator = this.getAjvInstance(ajvInstanceName).compile(this.schema);
       this.ajvRegistry[ajvInstanceName].ajvValidator=ajvValidator;
 
     }
   }
 
-  buildSchemaFromData(data?: any, requireAllFields = false): any {
+  buildSchemaFromData(data?: DataObject, requireAllFields = false): JsonSchema {
     if (data) {
       return buildSchemaFromData(data, requireAllFields);
     }
     this.schema = buildSchemaFromData(this.formValues, requireAllFields);
   }
 
-  buildSchemaFromLayout(layout?: any): any {
+  buildSchemaFromLayout(layout?: Layout): JsonSchema {
     if (layout) {
       return buildSchemaFromLayout(layout);
     }
     this.schema = buildSchemaFromLayout(this.layout);
   }
 
-  setTpldata(newTpldata: any = {}): void {
+  setTpldata(newTpldata: DataObject = {}): void {
     this.tpldata = newTpldata;
   }
 
@@ -523,8 +524,8 @@ this.ajv.addFormat("duration", {
    */
    parseText(
     text: string = '',
-    value: DataObject = {},
-    values: DataObject = {},
+    value: unknown = {},
+    values: unknown = {},
     key: IndexKey = null
   ): string {
     if (!text) {
@@ -538,7 +539,7 @@ this.ajv.addFormat("duration", {
       // If not in cache, compile it
       try {
         let etaTpl=text.replace(/{{/g,'{{=');
-        compiledTemplate = this.eta.compile(etaTpl,this.etaConfig)
+        compiledTemplate = this.eta.compile(etaTpl, this.etaConfig as never)
         // Store the newly compiled function in the cache
         this.templateCache.set(text, compiledTemplate);
       } catch (error) {
@@ -556,10 +557,10 @@ this.ajv.addFormat("duration", {
       idx: index,
       $index: index,
     };
-    
+
     try {
       // Execute the function (retrieved from cache or newly compiled)
-      return compiledTemplate.call(this.eta,dataContext,this.etaConfig);
+      return compiledTemplate.call(this.eta, dataContext, this.etaConfig as never);
     } catch (error) {
       console.error("Error during template execution:", error);
       return text;
@@ -580,8 +581,8 @@ this.ajv.addFormat("duration", {
   //parseText now uses template engines
   parseExpression(
     expression: string = '',
-    value: DataObject = {},
-    values: DataObject = {},
+    value: unknown = {},
+    values: unknown = {},
     key: IndexKey = null,
     tpldata: DataObject | null = null
   ): string | DataObject | number {
@@ -614,7 +615,7 @@ this.ajv.addFormat("duration", {
         // If not in cache, compile it
         try {
           let etaTpl=templateWrapper.replace(/{{/g,'{{=');
-          compiledTemplate = this.eta.compile(etaTpl, this.etaConfig);
+          compiledTemplate = this.eta.compile(etaTpl, this.etaConfig as never);
           // Store the newly compiled function in the cache
           this.templateCache.set(templateWrapper, compiledTemplate);
         } catch (error) {
@@ -622,10 +623,10 @@ this.ajv.addFormat("duration", {
           return templateWrapper; // Return original text if compilation fails
         }
       }
-      
+
       try {
         // Execute the function (retrieved from cache or newly compiled)
-        return compiledTemplate(dataContext);
+        return compiledTemplate(dataContext as object);
       } catch (error) {
         console.error("Error during template execution:", error);
         return templateWrapper;
@@ -644,28 +645,31 @@ this.ajv.addFormat("duration", {
   // }
   // result on button will be "Add Input [object Object]"
   setArrayItemTitle(
-    parentCtx: any = {},
-    childNode: any = null,
+    parentCtx: LegacyWidgetContext = {},
+    childNode: LayoutNode = null,
     index: number = null
   ): string {
     //for legacy compatibility, parentCtx.layoutNode could either be a value
     //or have been converted to use Signals
-    let parentCtxAsSignals:any={
+    let parentCtxAsSignals:{
+      layoutNode: () => LayoutNode;
+      dataIndex: () => number[];
+    }={
       layoutNode:()=>{
         if(isObject(parentCtx.layoutNode)){
-          return parentCtx.layoutNode
+          return parentCtx.layoutNode as LayoutNode
         }
-        return parentCtx.layoutNode();
+        return (parentCtx.layoutNode as ContextValue<LayoutNode>)();
       },
       dataIndex:()=>{
         if(isObject(parentCtx.dataIndex)){
-          return parentCtx.dataIndex
+          return parentCtx.dataIndex as number[]
         }
-        return parentCtx.dataIndex();
+        return (parentCtx.dataIndex as ContextValue<number[]>)();
       }
     }
     const parentNode = parentCtxAsSignals.layoutNode();
-    const parentValues: any = this.getFormControlValue(parentCtxAsSignals);
+    const parentValues: FormValue = this.getFormControlValue(parentCtxAsSignals);
     const isArrayItem =
       (parentNode.type || '').slice(-5) === 'array' && isArray(parentValues);
     const text = JsonPointer.getFirst(
@@ -682,7 +686,7 @@ this.ajv.addFormat("duration", {
           [parentNode, '/options/title'],
           [parentNode, '/options/legend']
         ]
-    );
+    ) as string;
     if (!text) {
       return text;
     }
@@ -699,20 +703,21 @@ this.ajv.addFormat("duration", {
       : this.parseText(
         ctx.options.title || toTitleCase(ctx.layoutNode().name),
         this.getFormControlValue(ctx),
-        (this.getFormControlGroup(ctx) || <any>{}).value,
+        (this.getFormControlGroup(ctx) || { value: undefined }).value,
         ctx.dataIndex()[ctx.dataIndex().length - 1]
       );
   }
 
   getItemTitleContext(ctx: WidgetContext){
+    const group = this.getFormControlGroup(ctx);
     return {
       value:this.getFormControlValue(ctx),
-      values:(this.getFormControlGroup(ctx) || <any>{}).value,
+      values: group ? group.value : undefined,
       key: ctx.dataIndex()[ctx.dataIndex().length - 1]
     }
   }
 
-  evaluateCondition(layoutNode: any, dataIndex: number[]): boolean {
+  evaluateCondition(layoutNode: LayoutNode, dataIndex: number[]): boolean {
     const condition = layoutNode.options?.condition;
 
     if (!hasValue(condition)) {
@@ -721,8 +726,8 @@ this.ajv.addFormat("duration", {
 
     if (typeof condition === 'string') {
       return this.evaluateStringCondition(condition, dataIndex);
-    } 
-    
+    }
+
     if (typeof condition === 'function') {
       // Direct function execution is safe and standard
       try {
@@ -731,17 +736,17 @@ this.ajv.addFormat("duration", {
           console.error('Condition function errored out:', e);
           return true; // Default to visible on error
       }
-    } 
-    
-    
+    }
+
+
     // Check if it matches the FunctionCondition interface structure
-    if (typeof condition === 'object' 
+    if (typeof condition === 'object'
       && (typeof (condition as FunctionCondition)?.functionBody === 'string'
       ||typeof (condition as FunctionCondition)?.functionBodyRaw === 'string')
     ) {
-        // This still uses the potentially insecure new Function approach, 
+        // This still uses the potentially insecure new Function approach,
         // but encapsulated as requested by the original code's structure.
-        
+
         // TODO(fix): add null checking as a workaround for issue caused by adding
         //debounceTime in buildFormGroup
         //also added functionBodyRaw that won't do any replacements
@@ -770,12 +775,12 @@ this.ajv.addFormat("duration", {
     }
 
     const parsedPointer = JsonPointer.parseObjectPath(pointer);
-    
+
     // Simplify data retrieval
     // The original logic checked both 'this.data' and '{model: this.data}' roots.
-    // We assume the pointer library handles root context correctly, 
+    // We assume the pointer library handles root context correctly,
     // or we consistently check one context.
-    
+
     const value = JsonPointer.get(this.data, parsedPointer);
     return !!value; // Convert truthy/falsy value to a strict boolean
   }
@@ -795,9 +800,9 @@ this.ajv.addFormat("duration", {
   }
 
 
-  evaluateConditionAsync(layoutNode: any, dataIndex: number[]): Observable<boolean> {
+  evaluateConditionAsync(layoutNode: LayoutNode, dataIndex: number[]): Observable<boolean> {
     const result = this.evaluateCondition(layoutNode, dataIndex);
-    
+
     // If it's synchronous, wrap the result in an observable using `of()`
     return of(result);
   }
@@ -806,7 +811,7 @@ this.ajv.addFormat("duration", {
     // Try to create a function from the body in a secure manner (without new Function)
     // You can try a safer implementation depending on your environment.
     // For example, you could precompile these in advance or use a library to handle safe evaluation.
-    
+
     const cacheKey = `${functionBody}`;
     if (!this.evalFunctionCache.has(cacheKey)) {
         const fn = new Function('model', 'arrayIndices', functionBody); // Still using new Function
@@ -829,7 +834,7 @@ this.ajv.addFormat("duration", {
     ctx.formControl = this.getFormControl(ctx);
     //introduced to check if the node  is part of ITE conditional
     //then change or add the control
-    if(layoutNode?.schemaPointer && layoutNode.isITEItem || 
+    if(layoutNode?.schemaPointer && layoutNode.isITEItem ||
       (layoutNode?.schemaPointer && layoutNode?.oneOfPointer) ||
       layoutNode?.schemaPointer && layoutNode.anyOfPointer  ){
       //before changing control, need to set the new data type for data formatting
@@ -866,8 +871,8 @@ this.ajv.addFormat("duration", {
               ))
       );
       this.fcValueChangesSubs=ctx.formControl.valueChanges.subscribe(value => {
-        if (!deepEqual(ctx.controlValue, value)) { 
-          ctx.controlValue = value 
+        if (!deepEqual(ctx.controlValue, value)) {
+          ctx.controlValue = value
         }
 
       });
@@ -882,7 +887,7 @@ this.ajv.addFormat("duration", {
       }
     }
     //if this is a ITE conditional field, the value would not have been
-    //set, as the control would only be initialized when the condition is true 
+    //set, as the control would only be initialized when the condition is true
     // TODO(review): decide which of the data sets between data, formValues and default
     //to use for the value
     // TODO: try maybe marking descendants in applyITEConditions
@@ -898,7 +903,7 @@ this.ajv.addFormat("duration", {
       const schemaDefault=ctx.options?.default;
       //if initial formValues was supplied and controlValue matches formValue then likely
       //control was initially created with the formValue then set value to data value
-      
+
       //if no formValues was supplied and controlValue matches schemaDefault then likely
       //control was initially created with the default then set value to data value
       const value=this.formValues && deepEqual(formValue,controlValue)?dataValue
@@ -909,7 +914,7 @@ this.ajv.addFormat("duration", {
     return ctx.boundControl;
   }
 
-  formatErrors(errors: any, validationMessages: any = {}): string {
+  formatErrors(errors: ValidationErrors, validationMessages: ValidationMessages | string = {}): string {
     if (isEmpty(errors)) {
       return null;
     }
@@ -969,7 +974,7 @@ this.ajv.addFormat("duration", {
     );
   }
 
-  updateValue(ctx: WidgetContext, value: any): void {
+  updateValue(ctx: WidgetContext, value: FormValue): void {
     // Set value of current control
     ctx.controlValue = value;
     if (ctx.boundControl) {
@@ -1057,7 +1062,8 @@ this.ajv.addFormat("duration", {
     const schemaPointer=ctx.layoutNode()?.isITEItem?ctx.layoutNode()?.schemaPointer:null;
     const oneOfPointer=ctx.layoutNode()?.oneOfPointer;
     const anyOfPointer=ctx.layoutNode()?.anyOfPointer;
-    return getControl(this.formGroup, this.getDataPointer(ctx),false,schemaPointer||oneOfPointer||anyOfPointer);
+    return getControl(this.formGroup, this.getDataPointer(ctx),false,schemaPointer||oneOfPointer||anyOfPointer) as
+      AbstractControl;
   }
 
   setFormControl(ctx: WidgetContext,control:AbstractControl): AbstractControl {
@@ -1068,12 +1074,13 @@ this.ajv.addFormat("duration", {
     ) {
       return null;
     }
-    return setControl(this.formGroup, this.getDataPointer(ctx),control);
+    setControl(this.formGroup, this.getDataPointer(ctx),control);
+    return control;
   }
 
-  getFormControlValue(ctx: WidgetContext): AbstractControl {
+  getFormControlValue(ctx: WidgetContext): FormValue {
 
-    if (!ctx || !ctx.layoutNode || 
+    if (!ctx || !ctx.layoutNode ||
       !isDefined(ctx.layoutNode().dataPointer) ||
       ctx.layoutNode().type === '$ref'
       ||this.formGroup==null
@@ -1083,7 +1090,8 @@ this.ajv.addFormat("duration", {
     const schemaPointer=ctx.layoutNode()?.isITEItem?ctx.layoutNode()?.schemaPointer:null;
     const oneOfPointer=ctx.layoutNode()?.oneOfPointer;
     const anyOfPointer=ctx.layoutNode()?.anyOfPointer;
-    const control = getControl(this.formGroup, this.getDataPointer(ctx),false,schemaPointer||oneOfPointer||anyOfPointer);
+    const control = getControl(this.formGroup, this.getDataPointer(ctx),false,schemaPointer||oneOfPointer||anyOfPointer) as
+      AbstractControl | null;
     return control ? control.value : null;
   }
 
@@ -1094,7 +1102,8 @@ this.ajv.addFormat("duration", {
     const schemaPointer=ctx.layoutNode()?.isITEItem?ctx.layoutNode()?.schemaPointer:null;
     const oneOfPointer=ctx.layoutNode()?.oneOfPointer;
     const anyOfPointer=ctx.layoutNode()?.anyOfPointer;
-    return getControl(this.formGroup, this.getDataPointer(ctx), true,schemaPointer||oneOfPointer||anyOfPointer);
+    return getControl(this.formGroup, this.getDataPointer(ctx), true,schemaPointer||oneOfPointer||anyOfPointer) as
+      UntypedFormArray | UntypedFormGroup;
   }
 
   getFormControlName(ctx: WidgetContext): string {
@@ -1108,11 +1117,11 @@ this.ajv.addFormat("duration", {
     return JsonPointer.toKey(this.getDataPointer(ctx));
   }
 
-  getLayoutArray(ctx: WidgetContext): any[] {
+  getLayoutArray(ctx: WidgetContext): LayoutNode[] {
     return JsonPointer.get(this.layout, this.getLayoutPointer(ctx), 0, -1);
   }
 
-  getParentNode(ctx: WidgetContext): any {
+  getParentNode(ctx: WidgetContext): LayoutNode {
     return JsonPointer.get(this.layout, this.getLayoutPointer(ctx), 0, -2);
   }
 
@@ -1259,29 +1268,30 @@ this.ajv.addFormat("duration", {
   }
 
    // TODO(fix): doesn't seem to work for nested array
-    adjustLayout(layout:any, newData: any,currLayoutIndex=[0],currDataIndex=[]) {
-      const createWidgetCtx=(layoutNode:any,layoutIndex:any,dataIndex:any):any=>{
+    adjustLayout(layout: LayoutNode | LayoutNode[], newData: DataObject, currLayoutIndex: number[] = [0], currDataIndex: number[] = []) {
+      const createWidgetCtx=(layoutNode: LayoutNode, layoutIndex: number[], dataIndex: number[]): WidgetContext=>{
         return {
           layoutNode: ()=>{return layoutNode},
           layoutIndex: ()=>{return layoutIndex},
           dataIndex: ()=>{return dataIndex},
         }
       }
+      const node = layout as LayoutNode;
       // console.log(`adjustLayout currLayoutIndex:${currLayoutIndex}`);
-      if(layout.items && isArray(newData)){
+      if(node.items && isArray(newData)){
         let ctx=createWidgetCtx(
           {//add a ref node to be that of first items datapointer
 
-            ...layout,
-            $ref:layout.$ref||layout.items[0]?.dataPointer,
-            dataPointer:layout.items[0]?.dataPointer,
+            ...node,
+            $ref:node.$ref||node.items[0]?.dataPointer,
+            dataPointer:node.items[0]?.dataPointer,
             arrayItem: true,
             arrayItemType: "list"
-          
+
           }
-          ,[...currLayoutIndex.slice(0, currLayoutIndex.length - 1),layout.items.length-1]
-          ,[...currDataIndex.slice(0, currDataIndex.length - 1),layout.items.length-1]);
-        const lengthDifference = newData.length - layout.items.filter(litem=>{
+          ,[...currLayoutIndex.slice(0, currLayoutIndex.length - 1),node.items.length-1]
+          ,[...currDataIndex.slice(0, currDataIndex.length - 1),node.items.length-1]);
+        const lengthDifference = newData.length - node.items.filter(litem=>{
           return litem?.type!="$ref"
         }).length;
         if (lengthDifference > 0) {
@@ -1290,13 +1300,13 @@ this.ajv.addFormat("duration", {
             this.addItem(ctx)
           }
         } else if (lengthDifference < 0) {
-          let numToRemove=layout.items.filter(litem=>{
+          let numToRemove=node.items.filter(litem=>{
             return litem?.type!="$ref"
           })
           .length-newData.length;
           // Remove extra controls if newData has fewer items
           for (let i = 0; i< numToRemove; i++) {
-           
+
             let oldDataIndex=ctx.dataIndex();
             let lastDataIndex=oldDataIndex[oldDataIndex.length-1];
             let updatedLayoutIndex=[...currLayoutIndex.slice(0, currLayoutIndex.length - 1),0]
@@ -1306,10 +1316,10 @@ this.ajv.addFormat("duration", {
 
           }
         }
-        return 
+        return
       }
       if(isArray(layout) ){
-        layout.forEach((layoutNode,ind)=>{
+        (layout as LayoutNode[]).forEach((layoutNode,ind)=>{
           //if(layoutNode.items){
             let layoutMappedData=layoutNode.dataPointer?JsonPointer.get(newData,layoutNode.dataPointer)
             :undefined;
@@ -1320,5 +1330,5 @@ this.ajv.addFormat("duration", {
 
     }
 
-    
+
 }

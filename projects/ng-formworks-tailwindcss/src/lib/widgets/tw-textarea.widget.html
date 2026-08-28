@@ -5,7 +5,7 @@
       [attr.for]="'control' + layoutNode()?._id"
       [class]="labelCls(options)"
       [style.display]="options?.notitle ? 'none' : ''"
-    [innerHTML]="$safeNavigationMigration(options?.title)"></label>
+    [innerHTML]="titleHtml(options)"></label>
   }
   @if (boundControl) {
     <textarea
@@ -19,7 +19,8 @@
       [attr.required]="options?.required"
       [class]="fieldCls(options, formControl)"
       [id]="'control' + $safeNavigationMigration(layoutNode()?._id)"
-    [name]="controlName"></textarea>
+      [name]="controlName"
+      rows="3"></textarea>
   }
   @if (!boundControl) {
     <textarea
@@ -34,6 +35,7 @@
       [disabled]="controlDisabled"
       [id]="'control' + $safeNavigationMigration(layoutNode()?._id)"
       [name]="controlName"
+      rows="3"
       [value]="controlValue"
     (input)="updateValue($event)">{{controlValue}}</textarea>
   }

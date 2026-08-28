@@ -1,4 +1,5 @@
 import { Component, inject, input } from '@angular/core';
+import type { LayoutNode } from '@ng-formworks/core';
 import { JsonSchemaFormService } from '@ng-formworks/core';
 import { SelectWidgetComponent } from '@ng-formworks/core';
 
@@ -15,7 +16,7 @@ import { SelectWidgetComponent } from '@ng-formworks/core';
 export class TailwindFrameworkComponent {
   jsf = inject(JsonSchemaFormService);
 
-  readonly layoutNode = input<any>(undefined);
+  readonly layoutNode = input<LayoutNode | undefined>(undefined);
   readonly layoutIndex = input<number[] | undefined>(undefined);
   readonly dataIndex = input<number[] | undefined>(undefined);
 }

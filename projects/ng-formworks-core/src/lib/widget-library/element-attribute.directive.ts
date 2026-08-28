@@ -7,7 +7,7 @@ export class ElementAttributeDirective {
 
  
   @Input()
-  public attributes: { [key: string]: any; };
+  public attributes: Record<string, string>;
 
   constructor(
     private renderer: Renderer2,

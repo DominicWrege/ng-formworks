@@ -1,6 +1,7 @@
-import { Component, ComponentRef, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewContainerRef, inject, input, viewChild } from '@angular/core';
+import { Component, ComponentRef, OnChanges, OnDestroy, OnInit, SimpleChanges, Type, ViewContainerRef, inject, input, viewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
 
+import type { LayoutNode } from '../shared/types';
 import { JsonSchemaFormService } from '../json-schema-form.service';
 
 @Component({
@@ -12,8 +13,8 @@ export class SelectWidgetComponent implements OnChanges, OnInit, OnDestroy {
   private jsf = inject(JsonSchemaFormService);
   private dataChangesSubs: Subscription;
 
-  newComponent: ComponentRef<any> = null;
-  readonly layoutNode = input<any>(undefined);
+  newComponent: ComponentRef<unknown> | null = null;
+  readonly layoutNode = input<LayoutNode | undefined>(undefined);
   readonly layoutIndex = input<number[]>(undefined);
   readonly dataIndex = input<number[]>(undefined);
   readonly widgetContainer = viewChild('widgetContainer', { read: ViewContainerRef });
@@ -38,12 +39,12 @@ export class SelectWidgetComponent implements OnChanges, OnInit, OnDestroy {
   updateComponent() {
     const widgetContainer = this.widgetContainer();
     if (widgetContainer && !this.newComponent && (this.layoutNode() || {}).widget) {
-      this.newComponent = widgetContainer.createComponent((this.layoutNode().widget)
+      this.newComponent = widgetContainer.createComponent((this.layoutNode().widget) as Type<unknown>
       );
     }
     if (this.newComponent) {
       for (const inp of ['layoutNode', 'layoutIndex', 'dataIndex']) {
-        this.newComponent.setInput(inp,this[inp]());
+        this.newComponent.setInput(inp,(this as unknown as Record<string, () => unknown>)[inp]());
       }
     }
   }

@@ -1,5 +1,6 @@
 import { Component, OnChanges, OnDestroy, OnInit, SimpleChanges, inject, input } from '@angular/core';
 import { Subscription } from 'rxjs';
+import type { FormValue, LayoutNode, WidgetOptions } from '../shared/types';
 import { JsonSchemaFormService } from '../json-schema-form.service';
 import { RootComponent } from './root.component';
 import { TextTemplatePipe } from './text-template.pipe';
@@ -19,15 +20,15 @@ export class SectionComponent implements OnInit, OnDestroy, OnChanges {
 
   private jsf = inject(JsonSchemaFormService);
 
-  options: any;
+  options: WidgetOptions;
   expanded = true;
   containerType: string;
-  readonly layoutNode = input<any>(undefined);
+  readonly layoutNode = input<LayoutNode | undefined>(undefined);
   readonly layoutIndex = input<number[]>(undefined);
   readonly dataIndex = input<number[]>(undefined);
 
   dataChangesSubs: Subscription;
-  titleContext: any = {
+  titleContext: { value: FormValue; values: unknown; key: number | string | null } = {
     value: {},
     values: {},
     key: null

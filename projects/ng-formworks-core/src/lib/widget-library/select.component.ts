@@ -1,5 +1,6 @@
 import { Component, inject, input, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
+import type { FormValue, LayoutNode, TitleMapItem, WidgetOptions } from '../shared/types';
 import { JsonSchemaFormService } from '../json-schema-form.service';
 import { buildTitleMap, isArray } from '../shared';
 import { FormsModule } from '@angular/forms';
@@ -16,14 +17,14 @@ export class SelectComponent implements OnInit, OnDestroy {
 
   formControl: AbstractControl;
   controlName: string;
-  controlValue: any;
+  controlValue: FormValue;
   controlDisabled = false;
   boundControl = false;
-  options: any;
-  selectList: any[] = [];
-  selectListFlatGroup: any[] = [];
+  options: WidgetOptions;
+  selectList: TitleMapItem[] = [];
+  selectListFlatGroup: TitleMapItem[] = [];
   isArray = isArray;
-  readonly layoutNode = input<any>(undefined);
+  readonly layoutNode = input<LayoutNode | undefined>(undefined);
   readonly layoutIndex = input<number[]>(undefined);
   readonly dataIndex = input<number[]>(undefined);
 
@@ -52,12 +53,13 @@ export class SelectComponent implements OnInit, OnDestroy {
   updateValue(event) {
     this.options.showErrors = true;
     if (this.options.multiple) {
-      if (this.controlValue?.includes(null)) {
+      const values = this.controlValue as unknown as unknown[] | null | undefined;
+      if (values?.includes(null)) {
         this.deselectAll();
         this.jsf.updateArrayMultiSelectList(this, []);
       } else {
         this.selectListFlatGroup.forEach(selItem => {
-          selItem.checked = this.controlValue?.indexOf(selItem.value) >= 0 ? true : false;
+          selItem.checked = values?.indexOf(selItem.value) >= 0 ? true : false;
         })
         this.jsf.updateArrayMultiSelectList(this, this.selectListFlatGroup);
       }

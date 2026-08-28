@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
+import type { WidgetOptions } from '@ng-formworks/core';
 import { CheckboxComponent } from '@ng-formworks/core';
-import { injectTw } from '../tw-base';
+import { injectTw, twTitle } from '../tw-base';
 import { ReactiveFormsModule } from '@angular/forms';
 
 @Component({
@@ -19,4 +20,5 @@ import { ReactiveFormsModule } from '@angular/forms';
 })
 export class TwCheckboxComponent extends CheckboxComponent {
   readonly tw = injectTw();
+  titleHtml(options?: WidgetOptions | null) { return twTitle(options); }
 }

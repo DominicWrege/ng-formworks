@@ -1,6 +1,7 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit, inject, input } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
 import { Subscription } from 'rxjs';
+import type { FormValue, LayoutNode, WidgetOptions } from '../shared/types';
 import { JsonSchemaFormService } from '../json-schema-form.service';
 import { hasOwn } from '../shared/utility.functions';
 import { StopPropagationDirective } from './stop-propagation.directive';
@@ -17,11 +18,11 @@ export class SubmitComponent implements OnInit,OnDestroy {
 
   formControl: AbstractControl;
   controlName: string;
-  controlValue: any;
+  controlValue: FormValue;
   controlDisabled = false;
   boundControl = false;
-  options: any;
-  readonly layoutNode = input<any>(undefined);
+  options: WidgetOptions;
+  readonly layoutNode = input<LayoutNode | undefined>(undefined);
   readonly layoutIndex = input<number[]>(undefined);
   readonly dataIndex = input<number[]>(undefined);
 

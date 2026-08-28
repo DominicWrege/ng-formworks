@@ -1,4 +1,6 @@
-export const zhValidationMessages: any = { // Chinese error messages
+import type { ValidationMessages } from '../shared/types';
+
+export const zhValidationMessages: ValidationMessages = { // Chinese error messages
   required: '必填字段.',
   minLength: '字符长度必须大于或者等于 {{minimumLength}} (当前长度: {{currentLength}})',
   maxLength: '字符长度必须小于或者等于 {{maximumLength}} (当前长度: {{currentLength}})',

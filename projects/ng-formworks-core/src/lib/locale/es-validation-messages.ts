@@ -1,4 +1,6 @@
-export const esValidationMessages: any = { // Default Spanish error messages
+import type { ValidationMessages } from '../shared/types';
+
+export const esValidationMessages: ValidationMessages = { // Default Spanish error messages
   required: 'Este campo está requerido.',
   minLength: 'Debe tener {{minimumLength}} caracteres o más longitud (longitud actual: {{currentLength}})',
   maxLength: 'Debe tener {{maximumLength}} caracteres o menos longitud (longitud actual: {{currentLength}})',

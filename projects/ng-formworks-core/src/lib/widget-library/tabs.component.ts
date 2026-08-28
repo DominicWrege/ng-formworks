@@ -1,5 +1,6 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit, inject, input, signal } from '@angular/core';
 import { Subscription } from 'rxjs';
+import type { LayoutNode, WidgetOptions } from '../shared/types';
 import { JsonSchemaFormService } from '../json-schema-form.service';
 import { FormsModule } from '@angular/forms';
 import { SelectFrameworkComponent } from './select-framework.component';
@@ -16,11 +17,11 @@ import { SelectFrameworkComponent } from './select-framework.component';
 export class TabsComponent implements OnInit,OnDestroy {
   private jsf = inject(JsonSchemaFormService);
   private cdr = inject(ChangeDetectorRef);
-  options: any;
+  options: WidgetOptions;
   itemCount: number;
   selectedItem = 0;
   showAddTab = true;
-  readonly layoutNode = input<any>(undefined);
+  readonly layoutNode = input<LayoutNode | undefined>(undefined);
   readonly layoutIndex = input<number[]>(undefined);
   readonly dataIndex = input<number[]>(undefined);
   dataChangesSubs:Subscription;
@@ -38,7 +39,7 @@ export class TabsComponent implements OnInit,OnDestroy {
     })
   }
 
-  select(index) {
+  select(index: number) {
     const layoutNode = this.layoutNode();
     if (layoutNode.items[index].type === '$ref') {
       this.itemCount = layoutNode.items.length;
@@ -61,14 +62,14 @@ export class TabsComponent implements OnInit,OnDestroy {
     }
   }
 
-  setTabTitle(item: any, index: number): string {
+  setTabTitle(item: LayoutNode, index: number): string {
     return this.jsf.setArrayItemTitle(this, item, index);
   }
 
   /** Hide a container's own title/legend when rendering a tab/option panel,
    *  since the tab label already identifies it and otherwise the heading is
    *  duplicated. Only container nodes are affected; leaf fields keep labels. */
-  panelNode(item: any): any {
+  panelNode(item: LayoutNode): LayoutNode {
     const isContainer = !!item && (
       item.dataType === 'object' ||
       Array.isArray(item.items) ||

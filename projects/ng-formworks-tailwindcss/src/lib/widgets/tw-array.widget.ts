@@ -1,4 +1,5 @@
 import { Component, inject } from '@angular/core';
+import type { LayoutNode, WidgetContext } from '@ng-formworks/core';
 import { SectionComponent, JsonSchemaFormService } from '@ng-formworks/core';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { injectTw } from '../tw-base';
@@ -30,7 +31,7 @@ export class TwArraySectionComponent extends SectionComponent {
   protected readonly twJsf = inject(JsonSchemaFormService);
 
   /** Layout-tree context for one row, WidgetContext shape (signal accessors). */
-  rowCtx(row: any, i: number): any {
+  rowCtx(row: LayoutNode, i: number): WidgetContext {
     const dataIndexValue = this.dataIndex() || [];
     const layoutIndexValue = this.layoutIndex() || [];
     return {
@@ -40,12 +41,12 @@ export class TwArraySectionComponent extends SectionComponent {
     };
   }
 
-  showWidget(row: any): boolean {
+  showWidget(row: LayoutNode): boolean {
     return this.twJsf.evaluateCondition(row, this.dataIndex());
   }
 
   /** Former css-framework showRemoveButton guard, ported. */
-  canRemove(row: any, i: number): boolean {
+  canRemove(row: LayoutNode, i: number): boolean {
     if (!row || row.type === '$ref' || !row.arrayItem) { return false; }
     const opts = row.options || {};
     if (opts.removable === false || opts.readonly) { return false; }
@@ -62,17 +63,17 @@ export class TwArraySectionComponent extends SectionComponent {
           === parentArray.items.length - 2;
   }
 
-  isDraggable(row: any): boolean {
+  isDraggable(row: LayoutNode): boolean {
     return !!row && row.arrayItem && row.type !== '$ref' &&
       row.arrayItemType === 'list' &&
       (row.options || {}).orderable !== false;
   }
 
-  removeRow(row: any, i: number) {
+  removeRow(row: LayoutNode, i: number) {
     this.twJsf.removeItem(this.rowCtx(row, i));
   }
 
-  drop(event: CdkDragDrop<any[]>) {
+  drop(event: CdkDragDrop<LayoutNode[]>) {
     const srcIdx = event.previousIndex;
     const trgIdx = event.currentIndex;
     if (srcIdx === trgIdx) { return; }

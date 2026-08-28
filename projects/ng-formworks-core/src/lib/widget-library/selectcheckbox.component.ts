@@ -1,6 +1,7 @@
 import { Component, inject, input, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
 import { FrameworkLibraryService } from '../framework-library/framework-library.service';
+import type { FormValue, LayoutNode, TitleMapItem, WidgetOptions } from '../shared/types';
 import { JsonSchemaFormService } from '../json-schema-form.service';
 import { buildTitleMap, isArray } from '../shared';
 import { FormsModule } from '@angular/forms';
@@ -105,15 +106,15 @@ export class SelectCheckboxComponent implements OnInit, OnDestroy {
 
   formControl: AbstractControl;
   controlName: string;
-  controlValue: any;
+  controlValue: FormValue;
   controlDisabled = false;
   boundControl = false;
-  options: any;
-  selectList: any[] = [];
-  selectListFlatGroup: any[] = [];
-  selectValue: any;
+  options: WidgetOptions;
+  selectList: TitleMapItem[] = [];
+  selectListFlatGroup: TitleMapItem[] = [];
+  selectValue: FormValue[];
   isArray = isArray;
-  readonly layoutNode = input<any>(undefined);
+  readonly layoutNode = input<LayoutNode | undefined>(undefined);
   readonly layoutIndex = input<number[]>(undefined);
   readonly dataIndex = input<number[]>(undefined);
 

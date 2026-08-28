@@ -1,6 +1,7 @@
 import { Component, ElementRef, OnDestroy, OnInit, ViewChild, inject, input } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
 
+import type { FormValue, LayoutNode, WidgetOptions } from '../shared/types';
 import { JsonSchemaFormService } from '../json-schema-form.service';
 import { ReactiveFormsModule } from '@angular/forms';
 import { StopPropagationDirective } from './stop-propagation.directive';
@@ -17,15 +18,15 @@ export class NumberComponent implements OnInit,OnDestroy {
 
   formControl: AbstractControl;
   controlName: string;
-  controlValue: any;
+  controlValue: FormValue;
   controlDisabled = false;
   boundControl = false;
-  options: any;
+  options: WidgetOptions;
   allowNegative = true;
   allowDecimal = true;
   allowExponents = false;
   lastValidNumber = '';
-  readonly layoutNode = input<any>(undefined);
+  readonly layoutNode = input<LayoutNode | undefined>(undefined);
   readonly layoutIndex = input<number[]>(undefined);
   readonly dataIndex = input<number[]>(undefined);
 

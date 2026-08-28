@@ -1,6 +1,7 @@
-import { ChangeDetectorRef, Component, ComponentRef, OnChanges, OnDestroy, OnInit, ViewContainerRef, inject, input, viewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ComponentRef, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewContainerRef, inject, input, viewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
 
+import type { LayoutNode } from '../shared/types';
 import { JsonSchemaFormService } from '../json-schema-form.service';
 
 @Component({
@@ -11,8 +12,8 @@ export class SelectFrameworkComponent implements OnChanges, OnInit, OnDestroy {
   private jsf = inject(JsonSchemaFormService);
   private changeDetectorRef = inject(ChangeDetectorRef);
   private dataChangesSubs: Subscription;
-  newComponent: ComponentRef<any> = null;
-  readonly layoutNode = input<any>(undefined);
+  newComponent: ComponentRef<unknown> | null = null;
+  readonly layoutNode = input<LayoutNode | undefined>(undefined);
   readonly layoutIndex = input<number[]>(undefined);
   readonly dataIndex = input<number[]>(undefined);
   readonly widgetContainer = viewChild('widgetContainer', { read: ViewContainerRef });
@@ -30,7 +31,7 @@ export class SelectFrameworkComponent implements OnChanges, OnInit, OnDestroy {
     this.dataChangesSubs?.unsubscribe();
   }
 
-  ngOnChanges(changes) {
+  ngOnChanges(changes: SimpleChanges) {
     this.updateComponent();
   }
 
@@ -42,7 +43,7 @@ export class SelectFrameworkComponent implements OnChanges, OnInit, OnDestroy {
     }
     if (this.newComponent) {
       for (const inp of ['layoutNode', 'layoutIndex', 'dataIndex']) {
-        this.newComponent.setInput(inp,this[inp]());
+        this.newComponent.setInput(inp,(this as unknown as Record<string, () => unknown>)[inp]());
       }
     }
   }

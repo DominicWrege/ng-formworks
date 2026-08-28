@@ -1,5 +1,6 @@
 import { Component, inject, input, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
+import type { FormValue, LayoutNode } from '../shared/types';
 import { JsonSchemaFormService } from '../json-schema-form.service';
 import { ReactiveFormsModule } from '@angular/forms';
 
@@ -14,10 +15,10 @@ export class HiddenComponent implements OnInit,OnDestroy {
 
   formControl: AbstractControl;
   controlName: string;
-  controlValue: any;
+  controlValue: FormValue;
   controlDisabled = false;
   boundControl = false;
-  readonly layoutNode = input<any>(undefined);
+  readonly layoutNode = input<LayoutNode | undefined>(undefined);
   readonly layoutIndex = input<number[]>(undefined);
   readonly dataIndex = input<number[]>(undefined);
 

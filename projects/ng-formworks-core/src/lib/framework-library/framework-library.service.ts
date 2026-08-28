@@ -1,7 +1,8 @@
 import { HttpClient } from '@angular/common/http';
-import { Inject, Injectable, inject } from '@angular/core';
+import { Inject, Injectable, Type, inject } from '@angular/core';
 import { Observable, Subject, lastValueFrom } from 'rxjs';
 import { hasOwn } from '../shared/utility.functions';
+import type { WidgetLibraryMap } from '../shared/types';
 import { WidgetLibraryService } from '../widget-library/widget-library.service';
 import { Framework } from './framework';
 
@@ -32,7 +33,7 @@ export class FrameworkLibraryService {
   private activeFrameworkNameSubject: Subject<string>;
   private activeFrameworkName:string;
 
-  constructor(@Inject(Framework) private frameworks: any[],) {
+  constructor(@Inject(Framework) private frameworks: Framework[],) {
     this.frameworks.forEach(framework =>
       this.frameworkLibrary[framework.name] = framework
     );
@@ -74,9 +75,9 @@ export class FrameworkLibraryService {
     return hasOwn(this.frameworkLibrary, type);
   }
 
-  public getFramework(): any {
+  public getFramework(): Type<unknown> | null {
     if (!this.activeFramework) { this.setFramework('default', true); }
-    return this.activeFramework.framework;
+    return this.activeFramework?.framework ?? null;
   }
 
   public getFrameworkList():{name:string,text:string}[] {
@@ -86,7 +87,7 @@ export class FrameworkLibraryService {
     
   }
 
-  public getFrameworkWidgets(): any {
+  public getFrameworkWidgets(): WidgetLibraryMap {
     return this.activeFramework.widgets || {};
   }
 
@@ -101,14 +102,14 @@ export class FrameworkLibraryService {
   }
 
   //applies to CssFramework classes
-  public getFrameworkConfig(existingFramework?:any): any {
+  public getFrameworkConfig(existingFramework?:Framework|null): Record<string, any> | undefined {
     let actFramework:Framework& { [key: string]: any; }=existingFramework||this.activeFramework;
     return actFramework.config;
   }
 
   //this will load the list of assets to be loaded at runtime in case the dependent framework
   //scripts and styles are include locally with the parent app
-  public getFrameworkAssetConfig(existingFramework?:any,useAssetRelPath=true):Promise<{stylesheets:string[],scripts:string[]}>{
+  public getFrameworkAssetConfig(existingFramework?:Framework|null,useAssetRelPath=true):Promise<{stylesheets:string[],scripts:string[]}>{
     let actFramework:Framework& { [key: string]: any; }=existingFramework||this.activeFramework;
     // TODO: move this into config
     const assetConfigPath = `assets/${actFramework.name}/cssframework`
@@ -120,9 +121,9 @@ export class FrameworkLibraryService {
       //})
       
       return lastValueFrom(subs).then(assetCfgText=>{
-        let assetCfg=JSON.parse(assetCfgText);
+        let assetCfg:{stylesheets:string[],scripts:string[]} = JSON.parse(assetCfgText);
         if(useAssetRelPath){
-          assetCfg.stylesheets=assetCfg.stylesheets.map(styleLink=>{
+          assetCfg.stylesheets=assetCfg.stylesheets.map((styleLink:string)=>{
             //ignore relative path if url starts with known protocol or //
             let nonRelPrefixes=["/","//","http:","https:"];//"//" list for completeness 
             let isNonRel=false;
@@ -134,7 +135,7 @@ export class FrameworkLibraryService {
             }
             return `${assetConfigPath}/${styleLink}`;
           })
-          assetCfg.scripts=assetCfg.scripts.map(scriptLink=>{
+          assetCfg.scripts=assetCfg.scripts.map((scriptLink:string)=>{
             return `${assetConfigPath}/${scriptLink}`;
           })
         }   
@@ -145,7 +146,7 @@ export class FrameworkLibraryService {
   //applies to CssFramework classes
   public getFrameworkThemes():{name:string,text:string}[] {
     let cssfwConfig=this.getFrameworkConfig();
-    let themes;
+    let themes:{name:string,text:string}[]=[];
     if(cssfwConfig){
       themes=cssfwConfig?.widgetstyles?.__themes__||[]
     }
@@ -153,7 +154,7 @@ export class FrameworkLibraryService {
   }
 
   //applies to CssFramework classes
-  public requestThemeChange(name:string,validateThemeExists:boolean=false,existingFramework?:any){
+  public requestThemeChange(name:string,validateThemeExists:boolean=false,existingFramework?:Framework|null){
     let actFramework:Framework& { [key: string]: any; }=existingFramework||this.activeFramework;
     if(actFramework.requestThemeChange){
       if(validateThemeExists){  
@@ -168,7 +169,7 @@ export class FrameworkLibraryService {
     }
   }
   //applies to CssFramework classes
-  public getActiveTheme(existingFramework?:any):{name:string,text:string}{
+  public getActiveTheme(existingFramework?:Framework|null):{name:string,text:string}{
     let actFramework:Framework& { [key: string]: any; }=existingFramework||this.activeFramework;
     if(actFramework.getActiveTheme){
       return actFramework.getActiveTheme();
@@ -176,7 +177,7 @@ export class FrameworkLibraryService {
   }
 
   //applies to CssFramework classes
-  public registerTheme(newTheme:{name:string,text:string},existingFramework?:any):boolean{
+  public registerTheme(newTheme:{name:string,text:string},existingFramework?:Framework|null):boolean{
     let actFramework:Framework& { [key: string]: any; }=existingFramework||this.activeFramework;
     if(actFramework.registerTheme){
       return actFramework.registerTheme(newTheme);
@@ -184,7 +185,7 @@ export class FrameworkLibraryService {
   }
 
     //applies to CssFramework classes
-    public unregisterTheme(name:string,existingFramework?:any):boolean{
+    public unregisterTheme(name:string,existingFramework?:Framework|null):boolean{
       let actFramework:Framework& { [key: string]: any; }=existingFramework||this.activeFramework;
       if(actFramework.registerTheme){
         return actFramework.unregisterTheme(name);

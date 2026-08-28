@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import type { LayoutNode } from '@ng-formworks/core';
 import { TabsComponent } from '@ng-formworks/core';
 import { injectTw } from '../tw-base';
 import { FormsModule } from '@angular/forms';
@@ -18,7 +19,7 @@ export class TwTabsComponent extends TabsComponent {
   /** Hide a container's own title/legend when rendering a tab/option panel,
    *  since the tab/radio label already identifies it and otherwise the heading
    *  is duplicated. Only container nodes are affected; leaf fields keep labels. */
-  panelNode(item: any): any {
+  panelNode(item: LayoutNode): LayoutNode {
     const isContainer = !!item && (
       item.dataType === 'object' ||
       Array.isArray(item.items) ||

@@ -5,6 +5,7 @@ import {
 } from './validator.functions';
 import { hasOwn, uniqueItems, commonItems } from './utility.functions';
 import { JsonPointer, Pointer } from './jsonpointer.functions';
+import type { JsonSchema } from './types';
 
 /**
  * 'mergeSchemas' function
@@ -24,14 +25,15 @@ import { JsonPointer, Pointer } from './jsonpointer.functions';
  * //   schemas - one or more input schemas
  * //  - merged schema
  */
-export function mergeSchemas(...schemas) {
-  schemas = schemas.filter(schema => !isEmpty(schema));
+export function mergeSchemas(...schemas: JsonSchema[]): JsonSchema {
+  schemas = schemas.filter(schema => !isEmpty(schema)) as JsonSchema[];
   if (schemas.some(schema => !isObject(schema))) { return null; }
-  const combinedSchema: any = {};
+  const combinedSchema: JsonSchema = {};
   for (const schema of schemas) {
     for (const key of Object.keys(schema)) {
-      const combinedValue = combinedSchema[key];
-      const schemaValue = schema[key];
+      // Values of custom schema keys are untyped by design
+      const combinedValue = combinedSchema[key] as any;
+      const schemaValue = schema[key] as any;
       if (!hasOwn(combinedSchema, key) || deepEqual(combinedValue, schemaValue)) {
         combinedSchema[key] = schemaValue;
       } else {
@@ -39,7 +41,7 @@ export function mergeSchemas(...schemas) {
           case 'allOf':
             // Combine all items from both arrays
             if (isArray(combinedValue) && isArray(schemaValue)) {
-              combinedSchema.allOf = mergeSchemas(...combinedValue, ...schemaValue);
+              combinedSchema.allOf = mergeSchemas(...combinedValue, ...schemaValue) as any;
             } else {
               return { allOf: [ ...schemas ] };
             }
@@ -73,7 +75,7 @@ export function mergeSchemas(...schemas) {
           case 'definitions':
             // Combine keys from both objects
             if (isObject(combinedValue) && isObject(schemaValue)) {
-              const combinedObject = { ...combinedValue };
+              const combinedObject = { ...combinedValue } as Record<string, any>;
               for (const subKey of Object.keys(schemaValue)) {
                 if (!hasOwn(combinedObject, subKey) ||
                   deepEqual(combinedObject[subKey], schemaValue[subKey])
@@ -94,7 +96,7 @@ export function mergeSchemas(...schemas) {
             // and merge schemas on matching keys,
             // converting from arrays to objects if necessary
             if (isObject(combinedValue) && isObject(schemaValue)) {
-              const combinedObject = { ...combinedValue };
+              const combinedObject = { ...combinedValue } as Record<string, any>;
               for (const subKey of Object.keys(schemaValue)) {
                 if (!hasOwn(combinedObject, subKey) ||
                   deepEqual(combinedObject[subKey], schemaValue[subKey])
@@ -159,7 +161,7 @@ export function mergeSchemas(...schemas) {
             if (isNumber(combinedValue) && isNumber(schemaValue)) {
               const gcd = (x, y) => !y ? x : gcd(y, x % y);
               const lcm = (x, y) => (x * y) / gcd(x, y);
-              combinedSchema.multipleOf = lcm(combinedValue, schemaValue);
+              combinedSchema.multipleOf = lcm(combinedValue as number, schemaValue as number);
             } else {
               return { allOf: [ ...schemas ] };
             }
@@ -168,7 +170,7 @@ export function mergeSchemas(...schemas) {
           case 'maxItems': case 'maxProperties':
             // If numbers, set to lowest value
             if (isNumber(combinedValue) && isNumber(schemaValue)) {
-              combinedSchema[key] = Math.min(combinedValue, schemaValue);
+              combinedSchema[key] = Math.min(combinedValue as number, schemaValue as number);
             } else {
               return { allOf: [ ...schemas ] };
             }
@@ -177,7 +179,7 @@ export function mergeSchemas(...schemas) {
           case 'minItems': case 'minProperties':
             // If numbers, set to highest value
             if (isNumber(combinedValue) && isNumber(schemaValue)) {
-              combinedSchema[key] = Math.max(combinedValue, schemaValue);
+              combinedSchema[key] = Math.max(combinedValue as number, schemaValue as number);
             } else {
               return { allOf: [ ...schemas ] };
             }
@@ -202,7 +204,7 @@ export function mergeSchemas(...schemas) {
             // Combine all keys from both objects
             // and merge schemas on matching keys
             if (isObject(combinedValue) && isObject(schemaValue)) {
-              const combinedObject = { ...combinedValue };
+              const combinedObject = { ...combinedValue } as Record<string, any>;
               for (const subKey of Object.keys(schemaValue)) {
                 if (!hasOwn(combinedObject, subKey) ||
                   deepEqual(combinedObject[subKey], schemaValue[subKey])
@@ -228,7 +230,7 @@ export function mergeSchemas(...schemas) {
             // unless additionalProperties === false
             // and merge schemas on matching keys
             if (isObject(combinedValue) && isObject(schemaValue)) {
-              const combinedObject = { ...combinedValue };
+              const combinedObject = { ...combinedValue } as Record<string, any>;
               // If new schema has additionalProperties,
               // merge or remove non-matching property keys in combined schema
               if (hasOwn(schemaValue, 'additionalProperties')) {
@@ -290,7 +292,7 @@ export function mergeSchemas(...schemas) {
               typeof schemaValue === 'boolean' &&
               typeof combinedValue === 'boolean'
             ) {
-              combinedSchema.required = !!combinedValue || !!schemaValue;
+              combinedSchema.required = (!!combinedValue || !!schemaValue) as any;
             } else {
               return { allOf: [ ...schemas ] };
             }
@@ -310,7 +312,9 @@ export function mergeSchemas(...schemas) {
             ) {
               const combinedTypes = commonItems(combinedValue, schemaValue);
               if (!combinedTypes.length) { return { allOf: [ ...schemas ] }; }
-              combinedSchema.type = combinedTypes.length > 1 ? combinedTypes : combinedTypes[0];
+              combinedSchema.type = (
+                combinedTypes.length > 1 ? combinedTypes : combinedTypes[0]
+              ) as JsonSchema['type'];
             } else {
               return { allOf: [ ...schemas ] };
             }

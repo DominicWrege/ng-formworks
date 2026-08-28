@@ -1,4 +1,6 @@
-export const enValidationMessages: any = { // Default English error messages
+import type { ValidationMessages } from '../shared/types';
+
+export const enValidationMessages: ValidationMessages = { // Default English error messages
   required: 'This field is required.',
   minLength: 'Must be {{minimumLength}} characters or longer (current length: {{currentLength}})',
   maxLength: 'Must be {{maximumLength}} characters or shorter (current length: {{currentLength}})',

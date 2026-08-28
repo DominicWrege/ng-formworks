@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
+import type { WidgetOptions } from '@ng-formworks/core';
 import { CheckboxesComponent } from '@ng-formworks/core';
-import { injectTw } from '../tw-base';
+import { injectTw, twTitle } from '../tw-base';
 
 @Component({
     selector: 'tw-checkboxes-widget',
@@ -17,4 +18,5 @@ import { injectTw } from '../tw-base';
 })
 export class TwCheckboxesComponent extends CheckboxesComponent {
   readonly tw = injectTw();
+  titleHtml(options?: WidgetOptions | null) { return twTitle(options); }
 }

@@ -3,7 +3,7 @@
  */
 
 export { JsonSchemaFormModule } from './lib/json-schema-form.module';
-export { TitleMapItem, ErrorMessages, JsonSchemaFormService } from './lib/json-schema-form.service';
+export { TitleMapItem, ErrorMessages, JsonSchemaFormService, WidgetContext, LegacyWidgetContext } from './lib/json-schema-form.service';
 export { JsonSchemaFormComponent } from './lib/json-schema-form.component';
 export { Framework } from './lib/framework-library/framework';
 export { FrameworkLibraryService } from './lib/framework-library/framework-library.service';

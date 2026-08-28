@@ -1,4 +1,5 @@
 import { Component, OnInit, input, inject } from '@angular/core';
+import type { LayoutNode, WidgetOptions } from '../shared/types';
 import { JsonSchemaFormService } from '../json-schema-form.service';
 import { RootComponent } from './root.component';
 
@@ -11,8 +12,8 @@ import { RootComponent } from './root.component';
 export class TabComponent implements OnInit {
   private jsf = inject(JsonSchemaFormService);
 
-  options: any;
-  readonly layoutNode = input<any>(undefined);
+  options: WidgetOptions;
+  readonly layoutNode = input<LayoutNode | undefined>(undefined);
   readonly layoutIndex = input<number[]>(undefined);
   readonly dataIndex = input<number[]>(undefined);
 

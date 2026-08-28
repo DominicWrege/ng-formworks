@@ -1,16 +1,17 @@
 // item-title.component.ts
 import { ChangeDetectorRef, Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { JsonSchemaFormService } from '../json-schema-form.service';
+import type { LayoutNode } from '../shared/types';
+import { JsonSchemaFormService, type LegacyWidgetContext } from '../json-schema-form.service';
 
 @Component({
     selector: 'item-title',
     templateUrl: './item-title.component.html',
 })
 export class ItemTitleComponent implements OnInit, OnChanges,OnDestroy {
-    @Input() item: any;
+    @Input() item: LayoutNode;
     @Input() index: number;
-    @Input() ctx: any;
+    @Input() ctx: LegacyWidgetContext;
 
     title: string;
     dataChangesSubs:Subscription;

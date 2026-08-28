@@ -1,7 +1,7 @@
 import { cloneDeep, deepEqual } from './shared/native.functions';
 
-import { ChangeDetectorRef, Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, forwardRef, inject, input, output } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { ChangeDetectorRef, Component, Input, OnChanges, OnDestroy, OnInit, Provider, SimpleChanges, Type, forwardRef, inject, input, output } from '@angular/core';
+import { AbstractControl, ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Subject, Subscription } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { FrameworkLibraryService } from './framework-library/framework-library.service';
@@ -18,14 +18,41 @@ import {
   isObject
 } from './shared/validator.functions';
 import { WidgetLibraryService } from './widget-library/widget-library.service';
+import type {
+  DataObject, FormOptions, JsonSchema, Layout, WidgetLibraryMap
+} from './shared/types';
+import type { ErrorObject, Options } from 'ajv/dist/2019';
+import { Framework } from './framework-library/framework';
 import { RootComponent } from './widget-library/root.component';
 import { FormsModule } from '@angular/forms';
 
-export const JSON_SCHEMA_FORM_VALUE_ACCESSOR: any = {
+export const JSON_SCHEMA_FORM_VALUE_ACCESSOR: Provider = {
   provide: NG_VALUE_ACCESSOR,
   useExisting: forwardRef(() => JsonSchemaFormComponent),
   multi: true,
 };
+
+/**
+ * Shape of the combined `form` input: may hold any combination of schema,
+ * layout, data and options keys (see `initializeForm` and friends).
+ */
+export interface FormInput {
+  schema?: JsonSchema;
+  JSONSchema?: JsonSchema;
+  layout?: Layout;
+  form?: Layout;
+  options?: FormOptions;
+  data?: DataObject;
+  value?: DataObject;
+  model?: DataObject;
+  formData?: DataObject;
+  UISchema?: DataObject;
+  uiSchema?: DataObject;
+  customFormItems?: DataObject;
+  tpldata?: DataObject;
+  ajvOptions?: Options;
+  [key: string]: any;
+}
 
 /**
  * @module 'JsonSchemaFormComponent' - Angular JSON Schema Form
@@ -78,16 +105,19 @@ export class JsonSchemaFormComponent implements ControlValueAccessor, OnChanges,
   // TODO: quickfix to avoid subscribing twice to the same emitters
   private unsubscribeOnActivateForm$ = new Subject<void>();
 
-  debugOutput: any; // Debug information, if requested
-  formValueSubscription: any = null;
+  debugOutput = ''; // Debug information, if requested
+  formValueSubscription: Subscription | null = null;
   formInitialized = false;
   objectWrap = false; // Is non-object input schema wrapped in an object?
 
   formValuesInput: string; // Name of the input providing the form data
   previousInputs: { // Previous input values, to detect which input triggers onChanges
-    schema: any, layout: any[], data: any, options: any, framework: any | string,
-    widgets: any, form: any, model: any, JSONSchema: any, UISchema: any,
-    formData: any, loadExternalAssets: boolean, debug: boolean,ajvOptions:any
+    schema: JsonSchema | null, layout: Layout | null, data: DataObject | null,
+    options: FormOptions | null, framework: Framework | string | null,
+    widgets: WidgetLibraryMap | null, form: FormInput | null, model: DataObject | null,
+    JSONSchema: JsonSchema | null, UISchema: DataObject | null,
+    formData: DataObject | null, loadExternalAssets: boolean | null,
+    debug: boolean | null, ajvOptions: Options | null
   } = {
       schema: null, layout: null, data: null, options: null, framework: null,
       widgets: null, form: null, model: null, JSONSchema: null, UISchema: null,
@@ -95,65 +125,65 @@ export class JsonSchemaFormComponent implements ControlValueAccessor, OnChanges,
     };
 
   // Recommended inputs
-  readonly schema = input<any>(undefined); // The JSON Schema
-  readonly layout = input<any[]>(undefined); // The form layout
-  readonly data = input<any>(undefined); // The form data
-  readonly options = input<any>(undefined); // The global form options
-  readonly framework = input<any | string>(undefined); // The framework to load
-  readonly widgets = input<any>(undefined); // Any custom widgets to load
+  readonly schema = input<JsonSchema | undefined>(undefined); // The JSON Schema
+  readonly layout = input<Layout | undefined>(undefined); // The form layout
+  readonly data = input<DataObject | undefined>(undefined); // The form data
+  readonly options = input<FormOptions | undefined>(undefined); // The global form options
+  readonly framework = input<Framework | string | undefined>(undefined); // The framework to load
+  readonly widgets = input<WidgetLibraryMap | undefined>(undefined); // Any custom widgets to load
 
   // Alternate combined single input
-  readonly form = input<any>(undefined); // For testing, and JSON Schema Form API compatibility
+  readonly form = input<FormInput | undefined>(undefined); // For testing, and JSON Schema Form API compatibility
 
   // Angular Schema Form API compatibility input
-  readonly model = input<any>(undefined); // Alternate input for form data
+  readonly model = input<DataObject | undefined>(undefined); // Alternate input for form data
 
   // React JSON Schema Form API compatibility inputs
-  readonly JSONSchema = input<any>(undefined); // Alternate input for JSON Schema
-  readonly UISchema = input<any>(undefined); // UI schema - alternate form layout format
-  readonly formData = input<any>(undefined); // Alternate input for form data
+  readonly JSONSchema = input<JsonSchema | undefined>(undefined); // Alternate input for JSON Schema
+  readonly UISchema = input<DataObject | undefined>(undefined); // UI schema - alternate form layout format
+  readonly formData = input<DataObject | undefined>(undefined); // Alternate input for form data
 
-  readonly ngModel = input<any>(undefined); // Alternate input for Angular forms
+  readonly ngModel = input<DataObject | undefined>(undefined); // Alternate input for Angular forms
 
   readonly language = input<string>(undefined); // Language
 
   // Development inputs, for testing and debugging
-  readonly loadExternalAssets = input<boolean>(undefined); // Load external framework assets?
-  readonly debug = input<boolean>(undefined); // Show debug information?
+  readonly loadExternalAssets = input<boolean | undefined>(undefined); // Load external framework assets?
+  readonly debug = input<boolean | undefined>(undefined); // Show debug information?
 
   readonly theme = input<string>(undefined); // Theme
 
-  readonly ajvOptions = input<any>(undefined); // ajvOptions
+  readonly ajvOptions = input<Options | undefined>(undefined); // ajvOptions
 
   private ajvInstanceName:string;
 
   @Input()
-  get value(): any {
+  get value(): DataObject {
     return this.objectWrap ? this.jsf.data['1'] : this.jsf.data;
   }
-  set value(value: any) {
+  set value(value: DataObject) {
     this.setFormValues(value, false);
   }
 
   // Outputs
-  readonly onChanges = output<any>(); // Live unvalidated internal form data
-  readonly onSubmit = output<any>(); // Complete validated form data
+  readonly onChanges = output<DataObject>(); // Live unvalidated internal form data
+  readonly onSubmit = output<DataObject>(); // Complete validated form data
   readonly isValid = output<boolean>(); // Is current data valid?
-  readonly validationErrors = output<any>(); // Validation errors (if any)
-  readonly formSchema = output<any>(); // Final schema used to create form
-  readonly formLayout = output<any>(); // Final layout used to create form
+  readonly validationErrors = output<ErrorObject[] | null>(); // Validation errors (if any)
+  readonly formSchema = output<JsonSchema>(); // Final schema used to create form
+  readonly formLayout = output<Layout>(); // Final layout used to create form
 
   // Outputs for possible 2-way data binding
   // Only the one input providing the initial form data will be bound.
   // If there is no inital data, input '{}' to activate 2-way data binding.
   // There is no 2-way binding if inital data is combined inside the 'form' input.
-  readonly dataChange = output<any>();
-  readonly modelChange = output<any>();
-  readonly formDataChange = output<any>();
-  readonly ngModelChange = output<any>();
+  readonly dataChange = output<DataObject>();
+  readonly modelChange = output<DataObject>();
+  readonly formDataChange = output<DataObject>();
+  readonly ngModelChange = output<DataObject>();
 
-  onChange: Function;
-  onTouched: Function;
+  onChange: (value?: unknown) => void;
+  onTouched: (value?: unknown) => void;
 
   // TODO: review,maybe use takeUntilDestroyed rxjs op
   dataChangesSubs:Subscription;
@@ -172,13 +202,14 @@ export class JsonSchemaFormComponent implements ControlValueAccessor, OnChanges,
   }
 
 
-  private getInputValue(inputKey:string){
+  private getInputValue(inputKey: string): any {
     // TODO(review): if the value is meant to be a function and not a signal,
     //it might inadvertently be called!
-    if(typeof this[inputKey]=="function"){
-      return this[inputKey]();
+    const inputRef = (this as unknown as Record<string, unknown>)[inputKey];
+    if(typeof inputRef =="function"){
+      return (inputRef as () => unknown)();
     }
-    return this[inputKey];
+    return inputRef;
   }
 
   private resetScriptsAndStyleSheets() {
@@ -234,16 +265,16 @@ export class JsonSchemaFormComponent implements ControlValueAccessor, OnChanges,
     }
   }
 
-  writeValue(value: any) {
+  writeValue(value: DataObject) {
     this.setFormValues(value, false);
     if (!this.formValuesInput) { this.formValuesInput = 'ngModel'; }
   }
 
-  registerOnChange(fn: Function) {
+  registerOnChange(fn: (value?: unknown) => void) {
     this.onChange = fn;
   }
 
-  registerOnTouched(fn: Function) {
+  registerOnTouched(fn: (value?: unknown) => void) {
     this.onTouched = fn;
   }
 
@@ -257,7 +288,7 @@ export class JsonSchemaFormComponent implements ControlValueAccessor, OnChanges,
   }
 
   updateForm() {
-      let changedData;
+      let changedData: DataObject;
     const language = this.language();
     if (!this.formInitialized || !this.formValuesInput ||
       (language && language !== this.jsf.language)
@@ -326,7 +357,7 @@ export class JsonSchemaFormComponent implements ControlValueAccessor, OnChanges,
   }
   
 
-  setFormValues(formValues: any, resetFirst = true,emitFormEvent=true,usePatch=true) {
+  setFormValues(formValues: DataObject, resetFirst = true,emitFormEvent=true,usePatch=true) {
 
     if (formValues) {
       const newFormValues = this.objectWrap ? formValues['1'] : formValues;
@@ -378,7 +409,7 @@ export class JsonSchemaFormComponent implements ControlValueAccessor, OnChanges,
    * - Create the master 'formGroupTemplate' then from it 'formGroup'
    *   the Angular formGroup used to control the reactive form.
    */
-  initializeForm(initialData?:any) {
+  initializeForm(initialData?: DataObject) {
     if (
       this.schema() || this.layout() || this.data() || this.form() || this.model() ||
       this.JSONSchema() || this.UISchema() || this.formData() || this.ngModel() ||
@@ -419,7 +450,7 @@ export class JsonSchemaFormComponent implements ControlValueAccessor, OnChanges,
       // Uncomment individual lines to output debugging information to browser:
       // (These only work if the 'debug' option has also been set to 'true'.)
       if (this.debug() || this.jsf.formOptions.debug) {
-        const vars: any[] = [];
+        const vars: unknown[] = [];
         // vars.push(this.jsf.schema);
         // vars.push(this.jsf.layout);
         // vars.push(this.options);
@@ -470,7 +501,7 @@ export class JsonSchemaFormComponent implements ControlValueAccessor, OnChanges,
     }
     this.jsf.setOptions({ debug: !!this.debug() });
     let loadExternalAssets: boolean = this.loadExternalAssets() || false;
-    let framework: any = this.framework() || 'default';
+    let framework: Framework | string = this.framework() || 'default';
     const options = this.options();
     if (isObject(options)) {
       this.jsf.setOptions(options);
@@ -540,7 +571,7 @@ export class JsonSchemaFormComponent implements ControlValueAccessor, OnChanges,
       this.jsf.ReactJsonSchemaFormCompatibility = true;
       this.jsf.schema = cloneDeep(form.JSONSchema);
     } else if (hasOwn(form, 'properties') && isObject(form.properties)) {
-      this.jsf.schema = cloneDeep(form);
+      this.jsf.schema = cloneDeep(form) as JsonSchema;
     } else if (isObject(form)) {
       // TODO: Handle other types of form input
     }
@@ -573,14 +604,14 @@ export class JsonSchemaFormComponent implements ControlValueAccessor, OnChanges,
           this.jsf.JsonFormCompatibility = true;
           this.jsf.schema = {
             'type': 'object',
-            'properties': this.jsf.schema
+            'properties': this.jsf.schema as unknown as Record<string, JsonSchema>
           };
         }
       }
 
       // If needed, update JSON Schema to draft 6 format, including
       // draft 3 (JSON Form style) and draft 4 (Angular Schema Form style)
-      this.jsf.schema = convertSchemaToDraft6(this.jsf.schema);
+      this.jsf.schema = convertSchemaToDraft6(this.jsf.schema) as JsonSchema;
 
       // Initialize ajv and compile schema (see initializeAjv())
 
@@ -671,7 +702,7 @@ export class JsonSchemaFormComponent implements ControlValueAccessor, OnChanges,
 
     // Rename JSON Form-style 'options' lists to
     // Angular Schema Form-style 'titleMap' lists.
-    const fixJsonFormOptions = (layout: any): any => {
+    const fixJsonFormOptions = (layout: Layout): Layout => {
       if (isObject(layout) || isArray(layout)) {
         forEach(layout, (value, key) => {
           if (hasOwn(value, 'options') && isObject(value.options)) {
@@ -701,7 +732,7 @@ export class JsonSchemaFormComponent implements ControlValueAccessor, OnChanges,
     }
 
     // Check for alternate layout inputs
-    let alternateLayout: any = null;
+    let alternateLayout: DataObject | null = null;
     const formValue = this.form();
     const UISchema = this.UISchema();
     if (isObject(UISchema)) {
@@ -715,7 +746,7 @@ export class JsonSchemaFormComponent implements ControlValueAccessor, OnChanges,
       alternateLayout = cloneDeep(formValue.uiSchema);
     } else if (hasOwn(formValue, 'customFormItems')) {
       this.jsf.JsonFormCompatibility = true;
-      alternateLayout = fixJsonFormOptions(cloneDeep(formValue.customFormItems));
+      alternateLayout = fixJsonFormOptions(cloneDeep(formValue.customFormItems) as unknown as Layout);
     }
 
     // if alternate layout found, copy alternate layout options into schema
@@ -827,12 +858,14 @@ export class JsonSchemaFormComponent implements ControlValueAccessor, OnChanges,
       const validateOnRender =
         JsonPointer.get(this.jsf, '/formOptions/validateOnRender');
       if (validateOnRender) { // validateOnRender === 'auto' || true
-        const touchAll = (control) => {
+        const touchAll = (control: AbstractControl) => {
           if (validateOnRender === true || hasValue(control.value)) {
             control.markAsTouched();
           }
-          Object.keys(control.controls || {})
-            .forEach(key => touchAll(control.controls[key]));
+          const controls = (control as unknown as
+            { controls?: Record<string, AbstractControl> }).controls;
+          Object.keys(controls || {})
+            .forEach(key => touchAll(controls[key]));
         };
         touchAll(this.jsf.formGroup);
         this.isValid.emit(this.jsf.isValid);

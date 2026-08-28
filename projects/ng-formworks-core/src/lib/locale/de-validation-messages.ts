@@ -1,4 +1,6 @@
-export const deValidationMessages: any = { // Default German error messages
+import type { ValidationMessages } from '../shared/types';
+
+export const deValidationMessages: ValidationMessages = { // Default German error messages
   required: 'Darf nicht leer sein',
   minLength: 'Mindestens {{minimumLength}} Zeichen benötigt (aktuell: {{currentLength}})',
   maxLength: 'Maximal {{maximumLength}} Zeichen erlaubt (aktuell: {{currentLength}})',

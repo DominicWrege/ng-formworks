@@ -28,7 +28,7 @@
     @if (options?.title) {
       <span
         [style.display]="options?.notitle ? 'none' : ''"
-      [innerHTML]="$safeNavigationMigration(options?.title)"></span>
+      [innerHTML]="titleHtml(options)"></span>
     }
   </label>
 </div>

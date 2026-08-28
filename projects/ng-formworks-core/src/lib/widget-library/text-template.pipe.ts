@@ -7,7 +7,7 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
 })
 export class TextTemplatePipe implements PipeTransform {
   private jsf=inject(JsonSchemaFormService);
-  transform(tpl: string, tplCtx: any): string {
+  transform(tpl: string, tplCtx: { value?: unknown; values?: unknown; key?: number | string | null }): string {
       return this.jsf.parseText(tpl,tplCtx.value,tplCtx.values,tplCtx.key)
   }
 

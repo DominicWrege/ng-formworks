@@ -16,6 +16,13 @@ export {
 
 export { JsonPointer, Pointer } from './jsonpointer.functions';
 
+export {
+  DataObject, FormOptions, FormGroupTemplate, FormValue, FunctionCondition, JsonObject, JsonPrimitive,
+  JsonSchema, JsonValue, Layout, LayoutItem, LayoutNode, SchemaTypeName,
+  TitleMapItem, ValidationMessage, ValidationMessageFn,
+  ValidationMessages, WidgetLibraryMap, WidgetOptions, WidgetType
+} from './types';
+
 export { JsonValidators } from './json.validators';
 
 export { buildSchemaFromData, buildSchemaFromLayout, checkInlineType, combineAllOf, fixRequiredArrayProperties, getControlValidators, getFromSchema, getInputType, getSubSchema, getTitleMapFromOneOf, isInputRequired, removeRecursiveReferences, resolveSchemaReferences, updateInputOptions } from './json-schema.functions';

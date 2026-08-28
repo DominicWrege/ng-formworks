@@ -3,7 +3,7 @@
     <label
       [class]="tw.label + ' ' + (options?.labelHtmlClass || '')"
       [style.display]="options?.notitle ? 'none' : ''"
-    [innerHTML]="$safeNavigationMigration(options?.title)"></label>
+    [innerHTML]="titleHtml(options)"></label>
   }
 
   @if (layoutOrientation === 'horizontal') {

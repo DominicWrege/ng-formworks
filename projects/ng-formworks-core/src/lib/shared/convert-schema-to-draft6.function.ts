@@ -1,4 +1,5 @@
 import { cloneDeep } from './native.functions';
+import type { JsonSchema } from './types';
 
 /**
  * 'convertSchemaToDraft6' function
@@ -17,21 +18,28 @@ import { cloneDeep } from './native.functions';
  * // { object } - JSON schema (draft 6)
  */
 export interface OptionObject { changed?: boolean; draft?: number; }
-export function convertSchemaToDraft6(schema, options: OptionObject = {}) {
+export function convertSchemaToDraft6(
+  schema: JsonSchema | JsonSchema[], options: OptionObject = {}
+): JsonSchema | JsonSchema[] {
   let draft: number = options.draft || null;
   let changed: boolean = options.changed || false;
 
-  if (typeof schema !== 'object') { return schema; }
-  if (typeof schema.map === 'function') {
-    return [...schema.map(subSchema => convertSchemaToDraft6(subSchema, { changed, draft }))];
+  if (typeof schema !== 'object') { return schema as JsonSchema; }
+  if (typeof (schema as JsonSchema[]).map === 'function') {
+    return [...(schema as JsonSchema[]).map(
+      subSchema => convertSchemaToDraft6(subSchema, { changed, draft })
+    )] as JsonSchema[];
   }
-  let newSchema = { ...schema };
+  schema = schema as JsonSchema;
+  // `& Record<string, any>` keeps legacy draft 1-3 keywords (extends,
+  // disallow, maxDecimal, ...) addressable alongside typed draft-6 keys.
+  let newSchema = { ...schema } as JsonSchema & Record<string, any>;
   const simpleTypes = ['array', 'boolean', 'integer', 'null', 'number', 'object', 'string'];
 
   if (typeof newSchema.$schema === 'string' &&
     /http\:\/\/json\-schema\.org\/draft\-0\d\/schema\#/.test(newSchema.$schema)
   ) {
-    draft = newSchema.$schema[30];
+    draft = newSchema.$schema[30] as unknown as number;
   }
 
   // Convert v1-v2 'contentEncoding' to 'media.binaryEncoding'
@@ -44,9 +52,9 @@ export function convertSchemaToDraft6(schema, options: OptionObject = {}) {
 
   // Convert v1-v3 'extends' to 'allOf'
   if (typeof newSchema.extends === 'object') {
-    newSchema.allOf = typeof newSchema.extends.map === 'function' ?
-      newSchema.extends.map(subSchema => convertSchemaToDraft6(subSchema, { changed, draft })) :
-      [convertSchemaToDraft6(newSchema.extends, { changed, draft })];
+    newSchema.allOf = typeof (newSchema.extends as JsonSchema[]).map === 'function' ?
+      (newSchema.extends as JsonSchema[]).map(subSchema => convertSchemaToDraft6(subSchema, { changed, draft })) as JsonSchema[] :
+      [convertSchemaToDraft6(newSchema.extends as JsonSchema, { changed, draft }) as JsonSchema];
     delete newSchema.extends;
     changed = true;
   }
@@ -54,7 +62,7 @@ export function convertSchemaToDraft6(schema, options: OptionObject = {}) {
   // Convert v1-v3 'disallow' to 'not'
   if (newSchema.disallow) {
     if (typeof newSchema.disallow === 'string') {
-      newSchema.not = { type: newSchema.disallow };
+      newSchema.not = { type: newSchema.disallow as unknown as JsonSchema['type'] };
     } else if (typeof newSchema.disallow.map === 'function') {
       newSchema.not = {
         anyOf: newSchema.disallow
@@ -72,8 +80,8 @@ export function convertSchemaToDraft6(schema, options: OptionObject = {}) {
   ) {
     newSchema.dependencies = { ...newSchema.dependencies };
     Object.keys(newSchema.dependencies)
-      .filter(key => typeof newSchema.dependencies[key] === 'string')
-      .forEach(key => newSchema.dependencies[key] = [newSchema.dependencies[key]]);
+      .filter(key => typeof (newSchema.dependencies[key] as unknown) === 'string')
+      .forEach(key => newSchema.dependencies[key] = [newSchema.dependencies[key]] as any);
     changed = true;
   }
 
@@ -141,7 +149,7 @@ export function convertSchemaToDraft6(schema, options: OptionObject = {}) {
   if (typeof newSchema.properties === 'object') {
     const properties = { ...newSchema.properties };
     const requiredKeys = Array.isArray(newSchema.required) ?
-      new Set(newSchema.required) : new Set();
+      new Set(newSchema.required as string[]) : new Set<string>();
 
     // Convert v1-v2 boolean 'optional' properties to 'required' array
     if (draft === 1 || draft === 2 ||
@@ -155,9 +163,9 @@ export function convertSchemaToDraft6(schema, options: OptionObject = {}) {
     }
 
     // Convert v3 boolean 'required' properties to 'required' array
-    if (Object.keys(properties).some(key => properties[key].required === true)) {
+    if (Object.keys(properties).some(key => (properties[key].required as unknown) === true)) {
       Object.keys(properties)
-        .filter(key => properties[key].required === true)
+        .filter(key => (properties[key].required as unknown) === true)
         .forEach(key => requiredKeys.add(key));
       changed = true;
     }
@@ -172,7 +180,7 @@ export function convertSchemaToDraft6(schema, options: OptionObject = {}) {
         .filter(key => properties[key].requires)
         .forEach(key => dependencies[key] =
           typeof properties[key].requires === 'string' ?
-            [properties[key].requires] : properties[key].requires
+            [properties[key].requires] : properties[key].requires as any
         );
       newSchema.dependencies = dependencies;
       changed = true;
@@ -195,7 +203,7 @@ export function convertSchemaToDraft6(schema, options: OptionObject = {}) {
   }
 
   // Revove v3 boolean 'required' key
-  if (typeof newSchema.required === 'boolean') {
+  if (typeof (newSchema.required as unknown) === 'boolean') {
     delete newSchema.required;
   }
 
@@ -210,9 +218,9 @@ export function convertSchemaToDraft6(schema, options: OptionObject = {}) {
   }
 
   // Check if v1-v3 'any' or object types will be converted
-  if (newSchema.type && (typeof newSchema.type.every === 'function' ?
-    !newSchema.type.every(type => simpleTypes.includes(type)) :
-    !simpleTypes.includes(newSchema.type)
+  if (newSchema.type && (typeof (newSchema.type as any).every === 'function' ?
+    !(newSchema.type as string[]).every(type => simpleTypes.includes(type)) :
+    !simpleTypes.includes(newSchema.type as string)
   )) {
     changed = true;
   }
@@ -234,28 +242,31 @@ export function convertSchemaToDraft6(schema, options: OptionObject = {}) {
   }
 
   // Convert v1-v3 'any' and object types
-  if (newSchema.type && (typeof newSchema.type.every === 'function' ?
-    !newSchema.type.every(type => simpleTypes.includes(type)) :
-    !simpleTypes.includes(newSchema.type)
+  if (newSchema.type && (typeof (newSchema.type as any).every === 'function' ?
+    !(newSchema.type as string[]).every(type => simpleTypes.includes(type)) :
+    !simpleTypes.includes(newSchema.type as string)
   )) {
-    if (newSchema.type.length === 1) { newSchema.type = newSchema.type[0]; }
+    const schemaType: any = newSchema.type;
+    if (schemaType.length === 1) { newSchema.type = schemaType[0]; }
     if (typeof newSchema.type === 'string') {
       // Convert string 'any' type to array of all standard types
-      if (newSchema.type === 'any') {
-        newSchema.type = simpleTypes;
+      if ((newSchema.type as unknown) === 'any') {
+        newSchema.type = simpleTypes as any;
         // Delete non-standard string type
       } else {
         delete newSchema.type;
       }
-    } else if (typeof newSchema.type === 'object') {
-      if (typeof newSchema.type.every === 'function') {
+    } else if (typeof (newSchema.type as unknown) === 'object') {
+      if (typeof (newSchema.type as any).every === 'function') {
         // If array of strings, only allow standard types
-        if (newSchema.type.every(type => typeof type === 'string')) {
-          newSchema.type = newSchema.type.some(type => type === 'any') ?
-            newSchema.type = simpleTypes :
-            newSchema.type.filter(type => simpleTypes.includes(type));
+        if ((newSchema.type as string[]).every(type => typeof type === 'string')) {
+          newSchema.type = (newSchema.type as string[]).some(type => (type as unknown) === 'any') ?
+            (newSchema.type = simpleTypes as any) :
+            (newSchema.type = (newSchema.type as string[]).filter(
+              type => simpleTypes.includes(type)
+            ) as any);
           // If type is an array with objects, convert the current schema to an 'anyOf' array
-        } else if (newSchema.type.length > 1) {
+        } else if ((newSchema.type as any[]).length > 1) {
           const arrayKeys = ['additionalItems', 'items', 'maxItems', 'minItems', 'uniqueItems', 'contains'];
           const numberKeys = ['multipleOf', 'maximum', 'exclusiveMaximum', 'minimum', 'exclusiveMinimum'];
           const objectKeys = ['maxProperties', 'minProperties', 'required', 'additionalProperties',
@@ -270,7 +281,7 @@ export function convertSchemaToDraft6(schema, options: OptionObject = {}) {
             'all': [...arrayKeys, ...numberKeys, ...objectKeys, ...stringKeys],
           };
           const anyOf = [];
-          for (const type of newSchema.type) {
+          for (const type of newSchema.type as any[]) {
             const newType = typeof type === 'string' ? { type } : { ...type };
             Object.keys(newSchema)
               .filter(key => !newType.hasOwnProperty(key) &&

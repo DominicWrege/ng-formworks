@@ -1,4 +1,6 @@
-export const frValidationMessages: any = { // French error messages
+import type { ValidationMessages } from '../shared/types';
+
+export const frValidationMessages: ValidationMessages = { // French error messages
   required: 'Est obligatoire.',
   minLength: 'Doit avoir minimum {{minimumLength}} caractères (actuellement: {{currentLength}})',
   maxLength: 'Doit avoir maximum {{maximumLength}} caractères (actuellement: {{currentLength}})',

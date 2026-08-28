@@ -1,5 +1,6 @@
 import { Component, OnInit, inject, input } from '@angular/core';
-import { JsonSchemaFormService } from '../json-schema-form.service';
+import type { LayoutNode, WidgetOptions } from '../shared/types';
+import { JsonSchemaFormService, type LegacyWidgetContext } from '../json-schema-form.service';
 import { StopPropagationDirective } from './stop-propagation.directive';
 
 
@@ -11,11 +12,11 @@ import { StopPropagationDirective } from './stop-propagation.directive';
 export class AddReferenceComponent implements OnInit {
   private jsf = inject(JsonSchemaFormService);
 
-  options: any;
+  options: WidgetOptions;
   itemCount: number;
   previousLayoutIndex: number[];
   previousDataIndex: number[];
-  readonly layoutNode = input<any>(undefined);
+  readonly layoutNode = input<LayoutNode | undefined>(undefined);
   readonly layoutIndex = input<number[]>(undefined);
   readonly dataIndex = input<number[]>(undefined);
 
@@ -35,12 +36,13 @@ export class AddReferenceComponent implements OnInit {
   }
 
   get buttonText(): string {
-    const parent: any = {
+    const parentNode = this.jsf.getParentNode(this);
+    const parent: LegacyWidgetContext = {
       dataIndex: this.dataIndex().slice(0, -1),
       layoutIndex: this.layoutIndex().slice(0, -1),
-      layoutNode: this.jsf.getParentNode(this)
+      layoutNode: parentNode
     };
-    return parent.layoutNode && (parent.layoutNode.add ||
+    return parentNode && (parentNode.add ||
       this.jsf.setArrayItemTitle(parent, this.layoutNode(), this.itemCount));
   }
 }

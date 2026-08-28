@@ -4,7 +4,7 @@
       [attr.for]="'control' + layoutNode()?._id"
       [class]="labelCls(options)"
       [style.display]="options?.notitle ? 'none' : ''"
-    [innerHTML]="$safeNavigationMigration(options?.title)"></label>
+    [innerHTML]="titleHtml(options)"></label>
   }
   @if (boundControl) {
     <input #inputControl

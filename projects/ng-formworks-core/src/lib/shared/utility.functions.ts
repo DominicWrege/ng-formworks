@@ -20,12 +20,12 @@ export function addClasses(
   oldClasses: string | string[] | Set<string>,
   newClasses: string | string[] | Set<string>
 ): string | string[] | Set<string> {
-  const badType = i => !isSet(i) && !isArray(i) && !isString(i);
+  const badType = (i: unknown) => !isSet(i) && !isArray(i) && !isString(i);
   if (badType(newClasses)) { return oldClasses; }
   if (badType(oldClasses)) { oldClasses = ''; }
   const toSet = i => isSet(i) ? i : isArray(i) ? new Set(i) : new Set(i.split(' '));
-  const combinedSet: Set<any> = toSet(oldClasses);
-  const newSet: Set<any> = toSet(newClasses);
+  const combinedSet: Set<string> = toSet(oldClasses);
+  const newSet: Set<string> = toSet(newClasses);
   newSet.forEach(c => combinedSet.add(c));
   if (isSet(oldClasses)) { return combinedSet; }
   if (isArray(oldClasses)) { return Array.from(combinedSet); }
@@ -43,12 +43,12 @@ export function addClasses(
  * // {boolean = false} errors - Show errors?
  * // {Object|Array|string|number|boolean|null} - The copied object
  */
-export function copy(object: any, errors = false): any {
+export function copy<T>(object: T, errors = false): T {
   if (typeof object !== 'object' || object === null) { return object; }
-  if (isMap(object))    { return new Map(object); }
-  if (isSet(object))    { return new Set(object); }
-  if (isArray(object))  { return [ ...object ];   }
-  if (isObject(object)) { return { ...object };   }
+  if (isMap(object))    { return new Map(object) as T; }
+  if (isSet(object))    { return new Set(object) as T; }
+  if (isArray(object))  { return [ ...object ] as T; }
+  if (isObject(object)) { return { ...(object as object) } as T; }
   if (errors) {
     console.error('copy error: Object to copy must be a JavaScript object or value.');
   }
@@ -153,7 +153,7 @@ export function forEachCopy(
  * // {string} property - the property to look for
  * // {boolean} - true if object has property, false if not
  */
-export function hasOwn(object: any, property: string): boolean {
+export function hasOwn(object: unknown, property: string | number): boolean {
   if (!object || !['number', 'string', 'symbol'].includes(typeof property) ||
     (!isObject(object) && !isArray(object) && !isMap(object) && !isSet(object))
   ) { return false; }
@@ -162,7 +162,7 @@ export function hasOwn(object: any, property: string): boolean {
     if (isArray(object)) { return object[<number>property]; }
     property = property + '';
   }
-  return object.hasOwnProperty(property);
+  return (object as Object).hasOwnProperty(property);
 }
 
 /**
@@ -192,16 +192,16 @@ export function getExpressionType(expressionCandidate: string): ExpressionType {
   return ExpressionType.NOT_AN_EXPRESSION;
 }
 
-export function isEqual(expressionType) {
-  return expressionType as ExpressionType === ExpressionType.EQUALS;
+export function isEqual(expressionType: ExpressionType): boolean {
+  return expressionType === ExpressionType.EQUALS;
 }
 
-export function isNotEqual(expressionType) {
-  return expressionType as ExpressionType === ExpressionType.NOT_EQUALS;
+export function isNotEqual(expressionType: ExpressionType): boolean {
+  return expressionType === ExpressionType.NOT_EQUALS;
 }
 
-export function isNotExpression(expressionType) {
-  return expressionType as ExpressionType === ExpressionType.NOT_AN_EXPRESSION;
+export function isNotExpression(expressionType: ExpressionType): boolean {
+  return expressionType === ExpressionType.NOT_AN_EXPRESSION;
 }
 
 /**
@@ -222,7 +222,7 @@ export function getKeyAndValueByExpressionType(expressionType: ExpressionType, k
   return null;
 }
 
-export function cleanValueOfQuotes(keyAndValue): String {
+export function cleanValueOfQuotes(keyAndValue: string): string {
   if (keyAndValue.charAt(0) === '\'' && keyAndValue.charAt(keyAndValue.length - 1) === '\'') {
     return keyAndValue.replace('\'', '').replace('\'', '');
   }
@@ -250,7 +250,7 @@ export function mergeFilteredObject(
   sourceObject: PlainObject,
   excludeKeys = <string[]>[],
   keyFn = (key: string): string => key,
-  valFn = (val: any): any => val
+  valFn = (val: unknown): unknown => val
 ): PlainObject {
   if (!isObject(sourceObject)) { return targetObject; }
   if (!isObject(targetObject)) { targetObject = {}; }
@@ -271,12 +271,12 @@ export function mergeFilteredObject(
  * // {...string} ...items -
  * // {string[]} -
  */
-export function uniqueItems(...items): string[] {
-  const returnItems = [];
+export function uniqueItems(...items: unknown[]): string[] {
+  const returnItems: unknown[] = [];
   for (const item of items) {
     if (!returnItems.includes(item)) { returnItems.push(item); }
   }
-  return returnItems;
+  return returnItems as string[];
 }
 
 /**
@@ -288,12 +288,12 @@ export function uniqueItems(...items): string[] {
  * // {...string|string[]} ...arrays -
  * // {string[]} -
  */
-export function commonItems(...arrays): string[] {
-  let returnItems = null;
-  for (let array of arrays) {
-    if (isString(array)) { array = [array]; }
-    returnItems = returnItems === null ? [ ...array ] :
-      returnItems.filter(item => array.includes(item));
+export function commonItems(...arrays: (string | string[])[]): string[] {
+  let returnItems: string[] | null = null;
+  for (const array of arrays) {
+    const items = isString(array) ? [array] : array;
+    returnItems = returnItems === null ? [ ...items ] :
+      returnItems.filter(item => items.includes(item));
     if (!returnItems.length) { return []; }
   }
   return returnItems;
@@ -394,7 +394,7 @@ export function hasNonNullValue(obj: Record<string, any>): boolean {
   }
 
   // Checks if at least one property passes the given condition.
-  return Object.values(obj).some((value: any): boolean => {
+  return Object.values(obj).some((value): boolean => {
     // If value is an object, recurse deeper into the object.
     if (isObject(value)) {
       return hasNonNullValue(value);
@@ -417,7 +417,7 @@ export function hasNonNullValue(obj: Record<string, any>): boolean {
  * console.log(compareObjectArraySizes(obj1,obj1));  // Output: false
  * mismatch will be on path b/c
  */
-  export function compareObjectArraySizes(obj1: any, obj2: any, comparePath = "") {
+  export function compareObjectArraySizes(obj1: unknown, obj2: unknown, comparePath = ""): boolean {
     if (isArray(obj1) && isArray(obj2)) {
       if (obj1.length != obj2.length) {
         console.log(`size mismatch at ${comparePath}` );
@@ -435,9 +435,11 @@ export function hasNonNullValue(obj: Record<string, any>): boolean {
     }
   
     if (isObject(obj1) && !isArray(obj1)) {
-      for (let key in obj1) {
-        if (obj2.hasOwnProperty(key)) {
-          const result = compareObjectArraySizes(obj1[key], obj2[key], `${comparePath}/${key}`);
+      const record1 = obj1 as Record<string, unknown>;
+      const record2 = obj2 as Record<string, unknown>;
+      for (let key in record1) {
+        if ((record2 as Object).hasOwnProperty(key)) {
+          const result = compareObjectArraySizes(record1[key], record2[key], `${comparePath}/${key}`);
           if (result === false) {
             return false; // propagate false if mismatch is found
           }

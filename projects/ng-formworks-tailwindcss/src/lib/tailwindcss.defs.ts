@@ -12,6 +12,10 @@ export interface TailwindFormClasses {
     label: string;
     /** text/number/email-like inputs */
     input: string;
+    /** range (slider) input element */
+    rangeInput: string;
+    /** color picker input element */
+    colorInput: string;
     /** appended to input when the control is invalid && dirty/touched */
     inputInvalid: string;
     /** <select> elements (input + extras applied by widget) */
@@ -22,12 +26,16 @@ export interface TailwindFormClasses {
     checkRow: string;
     /** checkbox/radio input element itself */
     checkInput: string;
+    /** radio input element (round) */
+    radioInput: string;
     /** vertical checkboxes/radios group wrapper */
     groupVertical: string;
     /** horizontal checkboxes/radios group wrapper */
     groupHorizontal: string;
     /** buttons and submit inputs */
     button: string;
+    /** compact "add item" button of arrays */
+    addBtn: string;
     /** muted description/help line, e.g. oneOf chooser hint */
     helpText: string;
     /** tab bar <ul> */

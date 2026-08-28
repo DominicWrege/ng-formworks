@@ -1,5 +1,6 @@
 import { Component, OnDestroy, OnInit, inject, input } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
+import type { LayoutNode, WidgetOptions } from '../shared/types';
 import { JsonSchemaFormService } from '../json-schema-form.service';
 import { ReactiveFormsModule } from '@angular/forms';
 import { StopPropagationDirective } from './stop-propagation.directive';
@@ -19,9 +20,9 @@ export class InputComponent implements OnInit, OnDestroy {
   controlValue: string;
   controlDisabled = false;
   boundControl = false;
-  options: any;
+  options: WidgetOptions;
   autoCompleteList: string[] = [];
-  readonly layoutNode = input<any>(undefined);
+  readonly layoutNode = input<LayoutNode | undefined>(undefined);
   readonly layoutIndex = input<number[]>(undefined);
   readonly dataIndex = input<number[]>(undefined);
 

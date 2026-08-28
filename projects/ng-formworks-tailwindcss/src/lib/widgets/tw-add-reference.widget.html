@@ -1,7 +1,7 @@
 <section [class]="options?.htmlClass || ''" align="end">
   @if (showAddButton) {
     <button
-      [class]="tw.button + ' ' + (options?.fieldHtmlClass || '')"
+      [class]="tw.addBtn + ' ' + (options?.fieldHtmlClass || '')"
       [disabled]="$safeNavigationMigration(options?.readonly)"
       (click)="addItem($event)"
       [appStopPropagation]="['mousedown', 'touchstart']"

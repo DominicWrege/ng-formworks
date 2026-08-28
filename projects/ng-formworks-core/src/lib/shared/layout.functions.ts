@@ -1,4 +1,3 @@
-import { TitleMapItem } from '../json-schema-form.service';
 import { cloneDeep, isPlainObject, uniqueId } from './native.functions';
 import {
   checkInlineType,
@@ -25,6 +24,12 @@ import {
   isObject,
   isString
 } from './validator.functions';
+import type { DataObject, JsonSchema, JsonValue, LayoutNode, TitleMapItem, ValidationMessages } from './types';
+import type { JsonSchemaFormService } from '../json-schema-form.service';
+import type { WidgetLibraryService } from '../widget-library/widget-library.service';
+
+/** Form-data node value passed while building layout from schema. */
+type DataNodeValue = DataObject | JsonValue | boolean;
 
 
 
@@ -50,10 +55,10 @@ import {
  * //   widgetLibrary
  * //
  */
-export function buildLayout_original(jsf, widgetLibrary) {
+export function buildLayout_original(jsf: JsonSchemaFormService, widgetLibrary: WidgetLibraryService) {
   let hasSubmitButton = !JsonPointer.get(jsf, '/formOptions/addSubmit');
   const formLayout = mapLayout(jsf.layout, (layoutItem, index, layoutPointer) => {
-    const newNode: any = {
+    const newNode: LayoutNode = {
       _id: uniqueId(),
       options: {},
     };
@@ -69,7 +74,7 @@ export function buildLayout_original(jsf, widgetLibrary) {
           delete newNode[option];
         });
       if (!hasOwn(newNode, 'type') && isString(newNode.widget)) {
-        newNode.type = newNode.widget;
+        newNode.type = newNode.widget as string;
         delete newNode.widget;
       }
       if (!hasOwn(newNode.options, 'title')) {
@@ -88,7 +93,8 @@ export function buildLayout_original(jsf, widgetLibrary) {
           // TV4 codes from https://github.com/geraintluff/tv4/blob/master/source/api.js
         } else if (hasOwn(newNode.options, 'validationMessage')) {
           if (typeof newNode.options.validationMessage === 'string') {
-            newNode.options.validationMessages = newNode.options.validationMessage;
+            newNode.options.validationMessages =
+              newNode.options.validationMessage as unknown as ValidationMessages;
           } else {
             newNode.options.validationMessages = {};
             Object.keys(newNode.options.validationMessage).forEach(key => {
@@ -127,7 +133,7 @@ export function buildLayout_original(jsf, widgetLibrary) {
       console.error(layoutItem);
       return null;
     }
-    let nodeSchema: any = null;
+    let nodeSchema: JsonSchema = null;
 
     // If newNode does not have a dataPointer, try to find an equivalent
     if (!hasOwn(newNode, 'dataPointer')) {
@@ -140,7 +146,7 @@ export function buildLayout_original(jsf, widgetLibrary) {
 
         // If newNode is an array, search for dataPointer in child nodes
       } else if (hasOwn(newNode, 'type') && newNode.type.slice(-5) === 'array') {
-        const findDataPointer = (items) => {
+        const findDataPointer = (items: LayoutNode) => {
           if (items === null || typeof items !== 'object') { return; }
           if (hasOwn(items, 'dataPointer')) { return items.dataPointer; }
           if (isArray(items.items)) {
@@ -213,12 +219,12 @@ export function buildLayout_original(jsf, widgetLibrary) {
           nodeDataMap.set('required', nodeSchema.required);
         }
         newNode.dataType =
-          nodeSchema.type || (hasOwn(nodeSchema, '$ref') ? '$ref' : null);
+          (nodeSchema.type as string) || (hasOwn(nodeSchema, '$ref') ? '$ref' : null);
         updateInputOptions(newNode, nodeSchema, jsf);
         nodeDataMap.set('disabled', !!newNode.options.disabled);
         // Present checkboxes as single control, rather than array
         if (newNode.type === 'checkboxes' && hasOwn(nodeSchema, 'items')) {
-          updateInputOptions(newNode, nodeSchema.items, jsf);
+          updateInputOptions(newNode, nodeSchema.items as JsonSchema, jsf);
         } else if (newNode.dataType === 'array') {
           newNode.options.maxItems = Math.min(
             nodeSchema.maxItems || 1000, newNode.options.maxItems || 1000
@@ -406,7 +412,7 @@ export function buildLayout_original(jsf, widgetLibrary) {
             // If newNode doesn't have a title, look for title of parent array item
           } else {
             const parentSchema =
-              getFromSchema(jsf.schema, newNode.dataPointer, 'parentSchema');
+              getFromSchema(jsf.schema, newNode.dataPointer, 'parentSchema') as JsonSchema;
             if (hasOwn(parentSchema, 'title')) {
               buttonText += ' to ' + parentSchema.title;
             } else {
@@ -485,11 +491,11 @@ export function buildLayout_original(jsf, widgetLibrary) {
 
 // TODO: review:this implements a quick 'post' fix rather than an
 //integrated ideal fix
-export function buildLayout(jsf, widgetLibrary) {
+export function buildLayout(jsf: JsonSchemaFormService, widgetLibrary: WidgetLibraryService) {
   let layout = buildLayout_original(jsf, widgetLibrary);
   if (jsf.formValues) {
     let fixedLayout = fixNestedArrayLayout({
-      builtLayout: layout,
+      builtLayout: layout as LayoutNode,
       formData: jsf.formValues
     });
   }
@@ -498,15 +504,18 @@ export function buildLayout(jsf, widgetLibrary) {
 
 
 
-export function fixNestedArrayLayout(options: any) {
+export function fixNestedArrayLayout(options: {
+  builtLayout: LayoutNode | LayoutNode[];
+  formData: DataObject;
+}) {
   let { builtLayout, formData } = options;
-  let arrLengths = {};
-  let traverseObj = function (obj, path, onValue?) {
+  const arrLengths: Record<string, number> = {};
+  const traverseObj = function (obj: DataObject | unknown[], path: string, onValue?: (value: unknown, path: string) => void) {
     if (isArray(obj)) {
       onValue && onValue(obj, path);
       obj.forEach((item, ind) => {
         onValue && onValue(item, path + "/" + ind);
-        traverseObj(item, path + "/" + ind, onValue);
+        traverseObj(item as DataObject | unknown[], path + "/" + ind, onValue);
       });
       return;
     }
@@ -514,19 +523,19 @@ export function fixNestedArrayLayout(options: any) {
       onValue && onValue(obj, path);
       Object.keys(obj).forEach(key => {
         onValue && onValue(obj[key], path + "/" + key);
-        traverseObj(obj[key], path + "/" + key, onValue);
+        traverseObj(obj[key] as DataObject | unknown[], path + "/" + key, onValue);
       });
       return
     }
   }
-  traverseObj(formData, "", (value, path) => {
+  traverseObj(formData as DataObject | unknown[], "", (value, path) => {
     if (isArray(value)) {
       arrLengths[path] = arrLengths[path] || value.length;
     }
   });
 
-  let getDataSize = (options: any) => {
-    let { data, dataPointer, indexArray } = options;
+  const getDataSize = (options: { dataPointer: string; indexArray: number[] }) => {
+    let { dataPointer, indexArray } = options;
     let dashCount = 0;
     let dpInstance = dataPointer.substring(1).split("/").map((part, pind) => {
       if (part == "-" && indexArray[dashCount] != undefined) {
@@ -536,23 +545,28 @@ export function fixNestedArrayLayout(options: any) {
     })
       .join("/");
     dpInstance = "/" + dpInstance;
-    let arrSize = arrLengths[dpInstance];
+    const arrSize = arrLengths[dpInstance];
     return arrSize;
   }
   //still too buggy
-  let createNonRefItem = (nodeWithRef: any) => {
-    let templateNode = {
+  const createNonRefItem = (nodeWithRef: LayoutNode) => {
+    const templateNode: LayoutNode = {
       "type": "section", //check this could also be array?
-      "recursiveReference": false,//check this 
+      "recursiveReference": false,//check this
       "items": []
     }
-    let clone = cloneDeep(nodeWithRef);
+    const clone = cloneDeep(nodeWithRef);
     //commented out for now so that it behaves as ususal
     //_.merge(clone,templateNode);
     return clone;
   }
 
-  let rebuildLayout = (options: any) => {
+  const rebuildLayout = (options: {
+    builtLayout: LayoutNode | LayoutNode[];
+    indices?: number[];
+    parentDataPointer?: string;
+    indexPos?: number;
+  }) => {
     let { builtLayout, indices, parentDataPointer, indexPos } = options;
     indices = indices || [];
     indexPos = indexPos == undefined ? indexPos = -1 : indexPos;
@@ -570,16 +584,15 @@ export function fixNestedArrayLayout(options: any) {
       return;
     }
 
-    let dataTypes = ["array"];//check only array for now
+    const dataTypes = ["array"];//check only array for now
     //for now added condition to ignore recursive references
     if (builtLayout.items && dataTypes.indexOf(builtLayout.dataType) >= 0
       && builtLayout.dataPointer
       && !builtLayout.recursiveReference
     ) {
-      let numDataItems: any = getDataSize({
-        data: formData,
+      const numDataItems: number = getDataSize({
         dataPointer: builtLayout.dataPointer,
-        indexArray: indices
+        indexArray: indices as number[]
       });
       let numActualItems = builtLayout.items.length;
       //check if there's ref items, if so ignore it and therefore
@@ -591,11 +604,11 @@ export function fixNestedArrayLayout(options: any) {
       });
       // TODO(fix): need to take listItems into account
       //esp when the layout is built for the first time
-      let numListItems=builtLayout.options?.listItems;
+      const numListItems = builtLayout.options?.listItems as number;
       numActualItems = Math.max(numActualItems, 0);//avoid dealing with negatives
-      if (numActualItems < Math.max(numDataItems,numListItems)) {
+      if (numActualItems < Math.max(numDataItems, numListItems)) {
 
-        let numItemsNeeded = Math.max(numDataItems,numListItems) - numActualItems;
+        let numItemsNeeded = Math.max(numDataItems, numListItems) - numActualItems;
         //added to ignore recursive references
         if (numActualItems == 0 && builtLayout.items[0].recursiveReference) {
           numItemsNeeded = 0
@@ -603,15 +616,15 @@ export function fixNestedArrayLayout(options: any) {
         for (let i = 0; i < numItemsNeeded; i++) {
           //node must not be of type "type": "$ref"
           //if it is then manufacture our own
-          let isRefNode = builtLayout.items[0].type && builtLayout.items[0].type == "$ref";
-          let newItem = isRefNode
+          const isRefNode = builtLayout.items[0].type && builtLayout.items[0].type == "$ref";
+          const newItem = isRefNode
             ? createNonRefItem(builtLayout.items[0])
             : cloneDeep(builtLayout.items[0]);//copy first
           newItem._id = uniqueId("new_");
           builtLayout.items.unshift(newItem);
         }
-      }else if (numActualItems > Math.max(numDataItems,numListItems)) {
-        let numItemsToRemove = numActualItems-Math.max(numDataItems,numListItems);
+      } else if (numActualItems > Math.max(numDataItems, numListItems)) {
+        const numItemsToRemove = numActualItems - Math.max(numDataItems, numListItems);
         for (let i = 0; i < numItemsToRemove; i++) {
           builtLayout.items.pop();
         }
@@ -620,7 +633,9 @@ export function fixNestedArrayLayout(options: any) {
         builtLayout.options.listItems = numDataItems;
       }
 
-      indices[builtLayout.dataPointer] = indices[builtLayout.dataPointer] || -1;
+      // expando: track the last used index per data pointer on the array itself
+      (indices as unknown as Record<string, number>)[builtLayout.dataPointer] =
+        (indices as unknown as Record<string, number>)[builtLayout.dataPointer] || -1;
       indexPos++;
       builtLayout.items.forEach((item, index) => {
         indices[indexPos] = index
@@ -652,7 +667,7 @@ export function fixNestedArrayLayout(options: any) {
     builtLayout: builtLayout
   });
   //NB original is mutated
-  let fixedLayout = builtLayout;
+  const fixedLayout = builtLayout;
   return fixedLayout;
 }
 
@@ -672,14 +687,18 @@ export function fixNestedArrayLayout(options: any) {
  * //
  */
 export function buildLayoutFromSchema(
-  jsf, widgetLibrary, nodeValue = null, schemaPointer = '',
-  dataPointer = '', arrayItem = false, arrayItemType: string = null,
+  jsf: JsonSchemaFormService, widgetLibrary: WidgetLibraryService,
+  nodeValue: DataNodeValue = null, schemaPointer = '',
+  dataPointer = '', arrayItem = false, arrayItemType: 'tuple' | 'list' = null,
   removable: boolean = null, forRefLibrary = false, dataPointerPrefix = '',
-  jsonSchema?
-) {
-  function applyITEConditions(builtLayout,schPointer,keySchemaPointer,negateClause,parentLayout?){
+  jsonSchema?: JsonSchema
+): LayoutNode | LayoutNode[] {
+  function applyITEConditions(
+    builtLayout: LayoutNode | LayoutNode[], schPointer: string, keySchemaPointer: string,
+    negateClause: boolean, parentLayout?: LayoutNode | LayoutNode[]
+  ): void {
     if (builtLayout) {
-      const parentCondition=parentLayout && parentLayout.isITEItem && parentLayout.options.condition;
+      const parentCondition = parentLayout && (parentLayout as LayoutNode).isITEItem && (parentLayout as LayoutNode).options?.condition;
       if(parentCondition){
          return;
       }
@@ -699,7 +718,7 @@ export function buildLayoutFromSchema(
     }
   }
   const jsSchema=jsonSchema||jsf.schema;
-  const schema = JsonPointer.get(jsSchema, schemaPointer);
+  const schema = JsonPointer.get(jsSchema, schemaPointer) as JsonSchema;
   if (!hasOwn(schema, 'type') && !hasOwn(schema, '$ref') &&
     !hasOwn(schema, 'x-schema-form')
     && !hasOwn(schema, 'if') && !hasOwn(schema, 'then') && !hasOwn(schema, 'else')
@@ -711,11 +730,11 @@ export function buildLayoutFromSchema(
   )) {
     nodeValue = JsonPointer.get(jsSchema, schemaPointer + '/default');
   }
-  let newNode: any = {
+  let newNode: LayoutNode = {
     _id: forRefLibrary ? null : uniqueId(),
     arrayItem: arrayItem,
     dataPointer: JsonPointer.toGenericPointer(dataPointer, jsf.arrayMap),
-    dataType: schema.type || (hasOwn(schema, '$ref') ? '$ref' : null),
+    dataType: (schema.type as string) || (hasOwn(schema, '$ref') ? '$ref' : null),
     options: {},
     required: isInputRequired(jsSchema, schemaPointer),
     type: newNodeType,
@@ -726,8 +745,7 @@ export function buildLayoutFromSchema(
   if (newNode.arrayItem) {
     newNode.arrayItemType = arrayItemType;
     newNode.options.removable = removable !== false;
-  }
-  const shortDataPointer = removeRecursiveReferences(
+  }  const shortDataPointer = removeRecursiveReferences(
     dataPointerPrefix + dataPointer, jsf.dataRecursiveRefMap, jsf.arrayMap
   );
   const recursive = !shortDataPointer.length ||
@@ -753,8 +771,8 @@ export function buildLayoutFromSchema(
       nodeDataMap.set('required', schema.required);
     }
     if (isObject(schema.properties)) {
-      const newSection: any[] = [];
-      const propertyKeys = schema['ui:order'] || Object.keys(schema.properties);
+      const newSection: LayoutNode[] = [];
+      const propertyKeys: string[] = schema['ui:order'] || Object.keys(schema.properties);
       if (propertyKeys.includes('*') && !hasOwn(schema.properties, '*')) {
         const unnamedKeys = Object.keys(schema.properties)
           .filter(key => !propertyKeys.includes(key));
@@ -772,11 +790,11 @@ export function buildLayoutFromSchema(
           const keySchemaPointer = hasOwn(schema.properties, key) ?
             '/properties/' + key : '/additionalProperties';
           const innerItem = buildLayoutFromSchema(
-            jsf, widgetLibrary, isObject(nodeValue) ? nodeValue[key] : null,
+            jsf, widgetLibrary, isObject(nodeValue) ? (nodeValue as DataObject)[key] : null,
             schemaPointer + keySchemaPointer,
             dataPointer + '/' + key,
             false, null, null, forRefLibrary, dataPointerPrefix
-          );
+          ) as LayoutNode | null;
           if (innerItem) {
             innerItem.schemaPointer=schemaPointer + keySchemaPointer;
             if (isInputRequired(schema, '/' + key)) {
@@ -792,8 +810,8 @@ export function buildLayoutFromSchema(
       ["allOf", "anyOf","oneOf"].forEach(ofType => {
         if (hasOwn(schema, ofType) && isArray(schema[ofType])) {
 
-          let outerOneOfItem; 
-          
+          let outerOneOfItem: LayoutNode;
+
           if(ofType=="oneOf"){
             outerOneOfItem = buildLayoutFromSchema(
               jsf, widgetLibrary, schema.oneOf,//{type:"tabarray",items:schema.oneOf},
@@ -801,40 +819,41 @@ export function buildLayoutFromSchema(
               dataPointer,
               false, null, null, forRefLibrary, dataPointerPrefix,
               //{type:"tabarray",items:schema.oneOf,oneOf:schema.oneOf}
-              {type:"one-of",items:schema.oneOf,oneOf:schema.oneOf}
-            );
+              {type:"one-of",items:schema.oneOf,oneOf:schema.oneOf} as unknown as JsonSchema
+            ) as LayoutNode;
             //outerItem.items=cloneDeep(newSection);
             //newSection.length=0;
             newSection.push(outerOneOfItem);
-            
+
           }
-            
-          schema[ofType].forEach((ofItem, ind) => {
+
+          const ofSchemas = schema[ofType] as JsonSchema[];
+          ofSchemas.forEach((ofItem: JsonSchema, ind: number) => {
             const keySchemaPointer = `/${ofType}/${ind}`;
             const innerItem = buildLayoutFromSchema(
               jsf, widgetLibrary, ofItem,
               schemaPointer + keySchemaPointer,
               dataPointer,
               false, null, null, ofType=="oneOf"/*forRefLibrary*/, dataPointerPrefix
-            );
+            ) as LayoutNode | LayoutNode[] | null;
             if (innerItem) {
               //newSection.push(innerItem);
-              if(innerItem.items){
-                innerItem.items.forEach(innerItemLevel2=>{
+              if((innerItem as LayoutNode).items){
+                (innerItem as LayoutNode).items.forEach(innerItemLevel2=>{
                   const l2SchemaPointer = hasOwn(ofItem,'properties') ?
                   '/properties/' +innerItemLevel2.name:innerItemLevel2.name;
                   //innerItemLevel2.oneOfPointer =  schemaPointer + keySchemaPointer + l2SchemaPointer;
-                 // innerItemLevel2.schemaPointer=innerItemLevel2.schemaPointer; 
-                 const ofPointer={anyOf:"anyOfPointer",oneOf:"oneOfPointer"}[ofType];
-                 innerItemLevel2[ofPointer]=ofPointer?innerItemLevel2.schemaPointer:undefined;
+                 // innerItemLevel2.schemaPointer=innerItemLevel2.schemaPointer;
+                  const ofPointer=({anyOf:"anyOfPointer",oneOf:"oneOfPointer"} as Record<string, string>)[ofType];
+                  innerItemLevel2[ofPointer]=ofPointer?innerItemLevel2.schemaPointer:undefined;
                 })
 
               }
               // TODO(review): will never reach here if forRefLibrary==true
               if (isArray(innerItem)) {
-                let outerOneOfItemTpl=cloneDeep(newNode);
+                const outerOneOfItemTpl=cloneDeep(newNode);
                 outerOneOfItemTpl
-                innerItem.forEach(item => {
+                innerItem.forEach((item: LayoutNode) => {
                   const l2SchemaPointer = hasOwn(ofItem,'properties') ?
                   '/properties/' +item.name:item.name;
                   if(ofType=="anyOf"){
@@ -843,7 +862,7 @@ export function buildLayoutFromSchema(
                   if(outerOneOfItem){
                     ////item.oneOfPointer =  schemaPointer + keySchemaPointer + l2SchemaPointer;
                     //schemaPointer + keySchemaPointer + item.dataPointer;
-                    ////item.schemaPointer=item.oneOfPointer; 
+                    ////item.schemaPointer=item.oneOfPointer;
 
                     /*
                     outerOneOfItem.items=outerOneOfItem.items||[];
@@ -851,7 +870,7 @@ export function buildLayoutFromSchema(
                     */
                     outerOneOfItemTpl.items=outerOneOfItemTpl.items||[];
                     outerOneOfItemTpl.items.push(item);
-                    
+
                   }else{
                     newSection.push(item);
                   }
@@ -864,13 +883,13 @@ export function buildLayoutFromSchema(
                 // TODO(test): might not work for more than 2 levels of nesting
               }else {
                 if(outerOneOfItem){
-                  const ofPointer={anyOf:"anyOfPointer",oneOf:"oneOfPointer"}[ofType];
-                  innerItem[ofPointer]=ofPointer?schemaPointer + keySchemaPointer:undefined;
-                  ////innerItem.schemaPointer=innerItem.oneOfPointer; 
+                  const ofPointer=({anyOf:"anyOfPointer",oneOf:"oneOfPointer"} as Record<string, string>)[ofType];
+                  (innerItem as LayoutNode)[ofPointer]=ofPointer?schemaPointer + keySchemaPointer:undefined;
+                  ////innerItem.schemaPointer=innerItem.oneOfPointer;
                   outerOneOfItem.items=outerOneOfItem.items||[];
-                  outerOneOfItem.items.push(innerItem);
+                  outerOneOfItem.items.push(innerItem as LayoutNode);
                 }else{
-                  newSection.push(innerItem)
+                  newSection.push(innerItem as LayoutNode)
                 }
               }
             }
@@ -885,11 +904,11 @@ export function buildLayoutFromSchema(
             const keySchemaPointer = `/${con}`;
             const negateClause = con == "else";
             const innerItem = buildLayoutFromSchema(
-              jsf, widgetLibrary, nodeValue[con],
+              jsf, widgetLibrary, (nodeValue as DataObject)[con],
               schemaPointer + keySchemaPointer,
               dataPointer,
               false, null, null, forRefLibrary, dataPointerPrefix
-            );
+            ) as LayoutNode | LayoutNode[] | null;
             if (innerItem) {
               applyITEConditions(innerItem,schemaPointer,keySchemaPointer,negateClause)
               if (isArray(innerItem)) {
@@ -908,7 +927,7 @@ export function buildLayoutFromSchema(
       }
 
       if (dataPointer === '' && !forRefLibrary) {
-        newNode = newSection;
+        return newSection;
       } else {
         newNode.items = newSection;
       }
@@ -956,7 +975,7 @@ export function buildLayoutFromSchema(
     if (isArray(schema.items)) {
       newNode.items = [];
       for (let i = 0; i < newNode.options.tupleItems; i++) {
-        let newItem: any;
+        let newItem: LayoutNode;
         const itemRefPointer = removeRecursiveReferences(
           shortDataPointer + '/' + i, jsf.dataRecursiveRefMap, jsf.arrayMap
         );
@@ -970,22 +989,22 @@ export function buildLayoutFromSchema(
           if (hasOwn(jsf.layoutRefLibrary, itemRefPointer)
             && !hasOwn(jsf.layoutRefLibrary, conditionalRefPointer)) {
               jsf.layoutRefLibrary[conditionalRefPointer] = buildLayoutFromSchema(
-                jsf, widgetLibrary, isArray(nodeValue) ? nodeValue[i] : null,
+                jsf, widgetLibrary, isArray(nodeValue) ? (nodeValue as DataObject[])[i] : null,
                 schemaPointer + '/items/' + i,
                 itemRecursive ? '' : dataPointer + '/' + i,
                 true, 'tuple', true, true, itemRecursive ? dataPointer + '/' + i : ''
-              );
+              ) as LayoutNode;
               templateRefToUse=conditionalRefPointer;
           }
           if (!hasOwn(jsf.layoutRefLibrary, itemRefPointer)) {
             // Set to null first to prevent recursive reference from causing endless loop
             jsf.layoutRefLibrary[itemRefPointer] = null;
             jsf.layoutRefLibrary[itemRefPointer] = buildLayoutFromSchema(
-              jsf, widgetLibrary, isArray(nodeValue) ? nodeValue[i] : null,
+              jsf, widgetLibrary, isArray(nodeValue) ? (nodeValue as DataObject[])[i] : null,
               schemaPointer + '/items/' + i,
               itemRecursive ? '' : dataPointer + '/' + i,
               true, 'tuple', true, true, itemRecursive ? dataPointer + '/' + i : ''
-            );
+            ) as LayoutNode;
             if (itemRecursive) {
               jsf.layoutRefLibrary[itemRefPointer].recursiveReference = true;
             }
@@ -995,14 +1014,14 @@ export function buildLayoutFromSchema(
             $ref: templateRefToUse,
             dataPointer: dataPointer + '/' + i,
             recursiveReference: itemRecursive,
-          }, jsf, widgetLibrary, isArray(nodeValue) ? nodeValue[i] : null);
+          }, jsf, widgetLibrary, isArray(nodeValue) ? (nodeValue as DataObject[])[i] : null);
         } else {
           newItem = buildLayoutFromSchema(
-            jsf, widgetLibrary, isArray(nodeValue) ? nodeValue[i] : null,
+            jsf, widgetLibrary, isArray(nodeValue) ? (nodeValue as DataObject[])[i] : null,
             schemaPointer + '/items/' + i,
             dataPointer + '/' + i,
             true, 'tuple', false, forRefLibrary, dataPointerPrefix
-          );
+          ) as LayoutNode;
         }
         if (newItem) { newNode.items.push(newItem); }
       }
@@ -1035,7 +1054,7 @@ export function buildLayoutFromSchema(
             itemSchemaPointer,
             itemRecursive ? '' : dataPointer + '/-',
             true, 'list', removable, true, itemRecursive ? dataPointer + '/-' : ''
-          )
+          ) as LayoutNode;
           templateRefToUse=conditionalRefPointer;
       }
       // Add list item layout to layoutRefLibrary
@@ -1047,7 +1066,7 @@ export function buildLayoutFromSchema(
           itemSchemaPointer,
           itemRecursive ? '' : dataPointer + '/-',
           true, 'list', removable, true, itemRecursive ? dataPointer + '/-' : ''
-        );
+        ) as LayoutNode;
         if (itemRecursive) {
           jsf.layoutRefLibrary[itemRefPointer].recursiveReference = true;
         }
@@ -1067,7 +1086,7 @@ export function buildLayoutFromSchema(
               $ref: templateRefToUse,
               dataPointer: dataPointer + '/-',
               recursiveReference: itemRecursive,
-            }, jsf, widgetLibrary, isArray(nodeValue) ? nodeValue[i] : null));
+            }, jsf, widgetLibrary, isArray(nodeValue) ? (nodeValue as DataObject[])[i] : null));
           }
         }
       }
@@ -1120,7 +1139,7 @@ export function buildLayoutFromSchema(
       // If newNode doesn't have a title, look for title of parent array item
     } else {
       const parentSchema =
-        JsonPointer.get(jsSchema, schemaPointer, 0, -1);
+        JsonPointer.get(jsSchema, schemaPointer, 0, -1) as JsonSchema;
       if (hasOwn(parentSchema, 'title')) {
         buttonText = 'Add to ' + parentSchema.title;
       } else {
@@ -1150,7 +1169,7 @@ export function buildLayoutFromSchema(
         const newLayout = buildLayoutFromSchema(
           jsf, widgetLibrary, null, schemaRef, '',
           newNode.arrayItem, newNode.arrayItemType, true, true, dataPointer
-        );
+        ) as LayoutNode;
         if (newLayout) {
           newLayout.recursiveReference = true;
           jsf.layoutRefLibrary[dataRef] = newLayout;
@@ -1162,14 +1181,14 @@ export function buildLayoutFromSchema(
       }
     }
   }else if (newNode.type === 'if') {
-    const newSection: any[] = [];
+    const newSection: LayoutNode[] = [];
     ["then", "else"].forEach(con => {
       if (hasOwn(schema, con)) {
 
         const keySchemaPointer = `/${con}`;
         const negateClause = con == "else";
         const innerItem = buildLayoutFromSchema(
-          jsf, widgetLibrary, nodeValue[con],
+          jsf, widgetLibrary, (nodeValue as DataObject)[con],
           schemaPointer + keySchemaPointer,
           dataPointer,
           false, null, null, forRefLibrary, dataPointerPrefix
@@ -1186,7 +1205,7 @@ export function buildLayoutFromSchema(
         }
       }
     })
-    newNode = newSection;
+    return newSection;
   }
 
   return newNode;
@@ -1214,9 +1233,12 @@ export function buildLayoutFromSchema(
  * //  { any[] = layout } rootLayout - the root layout, which conatins layout
  * //
  */
-export function mapLayout(layout, fn, layoutPointer = '', rootLayout = layout) {
+export function mapLayout(
+  layout: DataObject | unknown[], fn: (v: any, i?: number, l?: any, p?: any) => any,
+  layoutPointer = '', rootLayout: DataObject | unknown[] = layout
+): LayoutNode[] {
   let indexPad = 0;
-  let newLayout: any[] = [];
+  let newLayout: LayoutNode[] = [];
   forEach(layout, (item, index) => {
     const realIndex = +index + indexPad;
     const newLayoutPointer = layoutPointer + '/' + realIndex;
@@ -1256,8 +1278,9 @@ export function mapLayout(layout, fn, layoutPointer = '', rootLayout = layout) {
  * //  copied layoutNode
  */
 export function getLayoutNode(
-  refNode, jsf, widgetLibrary: any = null, nodeValue: any = null
-) {
+  refNode: LayoutNode, jsf: JsonSchemaFormService,
+  widgetLibrary: WidgetLibraryService | null = null, nodeValue: DataObject | null = null
+): LayoutNode {
 
   // If recursive reference and building initial layout, return Add button
   if (refNode.recursiveReference && widgetLibrary) {
@@ -1283,7 +1306,7 @@ export function getLayoutNode(
         JsonPointer.toSchemaPointer(refNode.$ref, jsf.schema),
         refNode.$ref, newLayoutNode.arrayItem,
         newLayoutNode.arrayItemType, newLayoutNode.options.removable, false
-      );
+      ) as LayoutNode;
     } else {
       // If value not defined, copy node from layoutRefLibrary
       newLayoutNode = cloneDeep(newLayoutNode);
@@ -1313,25 +1336,30 @@ export function getLayoutNode(
  * // { TitleMapItem[] }
  */
 export function buildTitleMap(
-  titleMap, enumList, fieldRequired = true, flatList = true
-) {
+  titleMap: TitleMapItem[] | DataObject | null, enumList: unknown,
+  fieldRequired = true, flatList = true
+): TitleMapItem[] {
+  // titleMap and enumList are heterogeneous user-supplied data
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const tm: any = titleMap;
+  const ev: any = enumList;
   let newTitleMap: TitleMapItem[] = [];
   let hasEmptyValue = false;
   if (titleMap) {
     if (isArray(titleMap)) {
       if (enumList) {
         for (const i of Object.keys(titleMap)) {
-          if (isObject(titleMap[i])) { // JSON Form style
-            const value = titleMap[i].value;
-            if (enumList.includes(value)) {
-              const name = titleMap[i].name;
+          if (isObject(tm[i])) { // JSON Form style
+            const value = tm[i].value;
+            if (ev.includes(value)) {
+              const name = tm[i].name;
               newTitleMap.push({ name, value });
               if (value === undefined || value === null) { hasEmptyValue = true; }
             }
-          } else if (isString(titleMap[i])) { // React Jsonschema Form style
-            if (i < enumList.length) {
-              const name = titleMap[i];
-              const value = enumList[i];
+          } else if (isString(tm[i])) { // React Jsonschema Form style
+            if (i < ev.length) {
+              const name = tm[i];
+              const value = ev[i];
               newTitleMap.push({ name, value });
               if (value === undefined || value === null) { hasEmptyValue = true; }
             }
@@ -1346,25 +1374,25 @@ export function buildTitleMap(
         }
       }
     } else if (enumList) { // Alternate JSON Form style, with enum list
-      for (const i of Object.keys(enumList)) {
-        const value = enumList[i];
-        if (hasOwn(titleMap, value)) {
-          const name = titleMap[value];
+      for (const i of Object.keys(ev)) {
+        const value = ev[i];
+        if (hasOwn(tm, value)) {
+          const name = tm[value];
           newTitleMap.push({ name, value });
           if (value === undefined || value === null) { hasEmptyValue = true; }
         }
       }
     } else { // Alternate JSON Form style, without enum list
-      for (const value of Object.keys(titleMap)) {
-        const name = titleMap[value];
+      for (const value of Object.keys(tm)) {
+        const name = tm[value];
         newTitleMap.push({ name, value });
         if (value === undefined || value === null) { hasEmptyValue = true; }
       }
     }
   } else if (enumList) { // Build map from enum list alone
-    for (const i of Object.keys(enumList)) {
-      const name = enumList[i];
-      const value = enumList[i];
+    for (const i of Object.keys(ev)) {
+      const name = ev[i];
+      const value = ev[i];
       newTitleMap.push({ name, value });
       if (value === undefined || value === null) { hasEmptyValue = true; }
     }

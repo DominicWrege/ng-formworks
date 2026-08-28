@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Type } from '@angular/core';
+import type { WidgetLibraryMap } from '@ng-formworks/core';
 import { Framework } from '@ng-formworks/core';
 import { TailwindFrameworkComponent } from './tailwindcss.component';
 import { TwInputComponent } from './widgets/tw-input.widget';
@@ -20,7 +21,7 @@ import { TwSectionComponent } from './widgets/tw-section.widget';
 export class TailwindFramework extends Framework {
   name = 'tailwindcss';
   text = 'Tailwind CSS';
-  framework: any = TailwindFrameworkComponent;
+  framework: Type<unknown> = TailwindFrameworkComponent;
 
   widgets = {
     ...defaultWidgetOverrides(),
@@ -28,7 +29,7 @@ export class TailwindFramework extends Framework {
 }
 
 /** Widget map merged over the core library when this framework is active. */
-export function defaultWidgetOverrides(): { [key: string]: any } {
+export function defaultWidgetOverrides(): WidgetLibraryMap {
   return {
     // form controls
     'text': TwInputComponent,

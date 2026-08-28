@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
+import type { WidgetOptions } from '@ng-formworks/core';
 import { TextareaComponent } from '@ng-formworks/core';
-import { injectTw, twLabelCls, twFieldCls } from '../tw-base';
-import { ReactiveFormsModule } from '@angular/forms';
+import { injectTw, twLabelCls, twFieldCls, twTitle } from '../tw-base';
+import { AbstractControl, ReactiveFormsModule } from '@angular/forms';
 
 @Component({
     imports: [ReactiveFormsModule],
@@ -10,6 +11,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 })
 export class TwTextareaComponent extends TextareaComponent {
   readonly tw = injectTw();
-  labelCls(options: any) { return twLabelCls(this.tw, options); }
-  fieldCls(options: any, fc?: any) { return twFieldCls(this.tw, options, 'textarea', fc); }
+  titleHtml(options?: WidgetOptions | null) { return twTitle(options); }
+  labelCls(options?: WidgetOptions | null) { return twLabelCls(this.tw, options); }
+  fieldCls(options: WidgetOptions | null | undefined, fc?: AbstractControl | null) { return twFieldCls(this.tw, options, 'textarea', fc); }
 }

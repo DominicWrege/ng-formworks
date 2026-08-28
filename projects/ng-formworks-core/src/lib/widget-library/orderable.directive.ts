@@ -1,5 +1,6 @@
 import { Directive, ElementRef, OnDestroy, OnInit, inject, input } from '@angular/core';
 import { Subscription } from 'rxjs';
+import type { LayoutNode } from '../shared/types';
 import { JsonSchemaFormService } from '../json-schema-form.service';
 
 
@@ -33,11 +34,11 @@ export class OrderableDirective implements OnInit,OnDestroy {
   private jsf = inject(JsonSchemaFormService);
 
   arrayLayoutIndex: string;
-  element: any;
+  element: HTMLElement;
   overParentElement = false;
   overChildElement = false;
   readonly orderable = input<boolean>(undefined);
-  readonly layoutNode = input<any>(undefined);
+  readonly layoutNode = input<LayoutNode | undefined>(undefined);
   readonly layoutIndex = input<number[]>(undefined);
   readonly dataIndex = input<number[]>(undefined);
 

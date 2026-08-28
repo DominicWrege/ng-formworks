@@ -4,6 +4,7 @@ import { map } from 'rxjs/operators';
 import { JsonSchemaFormatNames, jsonSchemaFormatTests } from './format-regex.constants';
 import { deepEqual } from './native.functions';
 import { forEachCopy } from './utility.functions';
+import type { DataObject, FormValue, JsonValue } from './types';
 import {
   _executeAsyncValidators,
   _executeValidators,
@@ -175,7 +176,7 @@ export class JsonValidators {
     if (!hasValue(requiredType)) { return JsonValidators.nullValidator; }
     return (control: AbstractControl, invert = false): ValidationErrors|null => {
       if (isEmpty(control.value)) { return null; }
-      const currentValue: any = control.value;
+      const currentValue: FormValue = control.value;
       const isValid = isArray(requiredType) ?
         (<SchemaPrimitiveType[]>requiredType).some(type => isType(currentValue, type)) :
         isType(currentValue, <SchemaPrimitiveType>requiredType);
@@ -192,14 +193,14 @@ export class JsonValidators {
    * Converts types as needed to allow string inputs to still correctly
    * match number, boolean, and null enum values.
    *
-   * // {any[]} allowedValues - array of acceptable values
+   * // {JsonValue[]} allowedValues - array of acceptable values
    * // {IValidatorFn}
    */
-  static enum(allowedValues: any[]): IValidatorFn {
+  static enum(allowedValues: JsonValue[]): IValidatorFn {
     if (!isArray(allowedValues)) { return JsonValidators.nullValidator; }
     return (control: AbstractControl, invert = false): ValidationErrors|null => {
       if (isEmpty(control.value)) { return null; }
-      const currentValue: any = control.value;
+      const currentValue: FormValue = control.value;
       const isEqualVal = (enumValue, inputValue) =>
         enumValue === inputValue ||
         (isNumber(enumValue) && +inputValue === +enumValue) ||
@@ -227,14 +228,14 @@ export class JsonValidators {
    *
    * TODO: modify to work with objects
    *
-   * // {any[]} requiredValue - required value
+   * // {JsonValue} requiredValue - required value
    * // {IValidatorFn}
    */
-  static const(requiredValue: any): IValidatorFn {
+  static const(requiredValue: JsonValue): IValidatorFn {
     if (!hasValue(requiredValue)) { return JsonValidators.nullValidator; }
     return (control: AbstractControl, invert = false): ValidationErrors|null => {
       if (isEmpty(control.value)) { return null; }
-      const currentValue: any = control.value;
+      const currentValue: FormValue = control.value;
       const isEqualVal = (constValue, inputValue) =>
         constValue === inputValue ||
         isNumber(constValue) && +inputValue === +constValue ||
@@ -538,10 +539,10 @@ export class JsonValidators {
    * Examples:
    * https://spacetelescope.github.io/understanding-json-schema/reference/object.html#dependencies
    *
-   * // {any} dependencies - required dependencies
+   * // {DataObject} dependencies - required dependencies
    * // {IValidatorFn}
    */
-  static dependencies(dependencies: any): IValidatorFn {
+  static dependencies(dependencies: DataObject): IValidatorFn {
     if (getType(dependencies) !== 'object' || isEmpty(dependencies)) {
       return JsonValidators.nullValidator;
     }
@@ -644,8 +645,8 @@ export class JsonValidators {
     if (!unique) { return JsonValidators.nullValidator; }
     return (control: AbstractControl, invert = false): ValidationErrors|null => {
       if (isEmpty(control.value)) { return null; }
-      const sorted: any[] = control.value.slice().sort();
-      const duplicateItems = [];
+      const sorted: FormValue[] = control.value.slice().sort();
+      const duplicateItems: FormValue[] = [];
       for (let i = 1; i < sorted.length; i++) {
         if (sorted[i - 1] === sorted[i] && duplicateItems.includes(sorted[i])) {
           duplicateItems.push(sorted[i]);

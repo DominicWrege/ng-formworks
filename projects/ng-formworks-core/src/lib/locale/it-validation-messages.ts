@@ -1,4 +1,6 @@
-export const itValidationMessages: any = { // Default Italian error messages
+import type { ValidationMessages } from '../shared/types';
+
+export const itValidationMessages: ValidationMessages = { // Default Italian error messages
   required: 'Il campo è obbligatorio',
   minLength: 'Deve inserire almeno {{minimumLength}} caratteri (lunghezza corrente: {{currentLength}})',
   maxLength: 'Il numero massimo di caratteri consentito è {{maximumLength}} (lunghezza corrente: {{currentLength}})',

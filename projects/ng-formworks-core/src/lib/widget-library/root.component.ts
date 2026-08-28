@@ -1,8 +1,9 @@
 import { CdkDrag, CdkDragDrop } from '@angular/cdk/drag-drop';
 import { ChangeDetectorRef, Component, inject, input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
 import { memoize } from '../shared';
+import type { LayoutNode, WidgetOptions } from '../shared/types';
 import { Subscription } from 'rxjs';
-import { JsonSchemaFormService } from '../json-schema-form.service';
+import { JsonSchemaFormService, type WidgetContext } from '../json-schema-form.service';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { SelectFrameworkComponent } from './select-framework.component';
 @Component({
@@ -44,24 +45,24 @@ export class RootComponent implements OnInit, OnDestroy,OnChanges {
 
   private jsf = inject(JsonSchemaFormService);
   private cdr = inject(ChangeDetectorRef);
-  options: any;
+  options: WidgetOptions;
   readonly dataIndex = input<number[]>(undefined);
   readonly layoutIndex = input<number[]>(undefined);
-  readonly layout = input<any[]>(undefined);
+  readonly layout = input<LayoutNode[] | undefined>(undefined);
   readonly isOrderable = input<boolean>(undefined);
   readonly isFlexItem = input(false);
   readonly memoizationEnabled= input<boolean>(true);
 
   dataChangesSubs:Subscription;
 
-  drop(event: CdkDragDrop<string[]>) {
+  drop(event: CdkDragDrop<LayoutNode[]>) {
     // most likely why this event is used is to get the dragging element's current index
     let srcInd=event.previousIndex;
     let trgInd=event.currentIndex;
     let layoutItem=this.layout()[trgInd];
     let dataInd=layoutItem?.arrayItem ? (this.dataIndex() || []).concat(trgInd) : (this.dataIndex() || []);
     let layoutInd=(this.layoutIndex() || []).concat(trgInd)
-    let itemCtx:any={
+    let itemCtx:WidgetContext={
       dataIndex:()=>{return dataInd},
       layoutIndex:()=>{return layoutInd},
       layoutNode:()=>{return layoutItem},
@@ -69,7 +70,7 @@ export class RootComponent implements OnInit, OnDestroy,OnChanges {
     this.jsf.moveArrayItem(itemCtx, srcInd, trgInd,true);
   }
 
-  isDraggable(node: any): boolean {
+  isDraggable(node: LayoutNode): boolean {
     let result=node.arrayItem && node.type !== '$ref' &&
     node.arrayItemType === 'list' && this.isOrderable() !== false
     && node.type !=='submit'
@@ -78,7 +79,7 @@ export class RootComponent implements OnInit, OnDestroy,OnChanges {
 
   // TODO: also need to think of other types such as button which can be
   //created by an arbitrary layout
-  isFixed(node: any): boolean {
+  isFixed(node: LayoutNode): boolean {
     let result=node.type == '$ref';
     return result;
   }
@@ -102,7 +103,7 @@ export class RootComponent implements OnInit, OnDestroy,OnChanges {
 
   // Set attributes for flexbox child
   // (container attributes are set in section.component)
-  getFlexAttribute(node: any, attribute: string) {
+  getFlexAttribute(node: LayoutNode, attribute: string) {
     const index = ['flex-grow', 'flex-shrink', 'flex-basis'].indexOf(attribute);
     return ((node.options || {}).flex || '').split(/\s+/)[index] ||
       (node.options || {})[attribute] || ['1', '1', 'auto'][index];
@@ -139,7 +140,7 @@ export class RootComponent implements OnInit, OnDestroy,OnChanges {
   }
     */
 
-  private _getSelectFrameworkInputsRaw = (layoutItem: any, i: number) => {
+  private _getSelectFrameworkInputsRaw = (layoutItem: LayoutNode, i: number) => {
     const dataIndexValue = this.dataIndex() || [];
     const layoutIndexValue = this.layoutIndex() || [];
 
@@ -153,14 +154,14 @@ export class RootComponent implements OnInit, OnDestroy,OnChanges {
   // Define a separate function to hold the memoized version
   private _getSelectFrameworkInputsMemoized = memoize(
     this._getSelectFrameworkInputsRaw,
-    (layoutItem: any, i: number) => {
+    (layoutItem: LayoutNode, i: number) => {
       const layoutItemKey = layoutItem?.id ?? JSON.stringify(layoutItem);
       return `${layoutItemKey}-${i}`;
     }
   );
 
   // This is the public function that the template calls
-  getSelectFrameworkInputs(layoutItem: any, i: number) {
+  getSelectFrameworkInputs(layoutItem: LayoutNode, i: number) {
     if (this.memoizationEnabled) {
       return this._getSelectFrameworkInputsMemoized(layoutItem, i);
     } else {
@@ -169,7 +170,7 @@ export class RootComponent implements OnInit, OnDestroy,OnChanges {
   }
   // TODO: investigate — using this trackByFn in the template caused a layout issue,
   // so it is currently unused
-  trackByFn(index: number, item: any): any {
+  trackByFn(index: number, item: LayoutNode): string | number {
     return item._id ?? index;
   }
 
@@ -194,20 +195,20 @@ export class RootComponent implements OnInit, OnDestroy,OnChanges {
 
 
 // Memoize the showWidget to avoid unnecessary recalculations
-private _showWidgetRaw = (layoutNode: any): boolean => {
+private _showWidgetRaw = (layoutNode: LayoutNode): boolean => {
   return this.jsf.evaluateCondition(layoutNode, this.dataIndex());
 };
 
 private _showWidgetMemoized = memoize(
   this._showWidgetRaw,
-  (layoutNode: any) => {
+  (layoutNode: LayoutNode) => {
     // Memoize based on the layoutNode and dataIndex
     return JSON.stringify(layoutNode) + '-' + (this.dataIndex() || []).join('-');
   }
 );
 
 // Public function used in the template
-showWidget(layoutNode: any): boolean {
+showWidget(layoutNode: LayoutNode): boolean {
   if (this.memoizationEnabled) {
     return this._showWidgetMemoized(layoutNode);
   } else {
