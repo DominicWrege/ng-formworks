@@ -1,9 +1,32 @@
-import { enableProdMode } from '@angular/core';
-import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
+import {
+	enableProdMode,
+	importProvidersFrom,
+	provideZonelessChangeDetection,
+} from "@angular/core";
+import {
+	bootstrapApplication,
+	REMOVE_STYLES_ON_COMPONENT_DESTROY,
+} from "@angular/platform-browser";
+import {
+	provideHttpClient,
+	withInterceptorsFromDi,
+	withXhr,
+} from "@angular/common/http";
+import { JsonSchemaFormModule } from "@ng-formworks/core";
+import { TailwindFrameworkModule } from "@ng-formworks/tailwindcss";
 
-import { DemoModule } from './app/demo.module';
-import { environment } from './environments/environment';
+import { DemoRootComponent } from "./app/demo-root.component";
+import { environment } from "./environments/environment";
 
-if (environment.production) { enableProdMode(); }
+if (environment.production) {
+	enableProdMode();
+}
 
-platformBrowserDynamic().bootstrapModule(DemoModule);
+bootstrapApplication(DemoRootComponent, {
+	providers: [
+		importProvidersFrom(JsonSchemaFormModule, TailwindFrameworkModule),
+		{ provide: REMOVE_STYLES_ON_COMPONENT_DESTROY, useValue: true },
+		provideHttpClient(withXhr(), withInterceptorsFromDi()),
+		provideZonelessChangeDetection(),
+	],
+}).catch((err) => console.error(err));

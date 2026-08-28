@@ -59,8 +59,8 @@ Let's first generate all the bundles we need to start the demo:
 
 ```bash
 $ cd ng-formworks
-$ yarn install or npm install
-$ yarn start
+$ pnpm install
+$ pnpm start
 ```
 
 You can stop the demo application.

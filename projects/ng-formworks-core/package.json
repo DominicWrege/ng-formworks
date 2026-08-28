@@ -48,9 +48,10 @@
   },
   "private": false,
   "dependencies": {
-    "ajv": "^8.12.0",
+    "ajv": "^8.17.1",
     "tslib": "^2.7.0",
-    "eta": "^4.5.0"
+    "eta": "^4.5.0",
+    "ajv-formats": "^3.0.1"
   },
   "peerDependencies": {
     "@angular/cdk": ">=22.0.0",
