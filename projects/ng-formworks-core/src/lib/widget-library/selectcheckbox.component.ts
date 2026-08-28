@@ -104,19 +104,19 @@ export class SelectCheckboxComponent implements OnInit, OnDestroy {
   private jsf = inject(JsonSchemaFormService);
   private jsfFLService = inject(FrameworkLibraryService);
 
-  formControl: AbstractControl;
-  controlName: string;
+  formControl!: AbstractControl;
+  controlName!: string;
   controlValue: FormValue;
   controlDisabled = false;
   boundControl = false;
-  options: WidgetOptions;
+  options!: WidgetOptions;
   selectList: TitleMapItem[] = [];
   selectListFlatGroup: TitleMapItem[] = [];
-  selectValue: FormValue[];
+  selectValue!: FormValue[];
   isArray = isArray;
   readonly layoutNode = input<LayoutNode | undefined>(undefined);
-  readonly layoutIndex = input<number[]>(undefined);
-  readonly dataIndex = input<number[]>(undefined);
+  readonly layoutIndex = input<number[] | undefined>(undefined);
+  readonly dataIndex = input<number[] | undefined>(undefined);
 
  frameworkStyles={
     daisyui:{selectClass:"select-box",optionClass:"checkbox tw:dui-checkbox",optionChecked:"active",optionUnchecked:""},
@@ -127,15 +127,15 @@ export class SelectCheckboxComponent implements OnInit, OnDestroy {
 
  }
 
- activeFramework:string;
+ activeFramework!:string;
 
   ngOnInit() {
-    this.options = this.layoutNode().options || {};
+    this.options = this.layoutNode()!.options || {};
     this.activeFramework= this.jsfFLService.activeFramework.name;
     this.selectList = buildTitleMap(
       // TODO(review): title is set to null in the setTitle() method of CssFrameworkComponent
       this.options.enumNames || (this.options?.title && [this.options?.title])
-      || [this.layoutNode().name],
+      || [this.layoutNode()!.name],
       [true],
       //make required true to avoid creating 'none' select option
       true, !!this.options.flatList
@@ -164,13 +164,13 @@ export class SelectCheckboxComponent implements OnInit, OnDestroy {
     })
   }
 
-  updateValue(event) {
+  updateValue(event: { target: { value: string | null } }) {
     this.options.showErrors = true;
     this.controlValue=this.selectValue[0];
     this.jsf.updateValue(this, this.controlValue);
   }
 
-  onSelectClicked($event){
+  onSelectClicked($event: MouseEvent){
     this.selectValue=this.selectValue && this.selectValue[0]?[false]:[true];
     this.controlValue=this.selectValue[0];
     this.jsf.updateValue(this, this.controlValue);

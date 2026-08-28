@@ -1,4 +1,4 @@
-import { Directive, ElementRef, Input, inject, output } from "@angular/core";
+import { Directive, ElementRef, booleanAttribute, effect, inject, input, output } from "@angular/core";
 import ace, { Editor } from "brace";
 import "brace/mode/json";
 import "brace/theme/sqlserver";
@@ -8,35 +8,44 @@ import "brace/theme/sqlserver";
 	exportAs: "aceEditor",
 })
 export class AceEditorDirective {
-	_options: Record<string, unknown> = {};
-	_highlightActiveLine = false;
-	_showGutter = false;
-	_readOnly = false;
-	_theme = "sqlserver";
-	_mode = "json";
-	_autoUpdateContent = true;
-	_suppressChange = false;
-	editor: Editor;
-	oldText: string;
+	readonly options = input<Record<string, unknown>>({});
+	readonly readOnly = input(false, { transform: booleanAttribute });
+	readonly theme = input("sqlserver");
+	readonly mode = input("json");
+	readonly text = input<string>();
+	readonly autoUpdateContent = input(true, { transform: booleanAttribute });
 	readonly textChanged = output<string>({ alias: "textChanged" });
 
-	constructor() {
-		const elementRef = inject(ElementRef);
+	private _initialApplied = false;
+	_highlightActiveLine = false;
+	_showGutter = false;
+	_suppressChange = false;
+	editor: Editor;
 
-		const el = elementRef.nativeElement;
+	constructor() {
+		const el = inject(ElementRef).nativeElement;
 		this.editor = ace.edit(el);
 		this.init();
 		this.initEvents();
+
+		effect(() => this.editor.setOptions(this.options() || {}));
+		effect(() => this.editor.setReadOnly(this.readOnly()));
+		effect(() => this.editor.setTheme(`ace/theme/${this.theme()}`));
+		effect(() => this.editor.getSession().setMode(`ace/mode/${this.mode()}`));
+		// One-shot initial content; later syncs go through setText() imperatively
+		effect(() => {
+			const text = this.text();
+			if (!this._initialApplied) {
+				this._initialApplied = true;
+				this.setText(text || "");
+			}
+		});
 	}
 
 	init() {
 		this.editor.getSession().setUseWorker(false);
-		this.editor.setOptions(this._options);
-		this.editor.setTheme(`ace/theme/${this._theme}`);
-		this.editor.getSession().setMode(`ace/mode/${this._mode}`);
 		this.editor.setHighlightActiveLine(this._highlightActiveLine);
 		this.editor.renderer.setShowGutter(this._showGutter);
-		this.editor.setReadOnly(this._readOnly);
 		this.editor.$blockScrolling = Infinity;
 	}
 
@@ -47,40 +56,6 @@ export class AceEditorDirective {
 			}
 			this.textChanged.emit(this.editor.getValue());
 		});
-	}
-
-	@Input() set options(options: Record<string, unknown>) {
-		this._options = options;
-		this.editor.setOptions(options || {});
-	}
-
-	@Input() set readOnly(readOnly: boolean) {
-		this._readOnly = readOnly;
-		this.editor.setReadOnly(readOnly);
-	}
-
-	@Input() set theme(theme: string) {
-		this._theme = theme;
-		this.editor.setTheme(`ace/theme/${theme}`);
-	}
-
-	@Input() set mode(mode: string) {
-		this._mode = mode;
-		this.editor.getSession().setMode(`ace/mode/${mode}`);
-	}
-
-	private _initialApplied = false;
-
-	@Input() set text(text: string) {
-		// One-shot initial content; later syncs go through setText() imperatively
-		if (this._initialApplied) {
-			return;
-		}
-		this._initialApplied = true;
-		if (!text) {
-			text = "";
-		}
-		this.setText(text);
 	}
 
 	setText(text: string) {
@@ -97,9 +72,5 @@ export class AceEditorDirective {
 				this._suppressChange = false;
 			});
 		}
-	}
-
-	@Input() set autoUpdateContent(status: boolean) {
-		this._autoUpdateContent = status;
 	}
 }

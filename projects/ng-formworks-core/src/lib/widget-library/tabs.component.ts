@@ -17,20 +17,20 @@ import { SelectFrameworkComponent } from './select-framework.component';
 export class TabsComponent implements OnInit,OnDestroy {
   private jsf = inject(JsonSchemaFormService);
   private cdr = inject(ChangeDetectorRef);
-  options: WidgetOptions;
-  itemCount: number;
+  options!: WidgetOptions;
+  itemCount!: number;
   selectedItem = 0;
   showAddTab = true;
   readonly layoutNode = input<LayoutNode | undefined>(undefined);
-  readonly layoutIndex = input<number[]>(undefined);
-  readonly dataIndex = input<number[]>(undefined);
-  dataChangesSubs:Subscription;
+  readonly layoutIndex = input<number[] | undefined>(undefined);
+  readonly dataIndex = input<number[] | undefined>(undefined);
+  dataChangesSubs!: Subscription;
   ngOnInit() {
-    this.options = this.layoutNode().options || {};
+    this.options = this.layoutNode()!.options || {};
     if(this.options.selectedTab){
       this.selectedItem = this.options.selectedTab;
     }
-    this.itemCount = this.layoutNode().items.length - 1;
+    this.itemCount = this.layoutNode()!.items!.length - 1;
     this.updateControl();
     // TODO(review/test): subscribe only to force change detection when dynamic
     //titles stop updating after their conditional linked field is destroyed
@@ -40,13 +40,13 @@ export class TabsComponent implements OnInit,OnDestroy {
   }
 
   select(index: number) {
-    const layoutNode = this.layoutNode();
-    if (layoutNode.items[index].type === '$ref') {
-      this.itemCount = layoutNode.items.length;
+    const layoutNode = this.layoutNode()!;
+    if (layoutNode.items![index].type === '$ref') {
+      this.itemCount = layoutNode.items!.length;
       this.jsf.addItem({
-        layoutNode: signal(layoutNode.items[index]),
-        layoutIndex: signal(this.layoutIndex().concat(index)),
-        dataIndex: signal(this.dataIndex().concat(index))
+        layoutNode: signal(layoutNode.items![index]),
+        layoutIndex: signal(this.layoutIndex()!.concat(index)),
+        dataIndex: signal(this.dataIndex()!.concat(index))
       });
       this.updateControl();
     }
@@ -54,9 +54,9 @@ export class TabsComponent implements OnInit,OnDestroy {
   }
 
   updateControl() {
-    const lastItem = this.layoutNode().items[this.layoutNode().items.length - 1];
+    const lastItem = this.layoutNode()!.items![this.layoutNode()!.items!.length - 1];
     if (lastItem.type === '$ref' &&
-      this.itemCount >= (lastItem.options.maxItems || 1000)
+      this.itemCount >= (lastItem.options?.maxItems || 1000)
     ) {
       this.showAddTab = false;
     }
@@ -73,7 +73,7 @@ export class TabsComponent implements OnInit,OnDestroy {
     const isContainer = !!item && (
       item.dataType === 'object' ||
       Array.isArray(item.items) ||
-      ['section', 'fieldset', 'div', 'flex', 'tab', 'array'].includes(item.type)
+      ['section', 'fieldset', 'div', 'flex', 'tab', 'array'].includes(item.type!)
     );
     return isContainer
       ? { ...item, options: { ...(item.options || {}), notitle: true } }

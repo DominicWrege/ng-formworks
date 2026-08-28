@@ -13,7 +13,7 @@ export function cloneDeep<T>(value: T): T {
   if (!isPlainObject(value)) { return value; }
   const clone: any = {};
   for (const key of Object.keys(value)) {
-    clone[key] = cloneDeep(value[key]);
+    clone[key] = cloneDeep(value[key as keyof T]);
   }
   return clone;
 }
@@ -44,7 +44,7 @@ export function memoize<T extends (...args: any[]) => any>(
   const cache = new Map<any, ReturnType<T>>();
   const memoized = (...args: Parameters<T>): ReturnType<T> => {
     const key = resolver ? resolver(...args) : args[0];
-    if (cache.has(key)) { return cache.get(key); }
+    if (cache.has(key)) { return cache.get(key)!; }
     const result = fn(...args);
     cache.set(key, result);
     return result;

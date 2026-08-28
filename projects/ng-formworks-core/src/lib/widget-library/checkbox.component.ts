@@ -17,20 +17,20 @@ import { ReactiveFormsModule } from '@angular/forms';
 export class CheckboxComponent implements OnInit,OnDestroy {
   private jsf = inject(JsonSchemaFormService);
 
-  formControl: AbstractControl;
-  controlName: string;
-  controlValue: FormValue;
+  formControl!: AbstractControl;
+  controlName!: string;
+  controlValue!: FormValue;
   controlDisabled = false;
   boundControl = false;
-  options: WidgetOptions;
+  options!: WidgetOptions;
   trueValue: FormValue = true;
   falseValue: FormValue = false;
   readonly layoutNode = input<LayoutNode | undefined>(undefined);
-  readonly layoutIndex = input<number[]>(undefined);
-  readonly dataIndex = input<number[]>(undefined);
+  readonly layoutIndex = input<number[] | undefined>(undefined);
+  readonly dataIndex = input<number[] | undefined>(undefined);
 
   ngOnInit() {
-    this.options = this.layoutNode().options || {};
+    this.options = this.layoutNode()!.options || {};
     this.jsf.initializeControl(this);
     if (this.controlValue === null || this.controlValue === undefined) {
       this.controlValue = false;
@@ -38,9 +38,9 @@ export class CheckboxComponent implements OnInit,OnDestroy {
     }
   }
 
-  updateValue(event) {
+  updateValue(event: Event) {
     event.preventDefault();
-    this.jsf.updateValue(this, event.target.checked ? this.trueValue : this.falseValue);
+    this.jsf.updateValue(this, (event.target as HTMLInputElement).checked ? this.trueValue : this.falseValue);
   }
 
   get isChecked() {

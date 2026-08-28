@@ -16,37 +16,37 @@ import { ElementAttributeDirective } from './element-attribute.directive';
 export class NumberComponent implements OnInit,OnDestroy {
   private jsf = inject(JsonSchemaFormService);
 
-  formControl: AbstractControl;
-  controlName: string;
+  formControl!: AbstractControl;
+  controlName!: string;
   controlValue: FormValue;
   controlDisabled = false;
   boundControl = false;
-  options: WidgetOptions;
+  options!: WidgetOptions;
   allowNegative = true;
   allowDecimal = true;
   allowExponents = false;
   lastValidNumber = '';
   readonly layoutNode = input<LayoutNode | undefined>(undefined);
-  readonly layoutIndex = input<number[]>(undefined);
-  readonly dataIndex = input<number[]>(undefined);
+  readonly layoutIndex = input<number[] | undefined>(undefined);
+  readonly dataIndex = input<number[] | undefined>(undefined);
 
     //needed as templates don't accept something like [attributes]="options?.['x-inputAttributes']"
     get inputAttributes() {
       return this.options?.['x-inputAttributes'];
     }
   @ViewChild('inputControl', {})
-  inputControl: ElementRef;
+  inputControl!: ElementRef;
 
   @ViewChild('divElt', {})
-  div: ElementRef;
+  div!: ElementRef;
 
   ngOnInit() {
-    this.options = this.layoutNode().options || {};
+    this.options = this.layoutNode()!.options || {};
     this.jsf.initializeControl(this);
-    if (this.layoutNode().dataType === 'integer') { this.allowDecimal = false; }
+    if (this.layoutNode()!.dataType === 'integer') { this.allowDecimal = false; }
   }
 
-  updateValue(event) {
+  updateValue(event: { target: { value: string | null } }) {
     this.jsf.updateValue(this, event.target.value);
   }
 

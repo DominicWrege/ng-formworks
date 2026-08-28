@@ -27,7 +27,7 @@ import type { JsonSchema } from './types';
  */
 export function mergeSchemas(...schemas: JsonSchema[]): JsonSchema {
   schemas = schemas.filter(schema => !isEmpty(schema)) as JsonSchema[];
-  if (schemas.some(schema => !isObject(schema))) { return null; }
+  if (schemas.some(schema => !isObject(schema))) { return null as unknown as JsonSchema; }
   const combinedSchema: JsonSchema = {};
   for (const schema of schemas) {
     for (const key of Object.keys(schema)) {
@@ -159,8 +159,8 @@ export function mergeSchemas(...schemas: JsonSchema[]): JsonSchema {
             // TODO: Adjust to correctly handle decimal values
             // If numbers, set to least common multiple
             if (isNumber(combinedValue) && isNumber(schemaValue)) {
-              const gcd = (x, y) => !y ? x : gcd(y, x % y);
-              const lcm = (x, y) => (x * y) / gcd(x, y);
+              const gcd = (x: number, y: number): number => !y ? x : gcd(y, x % y);
+              const lcm = (x: number, y: number): number => (x * y) / gcd(x, y);
               combinedSchema.multipleOf = lcm(combinedValue as number, schemaValue as number);
             } else {
               return { allOf: [ ...schemas ] };

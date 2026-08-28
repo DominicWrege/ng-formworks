@@ -10,12 +10,12 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
 })
 export class TemplateComponent implements OnInit, OnChanges, OnDestroy {
   private jsf = inject(JsonSchemaFormService);
-  private dataChangesSubs: Subscription;
+  private dataChangesSubs!: Subscription;
 
   newComponent: ComponentRef<unknown> | null = null;
   readonly layoutNode = input<LayoutNode | undefined>(undefined);
-  readonly layoutIndex = input<number[]>(undefined);
-  readonly dataIndex = input<number[]>(undefined);
+  readonly layoutIndex = input<number[] | undefined>(undefined);
+  readonly dataIndex = input<number[] | undefined>(undefined);
   readonly widgetContainer = viewChild('widgetContainer', { read: ViewContainerRef });
 
   ngOnInit() {
@@ -38,8 +38,8 @@ export class TemplateComponent implements OnInit, OnChanges, OnDestroy {
   updateComponent() {
     const layoutNode = this.layoutNode();
     const widgetContainer = this.widgetContainer();
-    if (widgetContainer && !this.newComponent && layoutNode.options.template) {
-      this.newComponent = widgetContainer.createComponent((layoutNode.options.template) as Type<unknown>
+    if (widgetContainer && !this.newComponent && layoutNode!.options!.template) {
+      this.newComponent = widgetContainer.createComponent((layoutNode!.options!.template) as Type<unknown>
       );
     }
     if (this.newComponent) {

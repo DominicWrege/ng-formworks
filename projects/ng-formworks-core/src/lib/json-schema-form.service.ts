@@ -44,13 +44,13 @@ import type { DataObject, ErrorMessages, FormOptions, FormValue, FunctionConditi
 
 import { setControl } from './shared/form-group.functions';
 
-import { Eta } from 'eta/core';
+import { Eta, type EtaConfig } from 'eta/core';
 import { WidgetLibraryService } from './widget-library/widget-library.service';
 
 export type { DataObject, ErrorMessages, FormOptions, FormGroupTemplate, TitleMapItem, ValidationMessages, WidgetOptions };
 
 /** Layout nodes and indexes may be plain getters (legacy) or Signals. */
-export type ContextValue<T> = (() => T) | Signal<T>;
+export type ContextValue<T> = (() => T | undefined) | Signal<T | undefined>;
 
 export type WidgetContext={
   formControl?:AbstractControl;
@@ -78,7 +78,7 @@ export type AJVRegistryItem={
   [name: string]:{
     name:string,
     ajvInstance:Ajv2019
-    ajvValidator:ValidateFunction
+    ajvValidator:ValidateFunction | null
   }
 }
 
@@ -109,7 +109,7 @@ export class JsonSchemaFormService implements OnDestroy {
   formGroupTemplate: FormGroupTemplate | null = {}; // Template used to create formGroup
   formGroup: UntypedFormGroup | null = null; // Angular formGroup, which powers the reactive form
   framework: Type<unknown> | null = null; // Active framework component
-  formOptions: FormOptions; // Active options, used to configure the form
+  formOptions!: FormOptions; // Active options, used to configure the form
 
   validData: DataObject | null = null; // Valid form data (or null) (=== isValid ? data : null)
   isValid: boolean | null = null; // Is current form data valid?
@@ -181,12 +181,12 @@ export class JsonSchemaFormService implements OnDestroy {
     },
     validationDebounceMs: 50
   };
-  fcValueChangesSubs:Subscription;
-  fcStatusChangesSubs:Subscription;
+  fcValueChangesSubs!:Subscription | null;
+  fcStatusChangesSubs!:Subscription | null;
 
   private readonly templateCache = new Map<string, Function>();
-  private readonly etaConfig = {
-    tags: ["{{", "}}"] as [string, string],
+  private readonly etaConfig: Partial<EtaConfig> = {
+    tags: ["{{", "}}"],
     cache:true,
      functionHeader: "const value=it.value, values=it.values,tpldata=it.tpldata,idx=it.idx,$index=it.$index"
    }
@@ -281,7 +281,7 @@ this.ajv.addFormat("duration", {
 
   setLanguage(language: string = 'en-US') {
     this.language = language;
-    const languageValidationMessages = {
+    const languageValidationMessages: Record<string, ValidationMessages> = {
       de: deValidationMessages,
       en: enValidationMessages,
       es: esValidationMessages,
@@ -294,7 +294,7 @@ this.ajv.addFormat("duration", {
 
     const validationMessages = languageValidationMessages[languageCode];
 
-    this.defaultFormOptions.defaultWidgetOptions.validationMessages = cloneDeep(
+    this.defaultFormOptions.defaultWidgetOptions!.validationMessages = cloneDeep(
       validationMessages
     );
   }
@@ -362,11 +362,11 @@ this.ajv.addFormat("duration", {
    */
   buildRemoteError(errors: ErrorMessages) {
     forEach(errors, (value, key) => {
-      if (key in this.formGroup.controls) {
+      if (typeof key === 'string' && key in this.formGroup!.controls) {
         for (const error of value) {
           const err: ValidationErrors = {};
           err[error['code']] = error['message'];
-          this.formGroup.get(key as string).setErrors(err, { emitEvent: true });
+          this.formGroup!.get(key)!.setErrors(err, { emitEvent: true });
         }
       }
     });
@@ -381,9 +381,9 @@ this.ajv.addFormat("duration", {
       this.arrayMap,
       this.formOptions.returnEmptyFields
     );
-    this.isValid = this.getAjvValidator(ajvInstanceName)(this.data);
+    this.isValid = this.getAjvValidator(ajvInstanceName)!(this.data);
     this.validData = this.isValid ? this.data : null;
-    const compileErrors = (errors: ErrorObject[]): Record<string, string[]> => {
+    const compileErrors = (errors: ErrorObject[] | null): Record<string, string[]> => {
       const compiledErrors: Record<string, string[]> = {};
       (errors || []).forEach(error => {
         // TODO(review): of ajv giving '' as instancePath for root objects
@@ -391,17 +391,17 @@ this.ajv.addFormat("duration", {
         if (!compiledErrors[errorPath]) {
           compiledErrors[errorPath] = [];
         }
-        compiledErrors[errorPath].push(error.message);
+        compiledErrors[errorPath].push(error.message!);
       });
       return compiledErrors;
     };
     // TODO: store ajv errors per ajvInstance in registry
-    this.ajvErrors = this.getAjvValidator(ajvInstanceName).errors;
+    this.ajvErrors = this.getAjvValidator(ajvInstanceName)!.errors ?? null;
     this.validationErrors = compileErrors(this.ajvErrors);
     if (updateSubscriptions) {
       this.dataChanges.next(this.data);
       this.isValidChanges.next(this.isValid);
-      this.validationErrorChanges.next(this.ajvErrors);
+      this.validationErrorChanges.next(this.ajvErrors as ErrorObject[]);
     }
   }
 
@@ -416,7 +416,7 @@ this.ajv.addFormat("duration", {
 
 
   buildFormGroup(ajvInstanceName?: string) {
-    this.formGroup = <UntypedFormGroup>buildFormGroup(this.formGroupTemplate);
+    this.formGroup = <UntypedFormGroup>buildFormGroup(this.formGroupTemplate!);
     if (this.formGroup) {
       this.compileAjvSchema(ajvInstanceName);
 
@@ -443,7 +443,7 @@ this.ajv.addFormat("duration", {
           distinctUntilChanged((prev, curr) => deepEqual(prev, curr))
         )
         .subscribe(() => {
-          this.validateData(this.formGroup.getRawValue(), true, ajvInstanceName);
+          this.validateData(this.formGroup!.getRawValue(), true, ajvInstanceName);
         });
     }
   }
@@ -458,14 +458,14 @@ this.ajv.addFormat("duration", {
       // Backward compatibility for 'defaultOptions' (renamed 'defaultWidgetOptions')
       if (isObject(addOptions.defaultOptions)) {
         Object.assign(
-          this.formOptions.defaultWidgetOptions,
+          this.formOptions.defaultWidgetOptions!,
           addOptions.defaultOptions
         );
         delete addOptions.defaultOptions;
       }
       if (isObject(addOptions.defaultWidgetOptions)) {
         Object.assign(
-          this.formOptions.defaultWidgetOptions,
+          this.formOptions.defaultWidgetOptions!,
           addOptions.defaultWidgetOptions
         );
         delete addOptions.defaultWidgetOptions;
@@ -473,7 +473,7 @@ this.ajv.addFormat("duration", {
       Object.assign(this.formOptions, addOptions);
 
       // convert disableErrorState / disableSuccessState to enable...
-      const globalDefaults = this.formOptions.defaultWidgetOptions;
+      const globalDefaults = this.formOptions.defaultWidgetOptions!;
       ['ErrorState', 'SuccessState']
         .filter(suffix => hasOwn(globalDefaults, 'disable' + suffix))
         .forEach(suffix => {
@@ -489,9 +489,9 @@ this.ajv.addFormat("duration", {
     let ajvValidator=this.getAjvValidator(ajvInstanceName);
     if (!ajvValidator) {
       // if 'ui:order' exists in properties, move it to root before compiling with ajv
-      if (Array.isArray(this.schema.properties['ui:order'])) {
-        this.schema['ui:order'] = this.schema.properties['ui:order'];
-        delete this.schema.properties['ui:order'];
+      if (Array.isArray(this.schema.properties!['ui:order'])) {
+        this.schema['ui:order'] = this.schema.properties!['ui:order'];
+        delete this.schema.properties!['ui:order'];
       }
       this.getAjvInstance(ajvInstanceName).removeSchema(this.schema);
 
@@ -501,14 +501,14 @@ this.ajv.addFormat("duration", {
     }
   }
 
-  buildSchemaFromData(data?: DataObject, requireAllFields = false): JsonSchema {
+  buildSchemaFromData(data?: DataObject, requireAllFields = false): JsonSchema | undefined {
     if (data) {
       return buildSchemaFromData(data, requireAllFields);
     }
     this.schema = buildSchemaFromData(this.formValues, requireAllFields);
   }
 
-  buildSchemaFromLayout(layout?: Layout): JsonSchema {
+  buildSchemaFromLayout(layout?: Layout): JsonSchema | undefined {
     if (layout) {
       return buildSchemaFromLayout(layout);
     }
@@ -539,7 +539,7 @@ this.ajv.addFormat("duration", {
       // If not in cache, compile it
       try {
         let etaTpl=text.replace(/{{/g,'{{=');
-        compiledTemplate = this.eta.compile(etaTpl, this.etaConfig as never)
+        compiledTemplate = this.eta.compile(etaTpl)
         // Store the newly compiled function in the cache
         this.templateCache.set(text, compiledTemplate);
       } catch (error) {
@@ -560,7 +560,7 @@ this.ajv.addFormat("duration", {
 
     try {
       // Execute the function (retrieved from cache or newly compiled)
-      return compiledTemplate.call(this.eta, dataContext, this.etaConfig as never);
+      return compiledTemplate.call(this.eta, dataContext, this.etaConfig);
     } catch (error) {
       console.error("Error during template execution:", error);
       return text;
@@ -615,7 +615,7 @@ this.ajv.addFormat("duration", {
         // If not in cache, compile it
         try {
           let etaTpl=templateWrapper.replace(/{{/g,'{{=');
-          compiledTemplate = this.eta.compile(etaTpl, this.etaConfig as never);
+          compiledTemplate = this.eta.compile(etaTpl);
           // Store the newly compiled function in the cache
           this.templateCache.set(templateWrapper, compiledTemplate);
         } catch (error) {
@@ -626,7 +626,7 @@ this.ajv.addFormat("duration", {
 
       try {
         // Execute the function (retrieved from cache or newly compiled)
-        return compiledTemplate(dataContext as object);
+        return compiledTemplate(dataContext);
       } catch (error) {
         console.error("Error during template execution:", error);
         return templateWrapper;
@@ -646,34 +646,32 @@ this.ajv.addFormat("duration", {
   // result on button will be "Add Input [object Object]"
   setArrayItemTitle(
     parentCtx: LegacyWidgetContext = {},
-    childNode: LayoutNode = null,
-    index: number = null
+    childNode: LayoutNode | null = null,
+    index: number | null = null
   ): string {
     //for legacy compatibility, parentCtx.layoutNode could either be a value
     //or have been converted to use Signals
     let parentCtxAsSignals:{
-      layoutNode: () => LayoutNode;
-      dataIndex: () => number[];
+      layoutNode: () => LayoutNode | undefined;
+      dataIndex: () => number[] | undefined;
     }={
       layoutNode:()=>{
-        if(isObject(parentCtx.layoutNode)){
-          return parentCtx.layoutNode as LayoutNode
-        }
-        return (parentCtx.layoutNode as ContextValue<LayoutNode>)();
+        return typeof parentCtx.layoutNode === 'function'
+          ? parentCtx.layoutNode()
+          : parentCtx.layoutNode
       },
       dataIndex:()=>{
-        if(isObject(parentCtx.dataIndex)){
-          return parentCtx.dataIndex as number[]
-        }
-        return (parentCtx.dataIndex as ContextValue<number[]>)();
+        return typeof parentCtx.dataIndex === 'function'
+          ? parentCtx.dataIndex()
+          : parentCtx.dataIndex
       }
     }
     const parentNode = parentCtxAsSignals.layoutNode();
     const parentValues: FormValue = this.getFormControlValue(parentCtxAsSignals);
     const isArrayItem =
-      (parentNode.type || '').slice(-5) === 'array' && isArray(parentValues);
+      (parentNode!.type || '').slice(-5) === 'array' && isArray(parentValues);
     const text = JsonPointer.getFirst(
-      isArrayItem && childNode.type !== '$ref'
+      isArrayItem && childNode!.type !== '$ref'
         ? [
           [childNode, '/options/legend'],
           [childNode, '/options/title'],
@@ -691,20 +689,20 @@ this.ajv.addFormat("duration", {
       return text;
     }
     const childValue =
-      isArray(parentValues) && index < parentValues.length
-        ? parentValues[index]
+      isArray(parentValues) && index! < parentValues.length
+        ? parentValues[index!]
         : parentValues;
     return this.parseText(text, childValue, parentValues, index);
   }
 
   setItemTitle(ctx: WidgetContext) {
-    return !ctx.options.title && /^(\d+|-)$/.test(ctx.layoutNode().name)
+    return !ctx.options!.title && /^(\d+|-)$/.test(ctx.layoutNode!()!.name!)
       ? null
       : this.parseText(
-        ctx.options.title || toTitleCase(ctx.layoutNode().name),
+        ctx.options!.title || toTitleCase(ctx.layoutNode!()!.name!),
         this.getFormControlValue(ctx),
         (this.getFormControlGroup(ctx) || { value: undefined }).value,
-        ctx.dataIndex()[ctx.dataIndex().length - 1]
+        ctx.dataIndex!()![ctx.dataIndex!()!.length - 1]
       );
   }
 
@@ -713,7 +711,7 @@ this.ajv.addFormat("duration", {
     return {
       value:this.getFormControlValue(ctx),
       values: group ? group.value : undefined,
-      key: ctx.dataIndex()[ctx.dataIndex().length - 1]
+      key: ctx.dataIndex!()![ctx.dataIndex!()!.length - 1]
     }
   }
 
@@ -741,8 +739,8 @@ this.ajv.addFormat("duration", {
 
     // Check if it matches the FunctionCondition interface structure
     if (typeof condition === 'object'
-      && (typeof (condition as FunctionCondition)?.functionBody === 'string'
-      ||typeof (condition as FunctionCondition)?.functionBodyRaw === 'string')
+      && (typeof condition?.functionBody === 'string'
+      ||typeof condition?.functionBodyRaw === 'string')
     ) {
         // This still uses the potentially insecure new Function approach,
         // but encapsulated as requested by the original code's structure.
@@ -759,7 +757,7 @@ this.ajv.addFormat("duration", {
           .replace(/([a-zA-Z_$\]])(\.)(?=[a-zA-Z_$])/g, '$1?.')
         };
 
-        return this.evaluateFunctionBodyCondition(condition_nullChecks as FunctionCondition, dataIndex);
+        return this.evaluateFunctionBodyCondition(condition_nullChecks, dataIndex);
     }
 
     return true; // Default visible if condition type is unknown
@@ -788,7 +786,7 @@ this.ajv.addFormat("duration", {
   private evaluateFunctionBodyCondition(condition: FunctionCondition, dataIndex: number[]): boolean {
      // This remains an insecure pattern but respects original functionality
      try {
-        const dynFn = this._getFunctionFromBody(condition.functionBody);
+        const dynFn = this._getFunctionFromBody(condition.functionBody!);
         //new Function('model', 'arrayIndices', condition.functionBody);
         return dynFn(this.data, dataIndex);
      } catch (e) {
@@ -818,29 +816,29 @@ this.ajv.addFormat("duration", {
         this.evalFunctionCache.set(cacheKey, fn);
     }
 
-    return this.evalFunctionCache.get(cacheKey) as Function;
+    return this.evalFunctionCache.get(cacheKey)!;
 }
 
   initializeControl(ctx: WidgetContext, bind = true): boolean {
     if (!isObject(ctx)) {
       return false;
     }
-    const layoutNode=ctx.layoutNode();
+    const layoutNode=ctx.layoutNode!();
     if (isEmpty(ctx.options)) {
       ctx.options = !isEmpty((layoutNode || {}).options)
-        ? layoutNode.options
+        ? layoutNode!.options
         : cloneDeep(this.formOptions);
     }
     ctx.formControl = this.getFormControl(ctx);
     //introduced to check if the node  is part of ITE conditional
     //then change or add the control
-    if(layoutNode?.schemaPointer && layoutNode.isITEItem ||
+    if(layoutNode?.schemaPointer && layoutNode!.isITEItem ||
       (layoutNode?.schemaPointer && layoutNode?.oneOfPointer) ||
-      layoutNode?.schemaPointer && layoutNode.anyOfPointer  ){
+      layoutNode?.schemaPointer && layoutNode!.anyOfPointer  ){
       //before changing control, need to set the new data type for data formatting
-      const schemaType=this.dataMap.get(layoutNode?.dataPointer).get("schemaType");
-      if(schemaType!=layoutNode.dataType){
-        this.dataMap.get(layoutNode?.dataPointer).set("schemaType",layoutNode.dataType)
+      const schemaType=this.dataMap.get(layoutNode!.dataPointer!)!.get("schemaType");
+      if(schemaType!=layoutNode!.dataType){
+        this.dataMap.get(layoutNode!.dataPointer!)!.set("schemaType",layoutNode!.dataType)
       }
       this.setFormControl(ctx,ctx.formControl);
     }
@@ -849,25 +847,25 @@ this.ajv.addFormat("duration", {
       ctx.controlName = this.getFormControlName(ctx);
       ctx.controlValue = ctx.formControl.value;
       ctx.controlDisabled = ctx.formControl.disabled;
-      ctx.options.errorMessage =
+      ctx.options!.errorMessage =
         ctx.formControl.status === 'VALID'
           ? null
           : this.formatErrors(
             ctx.formControl.errors,
-            ctx.options.validationMessages
+            ctx.options!.validationMessages
           );
-      ctx.options.showErrors =
+      ctx.options!.showErrors =
         this.formOptions.validateOnRender === true ||
         (this.formOptions.validateOnRender === 'auto' &&
           hasValue(ctx.controlValue));
       this.fcStatusChangesSubs=ctx.formControl.statusChanges.subscribe(
         status =>
-          (ctx.options.errorMessage =
+          (ctx.options!.errorMessage =
             status === 'VALID'
               ? null
               : this.formatErrors(
-                ctx.formControl.errors,
-                ctx.options.validationMessages
+                ctx.formControl!.errors,
+                ctx.options!.validationMessages
               ))
       );
       this.fcValueChangesSubs=ctx.formControl.valueChanges.subscribe(value => {
@@ -877,8 +875,8 @@ this.ajv.addFormat("duration", {
 
       });
     } else {
-      ctx.controlName = layoutNode.name;
-      ctx.controlValue = layoutNode.value || null;
+      ctx.controlName = layoutNode!.name!;
+      ctx.controlValue = layoutNode!.value || null;
       const dataPointer = this.getDataPointer(ctx);
       if (bind && dataPointer) {
         console.error(
@@ -914,19 +912,19 @@ this.ajv.addFormat("duration", {
     return ctx.boundControl;
   }
 
-  formatErrors(errors: ValidationErrors, validationMessages: ValidationMessages | string = {}): string {
+  formatErrors(errors: ValidationErrors | null, validationMessages: ValidationMessages | string = {}): string {
     if (isEmpty(errors)) {
-      return null;
+      return null!;
     }
     if (!isObject(validationMessages)) {
       validationMessages = {};
     }
-    const addSpaces = string =>
+    const addSpaces = (string: string) =>
       string[0].toUpperCase() +
       (string.slice(1) || '')
         .replace(/([a-z])([A-Z])/g, '$1 $2')
         .replace(/_/g, ' ');
-    const formatError = error =>
+    const formatError = (error: any): string =>
       typeof error === 'object'
         ? Object.keys(error)
           .map(key =>
@@ -940,11 +938,11 @@ this.ajv.addFormat("duration", {
         : addSpaces(error.toString());
     const messages = [];
     return (
-      Object.keys(errors)
+      Object.keys(errors!)
         // Hide 'required' error, unless it is the only one
         .filter(
           errorKey =>
-            errorKey !== 'required' || Object.keys(errors).length === 1
+            errorKey !== 'required' || Object.keys(errors!).length === 1
         )
         .map(errorKey =>
           // If validationMessages is a string, return it
@@ -952,23 +950,23 @@ this.ajv.addFormat("duration", {
             ? validationMessages
             : // If custom error message is a function, return function result
             typeof validationMessages[errorKey] === 'function'
-              ? validationMessages[errorKey](errors[errorKey])
+              ? validationMessages[errorKey](errors![errorKey])
               : // If custom error message is a string, replace placeholders and return
               typeof validationMessages[errorKey] === 'string'
                 ? // Does error message have any {{property}} placeholders?
                 !/{{.+?}}/.test(validationMessages[errorKey])
                   ? validationMessages[errorKey]
                   : // Replace {{property}} placeholders with values
-                  Object.keys(errors[errorKey]).reduce(
+                  Object.keys(errors![errorKey]).reduce(
                     (errorMessage, errorProperty) =>
                       errorMessage.replace(
                         new RegExp('{{' + errorProperty + '}}', 'g'),
-                        errors[errorKey][errorProperty]
+                        errors![errorKey][errorProperty]
                       ),
                     validationMessages[errorKey]
                   )
                 : // If no custom error message, return formatted error data instead
-                addSpaces(errorKey) + ' Error: ' + formatError(errors[errorKey])
+                addSpaces(errorKey) + ' Error: ' + formatError(errors![errorKey])
         )
         .join('<br>')
     );
@@ -978,21 +976,21 @@ this.ajv.addFormat("duration", {
     // Set value of current control
     ctx.controlValue = value;
     if (ctx.boundControl) {
-      ctx.formControl.setValue(value);
-      ctx.formControl.markAsDirty();
+      ctx.formControl!.setValue(value);
+      ctx.formControl!.markAsDirty();
     }
-    ctx.layoutNode().value = value;
+    ctx.layoutNode!()!.value = value;
 
     // Set values of any related controls in copyValueTo array
-    if (isArray(ctx.options.copyValueTo)) {
-      for (const item of ctx.options.copyValueTo) {
+    if (isArray(ctx.options!.copyValueTo)) {
+      for (const item of ctx.options!.copyValueTo) {
         const targetControl = this.formGroup && getControl(this.formGroup, item);
         if (
           isObject(targetControl) &&
-          typeof targetControl.setValue === 'function'
+          typeof targetControl!.setValue === 'function'
         ) {
-          targetControl.setValue(value);
-          targetControl.markAsDirty();
+          targetControl!.setValue(value);
+          targetControl!.markAsDirty();
         }
       }
     }
@@ -1008,14 +1006,14 @@ this.ajv.addFormat("duration", {
 
     // Re-add an item for each checked box
     const refPointer = removeRecursiveReferences(
-      ctx.layoutNode().dataPointer + '/-',
+      ctx.layoutNode!()!.dataPointer! + '/-',
       this.dataRecursiveRefMap,
       this.arrayMap
     );
     for (const checkboxItem of checkboxList) {
       if (checkboxItem.checked) {
         const newFormControl = buildFormGroup(
-          this.templateRefLibrary[refPointer]
+          this.templateRefLibrary[refPointer]!
         );
         newFormControl.setValue(checkboxItem.value);
         formArray.push(newFormControl);
@@ -1054,10 +1052,10 @@ this.ajv.addFormat("duration", {
   getFormControl(ctx: WidgetContext): AbstractControl {
     if (
       !ctx || !ctx.layoutNode ||
-      !isDefined(ctx.layoutNode().dataPointer) ||
-      ctx.layoutNode().type === '$ref'
+      !isDefined(ctx.layoutNode()!.dataPointer) ||
+      ctx.layoutNode()!.type === '$ref'
     ) {
-      return null;
+      return null!;
     }
     const schemaPointer=ctx.layoutNode()?.isITEItem?ctx.layoutNode()?.schemaPointer:null;
     const oneOfPointer=ctx.layoutNode()?.oneOfPointer;
@@ -1069,35 +1067,34 @@ this.ajv.addFormat("duration", {
   setFormControl(ctx: WidgetContext,control:AbstractControl): AbstractControl {
     if (
       !ctx || !ctx.layoutNode ||
-      !isDefined(ctx.layoutNode().dataPointer) ||
-      ctx.layoutNode().type === '$ref'
+      !isDefined(ctx.layoutNode()!.dataPointer) ||
+      ctx.layoutNode()!.type === '$ref'
     ) {
-      return null;
+      return null!;
     }
-    setControl(this.formGroup, this.getDataPointer(ctx),control);
+    setControl(this.formGroup!, this.getDataPointer(ctx),control);
     return control;
   }
 
   getFormControlValue(ctx: WidgetContext): FormValue {
 
     if (!ctx || !ctx.layoutNode ||
-      !isDefined(ctx.layoutNode().dataPointer) ||
-      ctx.layoutNode().type === '$ref'
+      !isDefined(ctx.layoutNode()!.dataPointer) ||
+      ctx.layoutNode()!.type === '$ref'
       ||this.formGroup==null
     ) {
-      return null;
+      return null!;
     }
     const schemaPointer=ctx.layoutNode()?.isITEItem?ctx.layoutNode()?.schemaPointer:null;
     const oneOfPointer=ctx.layoutNode()?.oneOfPointer;
     const anyOfPointer=ctx.layoutNode()?.anyOfPointer;
-    const control = getControl(this.formGroup, this.getDataPointer(ctx),false,schemaPointer||oneOfPointer||anyOfPointer) as
-      AbstractControl | null;
+    const control = getControl(this.formGroup, this.getDataPointer(ctx),false,schemaPointer||oneOfPointer||anyOfPointer);
     return control ? control.value : null;
   }
 
   getFormControlGroup(ctx: WidgetContext): UntypedFormArray | UntypedFormGroup {
-    if (!ctx || !ctx.layoutNode || !isDefined(ctx.layoutNode().dataPointer) ||this.formGroup==null) {
-      return null;
+    if (!ctx || !ctx.layoutNode || !isDefined(ctx.layoutNode()!.dataPointer) ||this.formGroup==null) {
+      return null!;
     }
     const schemaPointer=ctx.layoutNode()?.isITEItem?ctx.layoutNode()?.schemaPointer:null;
     const oneOfPointer=ctx.layoutNode()?.oneOfPointer;
@@ -1109,12 +1106,12 @@ this.ajv.addFormat("duration", {
   getFormControlName(ctx: WidgetContext): string {
     if (
       !ctx || !ctx.layoutNode ||
-      !isDefined(ctx.layoutNode().dataPointer) ||
-      !hasValue(ctx.dataIndex())
+      !isDefined(ctx.layoutNode()!.dataPointer) ||
+      !hasValue(ctx.dataIndex!())
     ) {
-      return null;
+      return null!;
     }
-    return JsonPointer.toKey(this.getDataPointer(ctx));
+    return JsonPointer.toKey(this.getDataPointer(ctx))!;
   }
 
   getLayoutArray(ctx: WidgetContext): LayoutNode[] {
@@ -1128,30 +1125,30 @@ this.ajv.addFormat("duration", {
   getDataPointer(ctx: WidgetContext): string {
     if (
       !ctx || !ctx.layoutNode ||
-      !isDefined(ctx.layoutNode().dataPointer) ||
-      !hasValue(ctx.dataIndex())
+      !isDefined(ctx.layoutNode()!.dataPointer) ||
+      !hasValue(ctx.dataIndex!())
     ) {
-      return null;
+      return null!;
     }
     return JsonPointer.toIndexedPointer(
-      ctx.layoutNode().dataPointer,
-      ctx.dataIndex(),
+      ctx.layoutNode!()!.dataPointer,
+      ctx.dataIndex!()!,
       this.arrayMap
-    );
+    )!;
   }
 
   getLayoutPointer(ctx: WidgetContext): string {
-    if (!hasValue(ctx.layoutIndex())) {
-      return null;
+    if (!hasValue(ctx.layoutIndex!())) {
+      return null!;
     }
-    return '/' + ctx.layoutIndex().join('/items/');
+    return '/' + ctx.layoutIndex!()!.join('/items/');
   }
 
   isControlBound(ctx: WidgetContext): boolean {
     if (
       !ctx || !ctx.layoutNode ||
-      !isDefined(ctx.layoutNode().dataPointer) ||
-      !hasValue(ctx.dataIndex())
+      !isDefined(ctx.layoutNode()!.dataPointer) ||
+      !hasValue(ctx.dataIndex!())
     ) {
       return false;
     }
@@ -1163,20 +1160,20 @@ this.ajv.addFormat("duration", {
   addItem(ctx: WidgetContext, name?: string): boolean {
     if (
       !ctx || !ctx.layoutNode ||
-      !isDefined(ctx.layoutNode().$ref) ||
-      !hasValue(ctx.dataIndex()) ||
-      !hasValue(ctx.layoutIndex())
+      !isDefined(ctx.layoutNode()!.$ref) ||
+      !hasValue(ctx.dataIndex!()) ||
+      !hasValue(ctx.layoutIndex!())
     ) {
       return false;
     }
 
     // Create a new Angular form control from a template in templateRefLibrary
     const newFormGroup = buildFormGroup(
-      this.templateRefLibrary[ctx.layoutNode().$ref]
+      this.templateRefLibrary[ctx.layoutNode!()!.$ref!]!
     );
 
     // Add the new form control to the parent formArray or formGroup
-    if (ctx.layoutNode().arrayItem) {
+    if (ctx.layoutNode!()!.arrayItem) {
       // Add new array item to formArray
       (<UntypedFormArray>this.getFormControlGroup(ctx)).push(newFormGroup);
     } else {
@@ -1188,17 +1185,17 @@ this.ajv.addFormat("duration", {
     }
 
     // Copy a new layoutNode from layoutRefLibrary
-    const newLayoutNode = getLayoutNode(ctx.layoutNode(), this);
-    newLayoutNode.arrayItem = ctx.layoutNode().arrayItem;
-    if (ctx.layoutNode().arrayItemType) {
-      newLayoutNode.arrayItemType = ctx.layoutNode().arrayItemType;
+    const newLayoutNode = getLayoutNode(ctx.layoutNode!()!, this);
+    newLayoutNode.arrayItem = ctx.layoutNode!()!.arrayItem;
+    if (ctx.layoutNode!()!.arrayItemType) {
+      newLayoutNode.arrayItemType = ctx.layoutNode!()!.arrayItemType;
     } else {
       delete newLayoutNode.arrayItemType;
     }
     if (name) {
       newLayoutNode.name = name;
       newLayoutNode.dataPointer += '/' + JsonPointer.escape(name);
-      newLayoutNode.options.title = fixTitle(name);
+      newLayoutNode.options!.title = fixTitle(name);
     }
 
     // Add the new layoutNode to the form layout
@@ -1210,9 +1207,9 @@ this.ajv.addFormat("duration", {
   moveArrayItem(ctx: WidgetContext, oldIndex: number, newIndex: number,moveLayout:boolean=true): boolean {
     if (
       !ctx || !ctx.layoutNode ||
-      !isDefined(ctx.layoutNode().dataPointer) ||
-      !hasValue(ctx.dataIndex()) ||
-      !hasValue(ctx.layoutIndex()) ||
+      !isDefined(ctx.layoutNode()!.dataPointer) ||
+      !hasValue(ctx.dataIndex!()) ||
+      !hasValue(ctx.layoutIndex!()) ||
       !isDefined(oldIndex) ||
       !isDefined(newIndex) ||
       oldIndex === newIndex
@@ -1242,18 +1239,18 @@ this.ajv.addFormat("duration", {
   removeItem(ctx: WidgetContext): boolean {
     if (
       !ctx || !ctx.layoutNode ||
-      !isDefined(ctx.layoutNode().dataPointer) ||
-      !hasValue(ctx.dataIndex()) ||
-      !hasValue(ctx.layoutIndex())
+      !isDefined(ctx.layoutNode()!.dataPointer) ||
+      !hasValue(ctx.dataIndex!()) ||
+      !hasValue(ctx.layoutIndex!())
     ) {
       return false;
     }
 
     // Remove the Angular form control from the parent formArray or formGroup
-    if (ctx.layoutNode().arrayItem) {
+    if (ctx.layoutNode!()!.arrayItem) {
       // Remove array item from formArray
       (<UntypedFormArray>this.getFormControlGroup(ctx)).removeAt(
-        ctx.dataIndex()[ctx.dataIndex().length - 1]
+        ctx.dataIndex!()![ctx.dataIndex!()!.length - 1]
       );
     } else {
       // Remove $ref item from formGroup
@@ -1276,7 +1273,17 @@ this.ajv.addFormat("duration", {
           dataIndex: ()=>{return dataIndex},
         }
       }
-      const node = layout as LayoutNode;
+      if(isArray(layout)){
+        layout.forEach((layoutNode,ind)=>{
+          //if(layoutNode.items){
+            let layoutMappedData=layoutNode.dataPointer?JsonPointer.get(newData,layoutNode.dataPointer)
+            :undefined;
+            this.adjustLayout(layoutNode,layoutMappedData,[...currLayoutIndex,ind],[...currDataIndex,ind]);
+          ///}
+        })
+        return
+      }
+      const node = layout;
       // console.log(`adjustLayout currLayoutIndex:${currLayoutIndex}`);
       if(node.items && isArray(newData)){
         let ctx=createWidgetCtx(
@@ -1307,25 +1314,16 @@ this.ajv.addFormat("duration", {
           // Remove extra controls if newData has fewer items
           for (let i = 0; i< numToRemove; i++) {
 
-            let oldDataIndex=ctx.dataIndex();
+            let oldDataIndex=ctx.dataIndex!()!;
             let lastDataIndex=oldDataIndex[oldDataIndex.length-1];
             let updatedLayoutIndex=[...currLayoutIndex.slice(0, currLayoutIndex.length - 1),0]
             let updatedDataIndex=[...oldDataIndex.slice(0, oldDataIndex.length - 1),0];
-            ctx=createWidgetCtx(ctx.layoutNode(),updatedLayoutIndex,updatedDataIndex)
+            ctx=createWidgetCtx(ctx.layoutNode!()!,updatedLayoutIndex,updatedDataIndex)
             let removed=this.removeItem(ctx);
 
           }
         }
         return
-      }
-      if(isArray(layout) ){
-        (layout as LayoutNode[]).forEach((layoutNode,ind)=>{
-          //if(layoutNode.items){
-            let layoutMappedData=layoutNode.dataPointer?JsonPointer.get(newData,layoutNode.dataPointer)
-            :undefined;
-            this.adjustLayout(layoutNode,layoutMappedData,[...currLayoutIndex,ind],[...currDataIndex,ind]);
-          ///}
-        })
       }
 
     }

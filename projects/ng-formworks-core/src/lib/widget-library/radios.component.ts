@@ -12,34 +12,34 @@ import { buildTitleMap } from '../shared';
 export class RadiosComponent implements OnInit,OnDestroy {
   private jsf = inject(JsonSchemaFormService);
 
-  formControl: AbstractControl;
-  controlName: string;
+  formControl!: AbstractControl;
+  controlName!: string;
   controlValue: FormValue;
   controlDisabled = false;
   boundControl = false;
-  options: WidgetOptions;
+  options!: WidgetOptions;
   layoutOrientation = 'vertical';
   radiosList: TitleMapItem[] = [];
   readonly layoutNode = input<LayoutNode | undefined>(undefined);
-  readonly layoutIndex = input<number[]>(undefined);
-  readonly dataIndex = input<number[]>(undefined);
+  readonly layoutIndex = input<number[] | undefined>(undefined);
+  readonly dataIndex = input<number[] | undefined>(undefined);
 
   ngOnInit() {
-    this.options = this.layoutNode().options || {};
-    const layoutNode = this.layoutNode();
+    this.options = this.layoutNode()!.options || {};
+    const layoutNode = this.layoutNode()!;
     if (layoutNode.type === 'radios-inline' ||
       layoutNode.type === 'radiobuttons'
     ) {
       this.layoutOrientation = 'horizontal';
     }
     this.radiosList = buildTitleMap(
-      this.options.titleMap || this.options.enumNames,
+      this.options.titleMap || this.options.enumNames || null,
       this.options.enum, true
     );
     this.jsf.initializeControl(this);
   }
 
-  updateValue(event) {
+  updateValue(event: { target: { value: string | null } }) {
     this.jsf.updateValue(this, event.target.value);
   }
 

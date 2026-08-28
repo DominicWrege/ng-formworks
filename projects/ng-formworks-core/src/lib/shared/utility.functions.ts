@@ -23,9 +23,9 @@ export function addClasses(
   const badType = (i: unknown) => !isSet(i) && !isArray(i) && !isString(i);
   if (badType(newClasses)) { return oldClasses; }
   if (badType(oldClasses)) { oldClasses = ''; }
-  const toSet = i => isSet(i) ? i : isArray(i) ? new Set(i) : new Set(i.split(' '));
-  const combinedSet: Set<string> = toSet(oldClasses);
-  const newSet: Set<string> = toSet(newClasses);
+  const toSet = (i: string | string[] | Set<string>) => isSet(i) ? i : isArray(i) ? new Set(i) : new Set(i.split(' '));
+  const combinedSet = toSet(oldClasses);
+  const newSet = toSet(newClasses);
   newSet.forEach(c => combinedSet.add(c));
   if (isSet(oldClasses)) { return combinedSet; }
   if (isArray(oldClasses)) { return Array.from(combinedSet); }
@@ -159,7 +159,7 @@ export function hasOwn(object: unknown, property: string | number): boolean {
   ) { return false; }
   if (isMap(object) || isSet(object)) { return object.has(property); }
   if (typeof property === 'number') {
-    if (isArray(object)) { return object[<number>property]; }
+    if (isArray(object)) { return object[property]; }
     property = property + '';
   }
   return (object as Object).hasOwnProperty(property);
@@ -248,7 +248,7 @@ export function cleanValueOfQuotes(keyAndValue: string): string {
 export function mergeFilteredObject(
   targetObject: PlainObject,
   sourceObject: PlainObject,
-  excludeKeys = <string[]>[],
+  excludeKeys: string[] = [],
   keyFn = (key: string): string => key,
   valFn = (val: unknown): unknown => val
 ): PlainObject {
@@ -296,7 +296,7 @@ export function commonItems(...arrays: (string | string[])[]): string[] {
       returnItems.filter(item => items.includes(item));
     if (!returnItems.length) { return []; }
   }
-  return returnItems;
+  return returnItems as string[];
 }
 
 /**
@@ -331,9 +331,9 @@ export function toTitleCase(input: string, forceWords?: string|string[]): string
   let forceArray: string[] = ['a', 'an', 'and', 'as', 'at', 'but', 'by', 'en',
    'for', 'if', 'in', 'nor', 'of', 'on', 'or', 'per', 'the', 'to', 'v', 'v.',
    'vs', 'vs.', 'via'];
-  if (isString(forceWords)) { forceWords = (<string>forceWords).split('|'); }
+  if (isString(forceWords)) { forceWords = forceWords.split('|'); }
   if (isArray(forceWords)) { forceArray = forceArray.concat(forceWords); }
-  const forceArrayLower: string[] = forceArray.map(w => w.toLowerCase());
+  const forceArrayLower = forceArray.map(w => w.toLowerCase());
   const noInitialCase: boolean =
     input === input.toUpperCase() || input === input.toLowerCase();
   let prevLastChar = '';
@@ -438,7 +438,7 @@ export function hasNonNullValue(obj: Record<string, any>): boolean {
       const record1 = obj1 as Record<string, unknown>;
       const record2 = obj2 as Record<string, unknown>;
       for (let key in record1) {
-        if ((record2 as Object).hasOwnProperty(key)) {
+        if (record2.hasOwnProperty(key)) {
           const result = compareObjectArraySizes(record1[key], record2[key], `${comparePath}/${key}`);
           if (result === false) {
             return false; // propagate false if mismatch is found
@@ -489,7 +489,7 @@ export function hasNonNullValue(obj: Record<string, any>): boolean {
   
         // Extract dependencies (data paths) from the parameters
         const dependencies = this.extractDependencies(parsedParams);
-  
+
         conditions.push({
           conditionName: functionName,
           parameters: this.buildParameters(functionName, parsedParams),
@@ -500,7 +500,7 @@ export function hasNonNullValue(obj: Record<string, any>): boolean {
       return conditions;
     }
   
-    static buildParameters(functionName: string, params: string[]): any {
+    static buildParameters(functionName: string, params: any[]): any {
       switch (functionName) {
         case 'equals':
         case 'greaterThan':
@@ -515,7 +515,7 @@ export function hasNonNullValue(obj: Record<string, any>): boolean {
     }
   
     // Extract data paths from parameters
-    static extractDependencies(params: string[]): string[] {
+    static extractDependencies(params: any[]): string[] {
       const dependencies: string[] = [];
   
       params.forEach(param => {
@@ -533,7 +533,7 @@ export function hasNonNullValue(obj: Record<string, any>): boolean {
   }
   
   class ConditionEvaluator {
-    private static predefinedFunctions = {
+    private static predefinedFunctions: { [key: string]: (...args: any[]) => any } = {
       equals: (src: string, trg: string) => src === trg,
       greaterThan: (src: number, trg: number) => src > trg,
       contains: (src: string, trg: string) => src.includes(trg),
@@ -544,7 +544,7 @@ export function hasNonNullValue(obj: Record<string, any>): boolean {
     static evaluateChangedConditions(changedData: string, conditions: any[]) {
       return conditions.filter(condition => {
         // Check if any condition's dependencies contain the changed data
-        return condition.dependencies.some(dep => dep.includes(changedData));
+        return condition.dependencies.some((dep: string) => dep.includes(changedData));
       });
     }
   
@@ -557,7 +557,7 @@ export function hasNonNullValue(obj: Record<string, any>): boolean {
       } else if (conditionName === 'or' || conditionName === 'and') {
         // Evaluate logical conditions
         const subResults = parameters.conditions.map((subCond: any) => this.evaluateCondition(subCond));
-        return this.predefinedFunctions[conditionName](subResults);
+        return this.predefinedFunctions[conditionName === 'or' ? 'or' : 'and'](subResults);
       }
   
       return false;

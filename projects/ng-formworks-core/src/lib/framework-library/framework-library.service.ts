@@ -24,9 +24,9 @@ export class FrameworkLibraryService {
   private widgetLibrary = inject(WidgetLibraryService);
   private http = inject(HttpClient);
 
-  activeFramework: Framework = null;
-  stylesheets: (HTMLStyleElement|HTMLLinkElement)[];
-  scripts: HTMLScriptElement[];
+  activeFramework: Framework = null!;
+  stylesheets!: (HTMLStyleElement|HTMLLinkElement)[];
+  scripts!: HTMLScriptElement[];
   loadExternalAssets = false;
   defaultFramework: string;
   frameworkLibrary: { [name: string]: Framework } = {};
@@ -69,7 +69,7 @@ export class FrameworkLibraryService {
 
   registerFrameworkWidgets(framework: Framework): boolean {
     return hasOwn(framework, 'widgets') ?
-      this.widgetLibrary.registerFrameworkWidgets(framework.widgets) :
+      this.widgetLibrary.registerFrameworkWidgets(framework.widgets!) :
       this.widgetLibrary.unRegisterFrameworkWidgets();
   }
 
@@ -171,7 +171,7 @@ export class FrameworkLibraryService {
     }
   }
   //applies to CssFramework classes
-  public getActiveTheme(existingFramework?:Framework|null):{name:string,text:string}{
+  public getActiveTheme(existingFramework?:Framework|null):{name:string,text:string}|undefined{
     let actFramework:Framework& { [key: string]: any; }=existingFramework||this.activeFramework;
     if(actFramework.getActiveTheme){
       return actFramework.getActiveTheme();
@@ -179,7 +179,7 @@ export class FrameworkLibraryService {
   }
 
   //applies to CssFramework classes
-  public registerTheme(newTheme:{name:string,text:string},existingFramework?:Framework|null):boolean{
+  public registerTheme(newTheme:{name:string,text:string},existingFramework?:Framework|null):boolean|undefined{
     let actFramework:Framework& { [key: string]: any; }=existingFramework||this.activeFramework;
     if(actFramework.registerTheme){
       return actFramework.registerTheme(newTheme);
@@ -187,7 +187,7 @@ export class FrameworkLibraryService {
   }
 
     //applies to CssFramework classes
-    public unregisterTheme(name:string,existingFramework?:Framework|null):boolean{
+    public unregisterTheme(name:string,existingFramework?:Framework|null):boolean|undefined{
       let actFramework:Framework& { [key: string]: any; }=existingFramework||this.activeFramework;
       if(actFramework.registerTheme){
         return actFramework.unregisterTheme(name);

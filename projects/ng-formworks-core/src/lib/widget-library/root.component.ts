@@ -45,21 +45,21 @@ export class RootComponent implements OnInit, OnDestroy,OnChanges {
 
   private jsf = inject(JsonSchemaFormService);
   private cdr = inject(ChangeDetectorRef);
-  options: WidgetOptions;
-  readonly dataIndex = input<number[]>(undefined);
-  readonly layoutIndex = input<number[]>(undefined);
+  options!: WidgetOptions;
+  readonly dataIndex = input<number[] | undefined>(undefined);
+  readonly layoutIndex = input<number[] | undefined>(undefined);
   readonly layout = input<LayoutNode[] | undefined>(undefined);
-  readonly isOrderable = input<boolean>(undefined);
+  readonly isOrderable = input<boolean | undefined>(undefined);
   readonly isFlexItem = input(false);
   readonly memoizationEnabled= input<boolean>(true);
 
-  dataChangesSubs:Subscription;
+  dataChangesSubs!: Subscription;
 
   drop(event: CdkDragDrop<LayoutNode[]>) {
     // most likely why this event is used is to get the dragging element's current index
     let srcInd=event.previousIndex;
     let trgInd=event.currentIndex;
-    let layoutItem=this.layout()[trgInd];
+    let layoutItem=this.layout()![trgInd];
     let dataInd=layoutItem?.arrayItem ? (this.dataIndex() || []).concat(trgInd) : (this.dataIndex() || []);
     let layoutInd=(this.layoutIndex() || []).concat(trgInd)
     let itemCtx:WidgetContext={
@@ -74,7 +74,7 @@ export class RootComponent implements OnInit, OnDestroy,OnChanges {
     let result=node.arrayItem && node.type !== '$ref' &&
     node.arrayItemType === 'list' && this.isOrderable() !== false
     && node.type !=='submit'
-    return result;
+    return result as boolean;
   }
 
   // TODO: also need to think of other types such as button which can be
@@ -95,7 +95,7 @@ export class RootComponent implements OnInit, OnDestroy,OnChanges {
     //created by an arbitrary layout
     //might not be needed added condition to [cdkDragDisabled]
     sortPredicate=(index: number, item: CdkDrag<number>)=> {
-      let layoutItem=this.layout()[index];
+      let layoutItem=this.layout()![index];
       let result=this.isDraggable(layoutItem);
       //layoutItem.type != '$ref';
       return result;
@@ -162,7 +162,7 @@ export class RootComponent implements OnInit, OnDestroy,OnChanges {
 
   // This is the public function that the template calls
   getSelectFrameworkInputs(layoutItem: LayoutNode, i: number) {
-    if (this.memoizationEnabled) {
+    if (this.memoizationEnabled()) {
       return this._getSelectFrameworkInputsMemoized(layoutItem, i);
     } else {
       return this._getSelectFrameworkInputsRaw(layoutItem, i);
@@ -196,7 +196,7 @@ export class RootComponent implements OnInit, OnDestroy,OnChanges {
 
 // Memoize the showWidget to avoid unnecessary recalculations
 private _showWidgetRaw = (layoutNode: LayoutNode): boolean => {
-  return this.jsf.evaluateCondition(layoutNode, this.dataIndex());
+  return this.jsf.evaluateCondition(layoutNode, this.dataIndex()!);
 };
 
 private _showWidgetMemoized = memoize(
@@ -209,14 +209,14 @@ private _showWidgetMemoized = memoize(
 
 // Public function used in the template
 showWidget(layoutNode: LayoutNode): boolean {
-  if (this.memoizationEnabled) {
+  if (this.memoizationEnabled()) {
     return this._showWidgetMemoized(layoutNode);
   } else {
     return this._showWidgetRaw(layoutNode);
   }
 }
   ngOnInit(): void {
-      if(this.memoizationEnabled){
+      if(this.memoizationEnabled()){
         this.dataChangesSubs=this.jsf.dataChanges.subscribe((val)=>{
           this._showWidgetMemoized.cache.clear();
           // TODO(review): clearing this cache causes ngOnChanges to run wherever

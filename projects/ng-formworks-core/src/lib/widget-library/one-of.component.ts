@@ -17,18 +17,18 @@ import { TabsComponent } from './tabs.component';
 export class OneOfComponent implements OnInit {
   private jsf = inject(JsonSchemaFormService);
 
-  formControl: AbstractControl;
-  controlName: string;
+  formControl!: AbstractControl;
+  controlName!: string;
   controlValue: FormValue;
   controlDisabled = false;
   boundControl = false;
-  options: WidgetOptions;
+  options!: WidgetOptions;
   readonly layoutNode = input<LayoutNode | undefined>(undefined);
-  readonly layoutIndex = input<number[]>(undefined);
-  readonly dataIndex = input<number[]>(undefined);
+  readonly layoutIndex = input<number[] | undefined>(undefined);
+  readonly dataIndex = input<number[] | undefined>(undefined);
 
   ngOnInit() {
-    this.options = this.layoutNode().options || {};
+    this.options = this.layoutNode()!.options || {};
     this.options.tabMode="oneOfMode";
     this.options.selectedTab=this.findSelectedTab();
     this.jsf.initializeControl(this);
@@ -39,14 +39,14 @@ export class OneOfComponent implements OnInit {
         //while the jsf.formGroup value is derived from the actual controls
         let foundInd=-1;
         //search for non null value
-        if(this.layoutNode().items){
-          this.layoutNode().items.forEach((layoutItem,ind)=>{
+        if(this.layoutNode()!.items){
+          this.layoutNode()!.items!.forEach((layoutItem,ind)=>{
             let formValue=JsonPointer.get(this.jsf.formValues,layoutItem.dataPointer);
               if(layoutItem.oneOfPointer){
                 let controlKey=path2ControlKey(layoutItem.oneOfPointer);
                 let fname=layoutItem.name;
-                if(hasOwn(this.jsf.formGroup.controls,controlKey)&&
-                  (formValue || hasNonNullValue(this.jsf.formGroup.controls[controlKey].value))
+                if(hasOwn(this.jsf.formGroup!.controls,controlKey)&&
+                  (formValue || hasNonNullValue(this.jsf.formGroup!.controls[controlKey].value))
                   //hasOwn(formValue,fname) && hasOwn(this.jsf.formGroup.controls,controlKey) 
                 // && (formValue[fname] || this.jsf.formGroup.controls[controlKey].value)
                   //&&deepEqual(formValue[fname],this.jsf.formGroup.controls[controlKey].value)
@@ -58,13 +58,13 @@ export class OneOfComponent implements OnInit {
                 //to see which one of item matches
                 if(foundInd==-1){
                   //find all descendant oneof paths
-                  let descendantOneOfControlNames=Object.keys(this.jsf.formGroup.controls).filter(controlName=>{
+                  let descendantOneOfControlNames=Object.keys(this.jsf.formGroup!.controls).filter(controlName=>{
                     return controlName.startsWith(controlKey);
                   })
                   descendantOneOfControlNames.forEach(controlName=>{
                     let parts=controlName.split('$');
                     let fieldName=parts[parts.length-1];
-                    let controlValue=this.jsf.formGroup.controls[controlName].value;
+                    let controlValue=this.jsf.formGroup!.controls[controlName].value;
                     let controlSchema=JsonPointer.get(this.jsf.schema,parts.join("/"));
                     let schemaPointer=parts.join("/");
                     let dPointer=schemaPointer.replace(/(anyOf|allOf|oneOf|none)\/[\d]+\//g, '')
@@ -99,7 +99,7 @@ export class OneOfComponent implements OnInit {
         return Math.max(foundInd,0);
       }
 
-  updateValue(event) {
+  updateValue(event: { target: { value: string | null } }) {
     this.jsf.updateValue(this, event.target.value);
   }
 }

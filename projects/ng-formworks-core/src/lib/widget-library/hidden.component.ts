@@ -13,14 +13,14 @@ import { ReactiveFormsModule } from '@angular/forms';
 export class HiddenComponent implements OnInit,OnDestroy {
   private jsf = inject(JsonSchemaFormService);
 
-  formControl: AbstractControl;
-  controlName: string;
-  controlValue: FormValue;
+  formControl!: AbstractControl;
+  controlName!: string;
+  controlValue!: FormValue;
   controlDisabled = false;
   boundControl = false;
   readonly layoutNode = input<LayoutNode | undefined>(undefined);
-  readonly layoutIndex = input<number[]>(undefined);
-  readonly dataIndex = input<number[]>(undefined);
+  readonly layoutIndex = input<number[] | undefined>(undefined);
+  readonly dataIndex = input<number[] | undefined>(undefined);
 
   ngOnInit() {
     this.jsf.initializeControl(this);

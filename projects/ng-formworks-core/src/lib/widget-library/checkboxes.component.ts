@@ -12,27 +12,27 @@ import { buildTitleMap } from '../shared';
 export class CheckboxesComponent implements OnInit,OnDestroy {
   private jsf = inject(JsonSchemaFormService);
 
-  formControl: AbstractControl;
-  controlName: string;
+  formControl!: AbstractControl;
+  controlName!: string;
   controlValue: FormValue;
   controlDisabled = false;
   boundControl = false;
-  options: WidgetOptions;
-  layoutOrientation: string;
-  formArray: AbstractControl;
+  options!: WidgetOptions;
+  layoutOrientation!: string;
+  formArray!: AbstractControl;
   checkboxList: TitleMapItem[] = [];
   readonly layoutNode = input<LayoutNode | undefined>(undefined);
-  readonly layoutIndex = input<number[]>(undefined);
-  readonly dataIndex = input<number[]>(undefined);
+  readonly layoutIndex = input<number[] | undefined>(undefined);
+  readonly dataIndex = input<number[] | undefined>(undefined);
 
   ngOnInit() {
-    this.options = this.layoutNode().options || {};
-    const layoutNode = this.layoutNode();
+    this.options = this.layoutNode()!.options || {};
+    const layoutNode = this.layoutNode()!;
     this.layoutOrientation = (layoutNode.type === 'checkboxes-inline' ||
       layoutNode.type === 'checkboxbuttons') ? 'horizontal' : 'vertical';
     this.jsf.initializeControl(this);
     this.checkboxList = buildTitleMap(
-      this.options.titleMap || this.options.enumNames, this.options.enum, true
+      this.options.titleMap || this.options.enumNames || null, this.options.enum, true
     );
     if (this.boundControl) {
       const formArray = this.jsf.getFormControl(this);
@@ -42,7 +42,7 @@ export class CheckboxesComponent implements OnInit,OnDestroy {
     }
   }
 
-  updateValue(event) {
+  updateValue(event: { target: { value: string | null; checked: boolean } }) {
     for (const checkboxItem of this.checkboxList) {
       if (event.target.value === checkboxItem.value) {
         checkboxItem.checked = event.target.checked;
@@ -55,7 +55,7 @@ export class CheckboxesComponent implements OnInit,OnDestroy {
 
   // TODO(review): resetting the control to an empty value here may not be needed
   ngOnDestroy () {
-        let nullVal=[];
+        let nullVal: FormValue[] = [];
         this.formControl.reset(nullVal)
         this.controlValue=null;
   }

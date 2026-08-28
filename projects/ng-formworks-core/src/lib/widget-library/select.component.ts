@@ -15,30 +15,30 @@ import { ReactiveFormsModule } from '@angular/forms';
 export class SelectComponent implements OnInit, OnDestroy {
   private jsf = inject(JsonSchemaFormService);
 
-  formControl: AbstractControl;
-  controlName: string;
+  formControl!: AbstractControl;
+  controlName!: string;
   controlValue: FormValue;
   controlDisabled = false;
   boundControl = false;
-  options: WidgetOptions;
+  options!: WidgetOptions;
   selectList: TitleMapItem[] = [];
   selectListFlatGroup: TitleMapItem[] = [];
   isArray = isArray;
   readonly layoutNode = input<LayoutNode | undefined>(undefined);
-  readonly layoutIndex = input<number[]>(undefined);
-  readonly dataIndex = input<number[]>(undefined);
+  readonly layoutIndex = input<number[] | undefined>(undefined);
+  readonly dataIndex = input<number[] | undefined>(undefined);
 
   ngOnInit() {
-    this.options = this.layoutNode().options || {};
+    this.options = this.layoutNode()!.options || {};
     this.selectList = buildTitleMap(
-      this.options.titleMap || this.options.enumNames,
+      this.options.titleMap || this.options.enumNames || null,
       this.options.enum, !!this.options.required, !!this.options.flatList
     );
     //the selectListFlatGroup array will be used to update the formArray values
     //while the selectList array will be bound to the form select
     //as either a grouped select or a flat select
     this.selectListFlatGroup = buildTitleMap(
-      this.options.titleMap || this.options.enumNames,
+      this.options.titleMap || this.options.enumNames || null,
       this.options.enum, !!this.options.required, true
     )
     this.jsf.initializeControl(this);
@@ -50,7 +50,7 @@ export class SelectComponent implements OnInit, OnDestroy {
     })
   }
 
-  updateValue(event) {
+  updateValue(event: { target: { value: string | null } }) {
     this.options.showErrors = true;
     if (this.options.multiple) {
       const values = this.controlValue as unknown as unknown[] | null | undefined;
@@ -59,7 +59,7 @@ export class SelectComponent implements OnInit, OnDestroy {
         this.jsf.updateArrayMultiSelectList(this, []);
       } else {
         this.selectListFlatGroup.forEach(selItem => {
-          selItem.checked = values?.indexOf(selItem.value) >= 0 ? true : false;
+          selItem.checked = values?.indexOf(selItem.value)! >= 0 ? true : false;
         })
         this.jsf.updateArrayMultiSelectList(this, this.selectListFlatGroup);
       }

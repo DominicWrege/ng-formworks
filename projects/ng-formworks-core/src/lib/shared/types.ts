@@ -187,7 +187,7 @@ export interface WidgetOptions {
 /** A node of the form layout tree. */
 export interface LayoutNode {
   _id?: string | null;
-  name?: string;
+  name?: string | null;
   key?: string;
   type?: string;
   widget?: WidgetType | null;
@@ -200,7 +200,7 @@ export interface LayoutNode {
   anyOfPointer?: string;
   isITEItem?: boolean;
   arrayItem?: boolean;
-  arrayItemType?: 'tuple' | 'list';
+  arrayItemType?: 'tuple' | 'list' | null;
   $ref?: string;
   recursiveReference?: boolean;
   required?: boolean;

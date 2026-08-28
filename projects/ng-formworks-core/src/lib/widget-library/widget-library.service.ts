@@ -179,7 +179,7 @@ export class WidgetLibraryService {
     return true;
   }
 
-  hasWidget(type: string, widgetSet = 'activeWidgets'): boolean {
+  hasWidget(type: string, widgetSet: 'activeWidgets' | 'widgetLibrary' | 'registeredWidgets' | 'frameworkWidgets' = 'activeWidgets'): boolean {
     if (!type || typeof type !== 'string') { return false; }
     return hasOwn(this[widgetSet], type);
   }
@@ -220,9 +220,9 @@ export class WidgetLibraryService {
     return false;
   }
 
-  getWidget(type?: string, widgetSet = 'activeWidgets'): WidgetType | null {
-    if (this.hasWidget(type, widgetSet)) {
-      return this[widgetSet][type];
+  getWidget(type?: string, widgetSet: 'activeWidgets' | 'widgetLibrary' | 'registeredWidgets' | 'frameworkWidgets' = 'activeWidgets'): WidgetType | null {
+    if (this.hasWidget(type!, widgetSet)) {
+      return this[widgetSet][type!];
     } else if (this.hasWidget(this.defaultWidget, widgetSet)) {
       return this[widgetSet][this.defaultWidget];
     } else {

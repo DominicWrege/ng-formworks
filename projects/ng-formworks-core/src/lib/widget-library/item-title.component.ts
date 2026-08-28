@@ -10,9 +10,9 @@ import { JsonSchemaFormService, type LegacyWidgetContext } from '../json-schema-
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ItemTitleComponent {
-    readonly item = input<LayoutNode>(undefined);
-    readonly index = input<number>(undefined);
-    readonly ctx = input<LegacyWidgetContext>(undefined);
+    readonly item = input<LayoutNode | undefined>(undefined);
+    readonly index = input<number | undefined>(undefined);
+    readonly ctx = input<LegacyWidgetContext | undefined>(undefined);
 
     private jsf = inject(JsonSchemaFormService);
     private dataChanges = toSignal(this.jsf.dataChanges);

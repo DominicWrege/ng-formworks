@@ -17,20 +17,19 @@ import type { JsonSchema } from './types';
  * //  { OptionObject = {} } options - options: parent schema changed?, schema draft number?
  * // { object } - JSON schema (draft 6)
  */
-export interface OptionObject { changed?: boolean; draft?: number; }
+export interface OptionObject { changed?: boolean; draft?: number | null; }
 export function convertSchemaToDraft6(
   schema: JsonSchema | JsonSchema[], options: OptionObject = {}
 ): JsonSchema | JsonSchema[] {
-  let draft: number = options.draft || null;
+  let draft: number | null = options.draft || null;
   let changed: boolean = options.changed || false;
 
-  if (typeof schema !== 'object') { return schema as JsonSchema; }
-  if (typeof (schema as JsonSchema[]).map === 'function') {
+  if (typeof schema !== 'object') { return schema; }
+  if (typeof schema.map === 'function') {
     return [...(schema as JsonSchema[]).map(
       subSchema => convertSchemaToDraft6(subSchema, { changed, draft })
     )] as JsonSchema[];
   }
-  schema = schema as JsonSchema;
   // `& Record<string, any>` keeps legacy draft 1-3 keywords (extends,
   // disallow, maxDecimal, ...) addressable alongside typed draft-6 keys.
   let newSchema = { ...schema } as JsonSchema & Record<string, any>;
@@ -52,9 +51,9 @@ export function convertSchemaToDraft6(
 
   // Convert v1-v3 'extends' to 'allOf'
   if (typeof newSchema.extends === 'object') {
-    newSchema.allOf = typeof (newSchema.extends as JsonSchema[]).map === 'function' ?
-      (newSchema.extends as JsonSchema[]).map(subSchema => convertSchemaToDraft6(subSchema, { changed, draft })) as JsonSchema[] :
-      [convertSchemaToDraft6(newSchema.extends as JsonSchema, { changed, draft }) as JsonSchema];
+    newSchema.allOf = typeof newSchema.extends.map === 'function' ?
+      newSchema.extends.map((subSchema: JsonSchema) => convertSchemaToDraft6(subSchema, { changed, draft })) :
+      [convertSchemaToDraft6(newSchema.extends, { changed, draft }) as JsonSchema];
     delete newSchema.extends;
     changed = true;
   }
@@ -62,11 +61,11 @@ export function convertSchemaToDraft6(
   // Convert v1-v3 'disallow' to 'not'
   if (newSchema.disallow) {
     if (typeof newSchema.disallow === 'string') {
-      newSchema.not = { type: newSchema.disallow as unknown as JsonSchema['type'] };
+      newSchema.not = { type: newSchema.disallow as JsonSchema['type'] };
     } else if (typeof newSchema.disallow.map === 'function') {
       newSchema.not = {
         anyOf: newSchema.disallow
-          .map(type => typeof type === 'object' ? type : { type })
+          .map((type: JsonSchema | string) => typeof type === 'object' ? type : { type })
       };
     }
     delete newSchema.disallow;
@@ -76,12 +75,12 @@ export function convertSchemaToDraft6(
   // Convert v3 string 'dependencies' properties to arrays
   if (typeof newSchema.dependencies === 'object' &&
     Object.keys(newSchema.dependencies)
-      .some(key => typeof newSchema.dependencies[key] === 'string')
+      .some(key => typeof newSchema.dependencies![key] === 'string')
   ) {
     newSchema.dependencies = { ...newSchema.dependencies };
     Object.keys(newSchema.dependencies)
-      .filter(key => typeof (newSchema.dependencies[key] as unknown) === 'string')
-      .forEach(key => newSchema.dependencies[key] = [newSchema.dependencies[key]] as any);
+      .filter(key => typeof newSchema.dependencies![key] === 'string')
+      .forEach(key => newSchema.dependencies![key] = [newSchema.dependencies![key]] as any);
     changed = true;
   }
 
@@ -149,7 +148,7 @@ export function convertSchemaToDraft6(
   if (typeof newSchema.properties === 'object') {
     const properties = { ...newSchema.properties };
     const requiredKeys = Array.isArray(newSchema.required) ?
-      new Set(newSchema.required as string[]) : new Set<string>();
+      new Set(newSchema.required) : new Set<string>();
 
     // Convert v1-v2 boolean 'optional' properties to 'required' array
     if (draft === 1 || draft === 2 ||
@@ -203,7 +202,7 @@ export function convertSchemaToDraft6(
   }
 
   // Revove v3 boolean 'required' key
-  if (typeof (newSchema.required as unknown) === 'boolean') {
+  if (typeof newSchema.required === 'boolean') {
     delete newSchema.required;
   }
 
@@ -256,23 +255,23 @@ export function convertSchemaToDraft6(
       } else {
         delete newSchema.type;
       }
-    } else if (typeof (newSchema.type as unknown) === 'object') {
-      if (typeof (newSchema.type as any).every === 'function') {
+    } else if (typeof newSchema.type === 'object') {
+      if (typeof newSchema.type.every === 'function') {
         // If array of strings, only allow standard types
-        if ((newSchema.type as string[]).every(type => typeof type === 'string')) {
-          newSchema.type = (newSchema.type as string[]).some(type => (type as unknown) === 'any') ?
+        if (newSchema.type.every(type => typeof type === 'string')) {
+          newSchema.type = newSchema.type.some(type => (type as unknown) === 'any') ?
             (newSchema.type = simpleTypes as any) :
-            (newSchema.type = (newSchema.type as string[]).filter(
+            (newSchema.type = newSchema.type.filter(
               type => simpleTypes.includes(type)
-            ) as any);
+            ));
           // If type is an array with objects, convert the current schema to an 'anyOf' array
-        } else if ((newSchema.type as any[]).length > 1) {
+        } else if (newSchema.type.length > 1) {
           const arrayKeys = ['additionalItems', 'items', 'maxItems', 'minItems', 'uniqueItems', 'contains'];
           const numberKeys = ['multipleOf', 'maximum', 'exclusiveMaximum', 'minimum', 'exclusiveMinimum'];
           const objectKeys = ['maxProperties', 'minProperties', 'required', 'additionalProperties',
             'properties', 'patternProperties', 'dependencies', 'propertyNames'];
           const stringKeys = ['maxLength', 'minLength', 'pattern', 'format'];
-          const filterKeys = {
+          const filterKeys: Record<string, string[]> = {
             'array': [...numberKeys, ...objectKeys, ...stringKeys],
             'integer': [...arrayKeys, ...objectKeys, ...stringKeys],
             'number': [...arrayKeys, ...objectKeys, ...stringKeys],
@@ -313,7 +312,7 @@ export function convertSchemaToDraft6(
         ['definitions', 'dependencies', 'properties', 'patternProperties']
           .includes(key) && typeof newSchema[key].map !== 'function'
       ) {
-        const newKey = {};
+        const newKey: Record<string, JsonSchema | JsonSchema[]> = {};
         Object.keys(newSchema[key]).forEach(subKey => newKey[subKey] =
           convertSchemaToDraft6(newSchema[key][subKey], { changed, draft })
         );

@@ -13,23 +13,23 @@ import { ReactiveFormsModule } from '@angular/forms';
 export class TextareaComponent implements OnInit,OnDestroy {
   private jsf = inject(JsonSchemaFormService);
 
-  formControl: AbstractControl;
-  controlName: string;
-  controlValue: FormValue;
+  formControl!: AbstractControl;
+  controlName!: string;
+  controlValue!: FormValue;
   controlDisabled = false;
   boundControl = false;
-  options: WidgetOptions;
+  options!: WidgetOptions;
   readonly layoutNode = input<LayoutNode | undefined>(undefined);
-  readonly layoutIndex = input<number[]>(undefined);
-  readonly dataIndex = input<number[]>(undefined);
+  readonly layoutIndex = input<number[] | undefined>(undefined);
+  readonly dataIndex = input<number[] | undefined>(undefined);
 
   ngOnInit() {
-    this.options = this.layoutNode().options || {};
+    this.options = this.layoutNode()!.options || {};
     this.jsf.initializeControl(this);
   }
 
-  updateValue(event) {
-    this.jsf.updateValue(this, event.target.value);
+  updateValue(event: Event) {
+    this.jsf.updateValue(this, (event.target as HTMLInputElement).value);
   }
   
   ngOnDestroy () {

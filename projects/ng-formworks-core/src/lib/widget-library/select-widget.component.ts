@@ -11,12 +11,12 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
 export class SelectWidgetComponent implements OnChanges, OnInit, OnDestroy {
 
   private jsf = inject(JsonSchemaFormService);
-  private dataChangesSubs: Subscription;
+  private dataChangesSubs!: Subscription;
 
   newComponent: ComponentRef<unknown> | null = null;
   readonly layoutNode = input<LayoutNode | undefined>(undefined);
-  readonly layoutIndex = input<number[]>(undefined);
-  readonly dataIndex = input<number[]>(undefined);
+  readonly layoutIndex = input<number[] | undefined>(undefined);
+  readonly dataIndex = input<number[] | undefined>(undefined);
   readonly widgetContainer = viewChild('widgetContainer', { read: ViewContainerRef });
 
   ngOnInit() {
@@ -39,7 +39,7 @@ export class SelectWidgetComponent implements OnChanges, OnInit, OnDestroy {
   updateComponent() {
     const widgetContainer = this.widgetContainer();
     if (widgetContainer && !this.newComponent && (this.layoutNode() || {}).widget) {
-      this.newComponent = widgetContainer.createComponent((this.layoutNode().widget) as Type<unknown>
+      this.newComponent = widgetContainer.createComponent((this.layoutNode()!.widget) as Type<unknown>
       );
     }
     if (this.newComponent) {

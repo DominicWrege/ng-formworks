@@ -20,14 +20,14 @@ export class SectionComponent implements OnInit, OnDestroy, OnChanges {
 
   private jsf = inject(JsonSchemaFormService);
 
-  options: WidgetOptions;
+  options!: WidgetOptions;
   expanded = true;
-  containerType: string;
+  containerType!: string;
   readonly layoutNode = input<LayoutNode | undefined>(undefined);
-  readonly layoutIndex = input<number[]>(undefined);
-  readonly dataIndex = input<number[]>(undefined);
+  readonly layoutIndex = input<number[] | undefined>(undefined);
+  readonly dataIndex = input<number[] | undefined>(undefined);
 
-  dataChangesSubs: Subscription;
+  dataChangesSubs!: Subscription;
   titleContext: { value: FormValue; values: unknown; key: number | string | null } = {
     value: {},
     values: {},
@@ -41,10 +41,10 @@ export class SectionComponent implements OnInit, OnDestroy, OnChanges {
 
   ngOnInit() {
     this.jsf.initializeControl(this);
-    this.options = this.layoutNode().options || {};
+    this.options = this.layoutNode()!.options || {};
     this.expanded = typeof this.options.expanded === 'boolean' ?
       this.options.expanded : !this.options.expandable;
-    switch (this.layoutNode().type) {
+    switch (this.layoutNode()!.type) {
       case 'fieldset': case 'array': case 'tab': case 'advancedfieldset':
       case 'authfieldset': case 'optionfieldset': case 'selectfieldset':
         this.containerType = 'fieldset';
@@ -68,7 +68,7 @@ export class SectionComponent implements OnInit, OnDestroy, OnChanges {
   // (child attributes are set in root.component)
   getFlexAttribute(attribute: string) {
     const flexActive: boolean =
-      this.layoutNode().type === 'flex' ||
+      this.layoutNode()!.type === 'flex' ||
       !!this.options.displayFlex ||
       this.options.display === 'flex';
     if (attribute !== 'flex' && !flexActive) { return null; }

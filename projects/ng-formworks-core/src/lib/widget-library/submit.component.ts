@@ -16,17 +16,17 @@ export class SubmitComponent implements OnInit,OnDestroy {
   private jsf = inject(JsonSchemaFormService);
   private cdr = inject(ChangeDetectorRef);
 
-  formControl: AbstractControl;
-  controlName: string;
+  formControl!: AbstractControl;
+  controlName!: string;
   controlValue: FormValue;
   controlDisabled = false;
   boundControl = false;
-  options: WidgetOptions;
+  options!: WidgetOptions;
   readonly layoutNode = input<LayoutNode | undefined>(undefined);
-  readonly layoutIndex = input<number[]>(undefined);
-  readonly dataIndex = input<number[]>(undefined);
+  readonly layoutIndex = input<number[] | undefined>(undefined);
+  readonly dataIndex = input<number[] | undefined>(undefined);
 
-  isValidChangesSubs:Subscription;
+  isValidChangesSubs: Subscription | null = null;
   ngOnDestroy(): void {
     this.isValidChangesSubs?.unsubscribe();
     this.isValidChangesSubs=null;
@@ -34,10 +34,10 @@ export class SubmitComponent implements OnInit,OnDestroy {
   }
 
   ngOnInit() {
-    this.options = this.layoutNode().options || {};
+    this.options = this.layoutNode()!.options || {};
     this.jsf.initializeControl(this);
     if (hasOwn(this.options, 'disabled')) {
-      this.controlDisabled = this.options.disabled;
+      this.controlDisabled = this.options.disabled!;
     } else if (this.jsf.formOptions.disableInvalidSubmit) {
       this.controlDisabled = !this.jsf.isValid;
       this.isValidChangesSubs=this.jsf.isValidChanges.subscribe(isValid => {
@@ -50,7 +50,7 @@ export class SubmitComponent implements OnInit,OnDestroy {
     }
   }
 
-  updateValue(event) {
+  updateValue(event: { target: { value: string | null } }) {
     if (typeof this.options.onClick === 'function') {
       this.options.onClick(event);
     } else {

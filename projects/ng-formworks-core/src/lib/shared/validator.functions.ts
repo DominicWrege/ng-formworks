@@ -44,7 +44,7 @@ export type JavaScriptType =
 export type PrimitiveValue = string | number | boolean | null | undefined;
 export interface PlainObject { [k: string]: any; }
 
-export type IValidatorFn = (c: AbstractControl, i?: boolean) => PlainObject;
+export type IValidatorFn = (c: AbstractControl, i?: boolean) => PlainObject | null;
 export type AsyncIValidatorFn =
   (c: AbstractControl, i?: boolean) => Promise<PlainObject> | Observable<PlainObject>;
 
@@ -98,8 +98,8 @@ export function _mergeObjects(...objects: (PlainObject | null | undefined)[]): P
   const mergedObject: PlainObject = { };
   for (const currentObject of objects) {
     if (isObject(currentObject)) {
-      for (const key of Object.keys(currentObject)) {
-        const currentValue = currentObject[key];
+      for (const key of Object.keys(currentObject!)) {
+        const currentValue = currentObject![key];
         const mergedValue = mergedObject[key];
         mergedObject[key] = !isDefined(mergedValue) ? currentValue :
           key === 'not' && isBoolean(mergedValue, 'strict') &&
@@ -329,7 +329,7 @@ export function isType(value: unknown, type: SchemaPrimitiveType): boolean {
       return !hasValue(value);
     default:
       console.error(`isType error: "${type}" is not a recognized type.`);
-      return null;
+      return null as unknown as boolean;
   }
 }
 
@@ -483,11 +483,11 @@ export function toSchemaType(
   }
   if ((<SchemaPrimitiveType[]>types).includes('integer')) {
     const testValue = toJavaScriptType(value, 'integer');
-    if (testValue !== null) { return +testValue; }
+    if (testValue !== null) { return +testValue!; }
   }
   if ((<SchemaPrimitiveType[]>types).includes('number')) {
     const testValue = toJavaScriptType(value, 'number');
-    if (testValue !== null) { return +testValue; }
+    if (testValue !== null) { return +testValue!; }
   }
   if (
     (isString(value) || isNumber(value, 'strict')) &&

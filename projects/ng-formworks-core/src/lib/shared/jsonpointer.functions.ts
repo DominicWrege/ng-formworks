@@ -10,7 +10,7 @@ import {
   isNotEqual,
   isNotExpression
 } from './utility.functions';
-import { isArray, isDefined, isEmpty, isMap, isNumber, isObject, isString } from './validator.functions';
+import { isArray, isDefined, isEmpty, isMap, isNumber, isObject, isString, PlainObject } from './validator.functions';
 
 /**
  * 'JsonPointer' class
@@ -45,18 +45,19 @@ export class JsonPointer {
    * // { object } - Located value (or true or false if getBoolean = true)
    */
   static get(
-    object, pointer, startSlice = 0, endSlice: number = null,
+    object: any, pointer: Pointer | null | undefined, startSlice = 0, endSlice: number | null = null,
     getBoolean = false, errors = false
   ) {
     if (object === null) { return getBoolean ? false : undefined; }
-    let keyArray: any[] = this.parse(pointer, errors);
+    let keyArray = this.parse(pointer, errors);
     if (typeof object === 'object' && keyArray !== null) {
       let subObject = object;
-      if (startSlice >= keyArray.length || endSlice <= -keyArray.length) { return object; }
+      if (startSlice >= keyArray.length || endSlice! <= -keyArray.length) { return object; }
       if (startSlice <= -keyArray.length) { startSlice = 0; }
-      if (!isDefined(endSlice) || endSlice >= keyArray.length) { endSlice = keyArray.length; }
-      keyArray = keyArray.slice(startSlice, endSlice);
-      for (let key of keyArray) {
+      if (!isDefined(endSlice) || endSlice! >= keyArray.length) { endSlice = keyArray.length; }
+      keyArray = keyArray.slice(startSlice, endSlice!);
+      for (const keyItem of keyArray) {
+        let key: string | number = keyItem;
         if (key === '-' && isArray(subObject) && subObject.length) {
           key = subObject.length - 1;
         }
@@ -88,7 +89,7 @@ export class JsonPointer {
     return getBoolean ? false : undefined;
   }
 
-  private static logErrors(errors, key, pointer, object) {
+  private static logErrors(errors: boolean, key: string | number, pointer: Pointer | null | undefined, object: any) {
     if (errors) {
       console.error(`get error: "${key}" key not found in object.`);
       console.error(pointer);
@@ -138,7 +139,7 @@ export class JsonPointer {
    * // { keysAndExpression } keysAndExpression - an object holding the expressions with
    */
   private static performExpressionOnValue(keysAndExpression: any, cleanedValue: String, subObject: Object) {
-    const propertyByKey = subObject[keysAndExpression.keyAndValue[0]];
+    const propertyByKey = (subObject as PlainObject)[keysAndExpression.keyAndValue[0]];
     if (this.doComparisonByExpressionType(keysAndExpression.expressionType, propertyByKey, cleanedValue)) {
       return {passed: true, key: keysAndExpression.keyAndValue[0]};
     }
@@ -146,7 +147,7 @@ export class JsonPointer {
     return null;
   }
 
-  private static doComparisonByExpressionType(expressionType: ExpressionType, propertyByKey, cleanedValue: String): Boolean {
+  private static doComparisonByExpressionType(expressionType: ExpressionType, propertyByKey: unknown, cleanedValue: String): Boolean {
     if (isEqual(expressionType)) {
       return propertyByKey === cleanedValue;
     }
@@ -165,7 +166,7 @@ export class JsonPointer {
    * // { keysAndExpression } keysAndExpression - an object holding the expressions with
    * the associated keys.
    */
-  private static doOwnCheckResult(subObject: Object, keysAndExpression) {
+  private static doOwnCheckResult(subObject: Object, keysAndExpression: { expressionType: ExpressionType, keyAndValue: string[] }) {
     let ownCheckResult = null;
     if (!hasOwn(subObject, keysAndExpression.keyAndValue[0])) {
       if (isEqual(keysAndExpression.expressionType)) {
@@ -184,7 +185,7 @@ export class JsonPointer {
    * // { key } key - the original for loop created value containing key and value in one string
    * // { subObject } subObject - the object with properties values
    */
-  private static parseKeysAndExpression(key: string, subObject) {
+  private static parseKeysAndExpression(key: string, subObject: Object) {
     if (this.keyOrSubObjEmpty(key, subObject)) {
       return null;
     }
@@ -217,7 +218,7 @@ export class JsonPointer {
    * // { object } - Located value (or true or false if getBoolean = true)
    */
   static getCopy(
-    object, pointer, startSlice = 0, endSlice: number = null,
+    object: any, pointer: Pointer | null | undefined, startSlice = 0, endSlice: number | null = null,
     getBoolean = false, errors = false
   ) {
     const objectToCopy =
@@ -256,7 +257,7 @@ export class JsonPointer {
       }
       return defaultValue;
     }
-    if (isMap(items)) {
+    if (isMap<any, any>(items)) {
       for (const [object, pointer] of items) {
         if (object === null || !this.isJsonPointer(pointer)) { continue; }
         const value = getCopy ?
@@ -306,17 +307,16 @@ export class JsonPointer {
    * //  { boolean } insert - insert value?
    * // { object } - The original object, modified with the set value
    */
-  static set(object, pointer, value, insert = false) {
-    // keys double as numeric array indexes while mutating, keep loose
-    const keyArray = this.parse(pointer) as any[] | null;
+  static set(object: PlainObject | any[], pointer: Pointer | null | undefined, value: unknown, insert = false) {
+    const keyArray = this.parse(pointer);
     if (keyArray !== null && keyArray.length) {
-      let subObject = object;
+      let subObject: any = object;
       for (let i = 0; i < keyArray.length - 1; ++i) {
-        let key = keyArray[i];
+        let key: string | number = keyArray[i];
         if (key === '-' && isArray(subObject)) {
           key = subObject.length;
         }
-        if (isMap(subObject) && subObject.has(key)) {
+        if (isMap<any, any>(subObject) && subObject.has(key)) {
           subObject = subObject.get(key);
         } else {
           if (!hasOwn(subObject, key)) {
@@ -329,7 +329,7 @@ export class JsonPointer {
       if (isArray(subObject) && lastKey === '-') {
         subObject.push(value);
       } else if (insert && isArray(subObject) && !isNaN(+lastKey)) {
-        subObject.splice(lastKey, 0, value);
+        subObject.splice(+lastKey, 0, value);
       } else if (isMap(subObject)) {
         subObject.set(lastKey, value);
       } else {
@@ -357,18 +357,17 @@ export class JsonPointer {
    * //  { boolean } insert - insert value?
    * // { object } - The new object with the set value
    */
-  static setCopy(object, pointer, value, insert = false) {
-    // keys double as numeric array indexes while mutating, keep loose
-    const keyArray = this.parse(pointer) as any[] | null;
+  static setCopy(object: PlainObject | any[], pointer: Pointer | null | undefined, value: unknown, insert = false) {
+    const keyArray = this.parse(pointer);
     if (keyArray !== null) {
       const newObject = copy(object);
-      let subObject = newObject;
+      let subObject: any = newObject;
       for (let i = 0; i < keyArray.length - 1; ++i) {
-        let key = keyArray[i];
+        let key: string | number = keyArray[i];
         if (key === '-' && isArray(subObject)) {
           key = subObject.length;
         }
-        if (isMap(subObject) && subObject.has(key)) {
+        if (isMap<any, any>(subObject) && subObject.has(key)) {
           subObject.set(key, copy(subObject.get(key)));
           subObject = subObject.get(key);
         } else {
@@ -383,7 +382,7 @@ export class JsonPointer {
       if (isArray(subObject) && lastKey === '-') {
         subObject.push(value);
       } else if (insert && isArray(subObject) && !isNaN(+lastKey)) {
-        subObject.splice(lastKey, 0, value);
+        subObject.splice(+lastKey, 0, value);
       } else if (isMap(subObject)) {
         subObject.set(lastKey, value);
       } else {
@@ -405,7 +404,7 @@ export class JsonPointer {
    * //   value - value to insert
    * // { object }
    */
-  static insert(object, pointer, value) {
+  static insert(object: PlainObject | any[], pointer: Pointer | null | undefined, value: unknown) {
     const updatedObject = this.set(object, pointer, value, true);
     return updatedObject;
   }
@@ -420,7 +419,7 @@ export class JsonPointer {
    * //   value - value to insert
    * // { object }
    */
-  static insertCopy(object, pointer, value) {
+  static insertCopy(object: PlainObject | any[], pointer: Pointer | null | undefined, value: unknown) {
     const updatedObject = this.setCopy(object, pointer, value, true);
     return updatedObject;
   }
@@ -434,15 +433,14 @@ export class JsonPointer {
    * //  { Pointer } pointer - JSON Pointer (string or array)
    * // { object }
    */
-  static remove(object, pointer) {
-    // keys double as numeric array indexes while mutating, keep loose
-    const keyArray = this.parse(pointer) as any[] | null;
+  static remove(object: PlainObject | any[], pointer: Pointer | null | undefined) {
+    const keyArray = this.parse(pointer);
     if (keyArray !== null && keyArray.length) {
-      let lastKey = keyArray.pop();
+      let lastKey: string | number = keyArray.pop()!;
       const parentObject = this.get(object, keyArray);
       if (isArray(parentObject)) {
         if (lastKey === '-') { lastKey = parentObject.length - 1; }
-        parentObject.splice(lastKey, 1);
+        parentObject.splice(+lastKey, 1);
       } else if (isObject(parentObject)) {
         delete parentObject[lastKey];
       }
@@ -461,7 +459,7 @@ export class JsonPointer {
    * //  { Pointer } pointer - JSON Pointer (string or array)
    * // { boolean }
    */
-  static has(object: unknown, pointer: Pointer): boolean {
+  static has(object: unknown, pointer: Pointer | null | undefined): boolean {
     const hasValue = this.get(object, pointer, 0, null, true);
     return hasValue;
   }
@@ -477,7 +475,7 @@ export class JsonPointer {
   static dict(object: unknown): Record<string, unknown> {
     const results: Record<string, unknown> = {};
     this.forEachDeep(object, (value, pointer) => {
-      if (typeof value !== 'object') { results[pointer] = value; }
+      if (typeof value !== 'object') { results[pointer!] = value; }
     });
     return results;
   }
@@ -602,17 +600,18 @@ export class JsonPointer {
    * //  { boolean = false } errors - Show error if invalid pointer?
    * // { string[] } - JSON Pointer array of keys
    */
-  static parse(pointer: Pointer, errors = false): string[] | null {
+  static parse(pointer: Pointer | null | undefined, errors = false): string[] | null {
     if (!this.isJsonPointer(pointer)) {
       if (errors) { console.error(`parse error: Invalid JSON Pointer: ${pointer}`); }
       return null;
     }
-    if (isArray(pointer)) { return <string[]>pointer; }
+    if (isArray(pointer)) { return pointer; }
     if (typeof pointer === 'string') {
-      if ((<string>pointer)[0] === '#') { pointer = pointer.slice(1); }
-      if (<string>pointer === '' || <string>pointer === '/') { return []; }
-      return (<string>pointer).slice(1).split('/').map(this.unescape);
+      if (pointer[0] === '#') { pointer = pointer.slice(1); }
+      if (pointer === '' || pointer === '/') { return []; }
+      return pointer.slice(1).split('/').map(this.unescape);
     }
+    return null;
   }
 
   /**
@@ -628,15 +627,15 @@ export class JsonPointer {
    * //  { boolean = false } errors - Show error if invalid pointer?
    * // { string } - JSON Pointer string
    */
-  static compile(pointer: Pointer, defaultValue: string | number = '', errors = false): string | null {
+  static compile(pointer: Pointer | null | undefined, defaultValue: string | number = '', errors = false): string | null {
     if (pointer === '#') { return ''; }
     if (!this.isJsonPointer(pointer)) {
       if (errors) { console.error(`compile error: Invalid JSON Pointer: ${pointer}`); }
       return null;
     }
     if (isArray(pointer)) {
-      if ((<string[]>pointer).length === 0) { return ''; }
-      return '/' + (<string[]>pointer).map(
+      if (pointer.length === 0) { return ''; }
+      return '/' + pointer.map(
         key => key === '' ? defaultValue : this.escape(key)
       ).join('/');
     }
@@ -644,6 +643,7 @@ export class JsonPointer {
       if (pointer[0] === '#') { pointer = pointer.slice(1); }
       return pointer;
     }
+    return null;
   }
 
   /**
@@ -655,7 +655,7 @@ export class JsonPointer {
    * //  { boolean = false } errors - Show error if invalid pointer?
    * // { string } - the extracted key
    */
-  static toKey(pointer: Pointer, errors = false): string | null {
+  static toKey(pointer: Pointer | null | undefined, errors = false): string | null {
     const keyArray = this.parse(pointer, errors);
     if (keyArray === null) { return null; }
     if (!keyArray.length) { return ''; }
@@ -696,7 +696,8 @@ export class JsonPointer {
    * // { boolean } - true if shortPointer is a subset of longPointer, false if not
    */
   static isSubPointer(
-    shortPointer, longPointer, trueIfMatching = false, errors = false
+    shortPointer: Pointer | null | undefined,
+    longPointer: Pointer | null | undefined, trueIfMatching = false, errors = false
   ) {
     if (!this.isJsonPointer(shortPointer) || !this.isJsonPointer(longPointer)) {
       if (errors) {
@@ -707,8 +708,8 @@ export class JsonPointer {
       }
       return;
     }
-    shortPointer = this.compile(shortPointer, '', errors);
-    longPointer = this.compile(longPointer, '', errors);
+    shortPointer = this.compile(shortPointer, '', errors) as string;
+    longPointer = this.compile(longPointer, '', errors) as string;
     return shortPointer === longPointer ? trueIfMatching :
       `${shortPointer}/` === longPointer.slice(0, shortPointer.length + 1);
   }
@@ -729,21 +730,21 @@ export class JsonPointer {
    * // { string } - The merged pointer with indexes
    */
   static toIndexedPointer(
-    genericPointer, indexArray, arrayMap: Map<string, number> = null
-  ) {
+    genericPointer: Pointer | null | undefined, indexArray: number[], arrayMap: Map<string, number> | null = null
+  ): string | undefined {
     if (this.isJsonPointer(genericPointer) && isArray(indexArray)) {
       let indexedPointer = this.compile(genericPointer);
       if (isMap(arrayMap)) {
         let arrayIndex = 0;
-        return indexedPointer.replace(/\/\-(?=\/|$)/g, (key, stringIndex) =>
+        return indexedPointer!.replace(/\/\-(?=\/|$)/g, (key, stringIndex) =>
           arrayMap.has((<string>indexedPointer).slice(0, stringIndex)) ?
             '/' + indexArray[arrayIndex++] : key
         );
       } else {
         for (const pointerIndex of indexArray) {
-          indexedPointer = indexedPointer.replace('/-', '/' + pointerIndex);
+          indexedPointer = indexedPointer!.replace('/-', '/' + pointerIndex);
         }
-        return indexedPointer;
+        return indexedPointer!;
       }
     }
     if (!this.isJsonPointer(genericPointer)) {
@@ -775,18 +776,20 @@ export class JsonPointer {
    * //  { Map<string, number> } arrayMap - The optional array map (for preserving tuple indexes)
    * // { string } - The generic pointer with indexes removed
    */
-  static toGenericPointer(indexedPointer, arrayMap = new Map<string, number>()) {
+  static toGenericPointer(
+    indexedPointer: Pointer | null | undefined, arrayMap = new Map<string, number>()
+  ): string | undefined {
     if (this.isJsonPointer(indexedPointer) && isMap(arrayMap)) {
-      const pointerArray = this.parse(indexedPointer);
+      const pointerArray = this.parse(indexedPointer) as string[];
       for (let i = 1; i < pointerArray.length; i++) {
-        const subPointer = this.compile(pointerArray.slice(0, i));
+        const subPointer = this.compile(pointerArray.slice(0, i)) as string;
         if (arrayMap.has(subPointer) &&
-          arrayMap.get(subPointer) <= +pointerArray[i]
+          arrayMap.get(subPointer)! <= +pointerArray[i]
         ) {
           pointerArray[i] = '-';
         }
       }
-      return this.compile(pointerArray);
+      return this.compile(pointerArray) as string;
     }
     if (!this.isJsonPointer(indexedPointer)) {
       console.error(`toGenericPointer error: invalid JSON Pointer: ${indexedPointer}`);
@@ -807,7 +810,7 @@ export class JsonPointer {
    * //  { boolean = false } controlMustExist - Only return if control exists?
    * // { Pointer } - JSON Pointer (string) to the formGroup object
    */
-  static toControlPointer(dataPointer, formGroup, controlMustExist = false) {
+  static toControlPointer(dataPointer: Pointer | null | undefined, formGroup: PlainObject, controlMustExist = false) {
     const dataPointerArray = this.parse(dataPointer);
     const controlPointerArray: string[] = [];
     let subGroup = formGroup;
@@ -822,7 +825,7 @@ export class JsonPointer {
           subGroup = subGroup[subGroup.length - 1];
         } else if (hasOwn(subGroup, key)) {
           controlPointerArray.push(key);
-          subGroup = subGroup[key];
+          subGroup = (subGroup as PlainObject)[key];
         } else if (controlMustExist) {
           console.error(`toControlPointer error: Unable to find "${key}" item in FormGroup.`);
           console.error(dataPointer);
@@ -850,11 +853,11 @@ export class JsonPointer {
    * //   schema - JSON schema for the object
    * // { Pointer } - JSON Pointer (string) to the object's schema
    */
-  static toSchemaPointer(dataPointer, schema) {
+  static toSchemaPointer(dataPointer: Pointer | null | undefined, schema: PlainObject): string | null {
     if (this.isJsonPointer(dataPointer) && typeof schema === 'object') {
-      const pointerArray = this.parse(dataPointer);
+      const pointerArray = this.parse(dataPointer) as string[];
       if (!pointerArray.length) { return ''; }
-      const firstKey = pointerArray.shift();
+      const firstKey = pointerArray.shift()!;
       if (schema.type === 'object' || schema.properties || schema.additionalProperties) {
         if ((schema.properties || {})[firstKey]) {
           return `/properties/${this.escape(firstKey)}` +
@@ -913,17 +916,17 @@ export class JsonPointer {
    * //  { boolean = false } errors - Show errors?
    * // { Pointer } - JSON Pointer (string) to the value in the data object
    */
-  static toDataPointer(schemaPointer, schema, errors = false) {
+  static toDataPointer(schemaPointer: Pointer | null | undefined, schema: PlainObject, errors = false): string | null {
     if (this.isJsonPointer(schemaPointer) && typeof schema === 'object' &&
       this.has(schema, schemaPointer)
     ) {
-      const pointerArray = this.parse(schemaPointer);
+      const pointerArray = this.parse(schemaPointer) as string[];
       if (!pointerArray.length) { return ''; }
-      const firstKey = pointerArray.shift();
+      const firstKey = pointerArray.shift()!;
       if (firstKey === 'properties' ||
         (firstKey === 'items' && isArray(schema.items))
       ) {
-        const secondKey = pointerArray.shift();
+        const secondKey = pointerArray.shift()!;
         const pointerSuffix = this.toDataPointer(pointerArray, schema[firstKey][secondKey]);
         return pointerSuffix === null ? null : '/' + secondKey + pointerSuffix;
       } else if (firstKey === 'additionalItems' ||
@@ -932,7 +935,7 @@ export class JsonPointer {
         const pointerSuffix = this.toDataPointer(pointerArray, schema[firstKey]);
         return pointerSuffix === null ? null : '/-' + pointerSuffix;
       } else if (['allOf', 'anyOf', 'oneOf'].includes(firstKey)) {
-        const secondKey = pointerArray.shift();
+        const secondKey = pointerArray.shift()!;
         return this.toDataPointer(pointerArray, schema[firstKey][secondKey]);
       } else if (firstKey === 'not') {
         return this.toDataPointer(pointerArray, schema[firstKey]);
@@ -969,8 +972,8 @@ export class JsonPointer {
    * //  { Pointer } path - The object path to parse
    * // { string[] } - The resulting array of keys
    */
-  static parseObjectPath(path) {
-    if (isArray(path)) { return <string[]>path; }
+  static parseObjectPath(path: Pointer | null | undefined) {
+    if (isArray(path)) { return path; }
     if (this.isJsonPointer(path)) { return this.parse(path); }
     if (typeof path === 'string') {
       let index = 0;

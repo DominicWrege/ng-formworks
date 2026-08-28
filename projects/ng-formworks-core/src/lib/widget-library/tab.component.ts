@@ -12,12 +12,12 @@ import { RootComponent } from './root.component';
 export class TabComponent implements OnInit {
   private jsf = inject(JsonSchemaFormService);
 
-  options: WidgetOptions;
+  options!: WidgetOptions;
   readonly layoutNode = input<LayoutNode | undefined>(undefined);
-  readonly layoutIndex = input<number[]>(undefined);
-  readonly dataIndex = input<number[]>(undefined);
+  readonly layoutIndex = input<number[] | undefined>(undefined);
+  readonly dataIndex = input<number[] | undefined>(undefined);
 
   ngOnInit() {
-    this.options = this.layoutNode().options || {};
+    this.options = this.layoutNode()!.options || {};
   }
 }

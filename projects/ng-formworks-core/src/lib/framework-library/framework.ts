@@ -3,9 +3,9 @@ import type { WidgetLibraryMap } from '../shared/types';
 
 @Injectable()
 export class Framework {
-  name: string;
-  text:string;
-  framework: Type<unknown>;
+  name!: string;
+  text!:string;
+  framework!: Type<unknown>;
   widgets?: WidgetLibraryMap = {};
   stylesheets?: string[] = [];
   scripts?: string[] = [];

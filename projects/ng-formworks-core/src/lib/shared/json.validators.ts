@@ -1,5 +1,5 @@
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
-import { forkJoin } from 'rxjs';
+import { forkJoin, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { JsonSchemaFormatNames, jsonSchemaFormatTests } from './format-regex.constants';
 import { deepEqual } from './native.functions';
@@ -21,6 +21,7 @@ import {
   isString,
   isType,
   IValidatorFn,
+  PlainObject,
   SchemaPrimitiveType,
   toJavaScriptType,
   toObservable,
@@ -174,7 +175,7 @@ export class JsonValidators {
    */
   static type(requiredType: SchemaPrimitiveType|SchemaPrimitiveType[]): IValidatorFn {
     if (!hasValue(requiredType)) { return JsonValidators.nullValidator; }
-    return (control: AbstractControl, invert = false): ValidationErrors|null => {
+    return ((control: AbstractControl, invert = false): ValidationErrors|null => {
       if (isEmpty(control.value)) { return null; }
       const currentValue: FormValue = control.value;
       const isValid = isArray(requiredType) ?
@@ -182,7 +183,7 @@ export class JsonValidators {
         isType(currentValue, <SchemaPrimitiveType>requiredType);
       return xor(isValid, invert) ?
         null : { 'type': { requiredType, currentValue } };
-    };
+    });
   }
 
   /**
@@ -198,12 +199,12 @@ export class JsonValidators {
    */
   static enum(allowedValues: JsonValue[]): IValidatorFn {
     if (!isArray(allowedValues)) { return JsonValidators.nullValidator; }
-    return (control: AbstractControl, invert = false): ValidationErrors|null => {
+    return ((control: AbstractControl, invert = false): ValidationErrors|null => {
       if (isEmpty(control.value)) { return null; }
       const currentValue: FormValue = control.value;
-      const isEqualVal = (enumValue, inputValue) =>
+      const isEqualVal = (enumValue: JsonValue, inputValue: FormValue) =>
         enumValue === inputValue ||
-        (isNumber(enumValue) && +inputValue === +enumValue) ||
+        (isNumber(enumValue) && +(<string|number>inputValue) === +(<string|number>enumValue)) ||
         (isBoolean(enumValue, 'strict') &&
           toJavaScriptType(inputValue, 'boolean') === enumValue) ||
         (enumValue === null && !hasValue(inputValue)) ||
@@ -215,7 +216,7 @@ export class JsonValidators {
         allowedValues.some(enumValue => isEqualVal(enumValue, currentValue));
       return xor(isValid, invert) ?
         null : { 'enum': { allowedValues, currentValue } };
-    };
+    });
   }
 
   /**
@@ -233,19 +234,19 @@ export class JsonValidators {
    */
   static const(requiredValue: JsonValue): IValidatorFn {
     if (!hasValue(requiredValue)) { return JsonValidators.nullValidator; }
-    return (control: AbstractControl, invert = false): ValidationErrors|null => {
+    return ((control: AbstractControl, invert = false): ValidationErrors|null => {
       if (isEmpty(control.value)) { return null; }
       const currentValue: FormValue = control.value;
-      const isEqualVal = (constValue, inputValue) =>
+      const isEqualVal = (constValue: JsonValue, inputValue: FormValue) =>
         constValue === inputValue ||
-        isNumber(constValue) && +inputValue === +constValue ||
+        isNumber(constValue) && +(<string|number>inputValue) === +(<string|number>constValue) ||
         isBoolean(constValue, 'strict') &&
           toJavaScriptType(inputValue, 'boolean') === constValue ||
         constValue === null && !hasValue(inputValue);
       const isValid = isEqualVal(requiredValue, currentValue);
       return xor(isValid, invert) ?
         null : { 'const': { requiredValue, currentValue } };
-    };
+    });
   }
 
   /**
@@ -259,13 +260,13 @@ export class JsonValidators {
    */
   static minLength(minimumLength: number): IValidatorFn {
     if (!hasValue(minimumLength)) { return JsonValidators.nullValidator; }
-    return (control: AbstractControl, invert = false): ValidationErrors|null => {
+    return ((control: AbstractControl, invert = false): ValidationErrors|null => {
       if (isEmpty(control.value)) { return null; }
       const currentLength = isString(control.value) ? control.value.length : 0;
       const isValid = currentLength >= minimumLength;
       return xor(isValid, invert) ?
         null : { 'minLength': { minimumLength, currentLength } };
-    };
+    });
   }
 
   /**
@@ -279,12 +280,12 @@ export class JsonValidators {
    */
   static maxLength(maximumLength: number): IValidatorFn {
     if (!hasValue(maximumLength)) { return JsonValidators.nullValidator; }
-    return (control: AbstractControl, invert = false): ValidationErrors|null => {
+    return ((control: AbstractControl, invert = false): ValidationErrors|null => {
       const currentLength = isString(control.value) ? control.value.length : 0;
       const isValid = currentLength <= maximumLength;
       return xor(isValid, invert) ?
         null : { 'maxLength': { maximumLength, currentLength } };
-    };
+    });
   }
 
   /**
@@ -307,7 +308,7 @@ export class JsonValidators {
    */
   static pattern(pattern: string|RegExp, wholeString = false): IValidatorFn {
     if (!hasValue(pattern)) { return JsonValidators.nullValidator; }
-    return (control: AbstractControl, invert = false): ValidationErrors|null => {
+    return ((control: AbstractControl, invert = false): ValidationErrors|null => {
       if (isEmpty(control.value)) { return null; }
       let regex: RegExp;
       let requiredPattern: string;
@@ -322,7 +323,7 @@ export class JsonValidators {
       const isValid = isString(currentValue) ? regex.test(currentValue) : false;
       return xor(isValid, invert) ?
         null : { 'pattern': { requiredPattern, currentValue } };
-    };
+    });
   }
 
   /**
@@ -343,7 +344,7 @@ export class JsonValidators {
    */
   static format(requiredFormat: JsonSchemaFormatNames): IValidatorFn {
     if (!hasValue(requiredFormat)) { return JsonValidators.nullValidator; }
-    return (control: AbstractControl, invert = false): ValidationErrors|null => {
+    return ((control: AbstractControl, invert = false): ValidationErrors|null => {
       if (isEmpty(control.value)) { return null; }
       let isValid: boolean;
       const currentValue: string|Date = control.value;
@@ -370,7 +371,7 @@ export class JsonValidators {
       }
       return xor(isValid, invert) ?
         null : { 'format': { requiredFormat, currentValue } };
-    };
+    });
   }
 
   /**
@@ -388,13 +389,13 @@ export class JsonValidators {
    */
   static minimum(minimumValue: number): IValidatorFn {
     if (!hasValue(minimumValue)) { return JsonValidators.nullValidator; }
-    return (control: AbstractControl, invert = false): ValidationErrors|null => {
+    return ((control: AbstractControl, invert = false): ValidationErrors|null => {
       if (isEmpty(control.value)) { return null; }
       const currentValue = control.value;
       const isValid = !isNumber(currentValue) || currentValue >= minimumValue;
       return xor(isValid, invert) ?
         null : { 'minimum': { minimumValue, currentValue } };
-    };
+    });
   }
 
   /**
@@ -411,13 +412,13 @@ export class JsonValidators {
    */
   static exclusiveMinimum(exclusiveMinimumValue: number): IValidatorFn {
     if (!hasValue(exclusiveMinimumValue)) { return JsonValidators.nullValidator; }
-    return (control: AbstractControl, invert = false): ValidationErrors|null => {
+    return ((control: AbstractControl, invert = false): ValidationErrors|null => {
       if (isEmpty(control.value)) { return null; }
       const currentValue = control.value;
       const isValid = !isNumber(currentValue) || +currentValue < exclusiveMinimumValue;
       return xor(isValid, invert) ?
         null : { 'exclusiveMinimum': { exclusiveMinimumValue, currentValue } };
-    };
+    });
   }
 
   /**
@@ -435,13 +436,13 @@ export class JsonValidators {
    */
   static maximum(maximumValue: number): IValidatorFn {
     if (!hasValue(maximumValue)) { return JsonValidators.nullValidator; }
-    return (control: AbstractControl, invert = false): ValidationErrors|null => {
+    return ((control: AbstractControl, invert = false): ValidationErrors|null => {
       if (isEmpty(control.value)) { return null; }
       const currentValue = control.value;
       const isValid = !isNumber(currentValue) || +currentValue <= maximumValue;
       return xor(isValid, invert) ?
         null : { 'maximum': { maximumValue, currentValue } };
-    };
+    });
   }
 
   /**
@@ -458,13 +459,13 @@ export class JsonValidators {
    */
   static exclusiveMaximum(exclusiveMaximumValue: number): IValidatorFn {
     if (!hasValue(exclusiveMaximumValue)) { return JsonValidators.nullValidator; }
-    return (control: AbstractControl, invert = false): ValidationErrors|null => {
+    return ((control: AbstractControl, invert = false): ValidationErrors|null => {
       if (isEmpty(control.value)) { return null; }
       const currentValue = control.value;
       const isValid = !isNumber(currentValue) || +currentValue < exclusiveMaximumValue;
       return xor(isValid, invert) ?
         null : { 'exclusiveMaximum': { exclusiveMaximumValue, currentValue } };
-    };
+    });
   }
 
   /**
@@ -478,14 +479,14 @@ export class JsonValidators {
    */
   static multipleOf(multipleOfValue: number): IValidatorFn {
     if (!hasValue(multipleOfValue)) { return JsonValidators.nullValidator; }
-    return (control: AbstractControl, invert = false): ValidationErrors|null => {
+    return ((control: AbstractControl, invert = false): ValidationErrors|null => {
       if (isEmpty(control.value)) { return null; }
       const currentValue = control.value;
       const isValid = isNumber(currentValue) &&
         currentValue % multipleOfValue === 0;
       return xor(isValid, invert) ?
         null : { 'multipleOf': { multipleOfValue, currentValue } };
-    };
+    });
   }
 
   /**
@@ -499,13 +500,13 @@ export class JsonValidators {
    */
   static minProperties(minimumProperties: number): IValidatorFn {
     if (!hasValue(minimumProperties)) { return JsonValidators.nullValidator; }
-    return (control: AbstractControl, invert = false): ValidationErrors|null => {
+    return ((control: AbstractControl, invert = false): ValidationErrors|null => {
       if (isEmpty(control.value)) { return null; }
       const currentProperties = Object.keys(control.value).length || 0;
       const isValid = currentProperties >= minimumProperties;
       return xor(isValid, invert) ?
         null : { 'minProperties': { minimumProperties, currentProperties } };
-    };
+    });
   }
 
   /**
@@ -522,12 +523,12 @@ export class JsonValidators {
    */
   static maxProperties(maximumProperties: number): IValidatorFn {
     if (!hasValue(maximumProperties)) { return JsonValidators.nullValidator; }
-    return (control: AbstractControl, invert = false): ValidationErrors|null => {
+    return ((control: AbstractControl, invert = false): ValidationErrors|null => {
       const currentProperties = Object.keys(control.value).length || 0;
       const isValid = currentProperties <= maximumProperties;
       return xor(isValid, invert) ?
         null : { 'maxProperties': { maximumProperties, currentProperties } };
-    };
+    });
   }
 
   /**
@@ -546,23 +547,23 @@ export class JsonValidators {
     if (getType(dependencies) !== 'object' || isEmpty(dependencies)) {
       return JsonValidators.nullValidator;
     }
-    return (control: AbstractControl, invert = false): ValidationErrors|null => {
+    return ((control: AbstractControl, invert = false): ValidationErrors|null => {
       if (isEmpty(control.value)) { return null; }
       const allErrors = _mergeObjects(
         forEachCopy(dependencies, (value, requiringField) => {
-          if (!hasValue(control.value[requiringField])) { return null; }
+          if (!hasValue(control.value[requiringField!])) { return null; }
           let requiringFieldErrors: ValidationErrors = { };
           let requiredFields: string[];
           let properties: ValidationErrors = { };
-          if (getType(dependencies[requiringField]) === 'array') {
-            requiredFields = dependencies[requiringField];
-          } else if (getType(dependencies[requiringField]) === 'object') {
-            requiredFields = dependencies[requiringField]['required'] || [];
-            properties = dependencies[requiringField]['properties'] || { };
+          if (getType(dependencies[requiringField!]) === 'array') {
+            requiredFields = dependencies[requiringField!];
+          } else if (getType(dependencies[requiringField!]) === 'object') {
+            requiredFields = dependencies[requiringField!]['required'] || [];
+            properties = dependencies[requiringField!]['properties'] || { };
           }
 
           // Validate property dependencies
-          for (const requiredField of requiredFields) {
+          for (const requiredField of requiredFields!) {
             if (xor(!hasValue(control.value[requiredField]), invert)) {
               requiringFieldErrors[requiredField] = { 'required': true };
             }
@@ -573,27 +574,27 @@ export class JsonValidators {
             forEachCopy(properties, (requirements, requiredField) => {
               const requiredFieldErrors = _mergeObjects(
                 forEachCopy(requirements, (requirement, parameter) => {
-                  let validator: IValidatorFn = null;
+                  let validator: IValidatorFn|null = null;
                   if (requirement === 'maximum' || requirement === 'minimum') {
                     const exclusive = !!requirements['exclusiveM' + requirement.slice(1)];
-                    validator = JsonValidators[requirement](parameter, exclusive);
-                  } else if (typeof JsonValidators[requirement] === 'function') {
-                    validator = JsonValidators[requirement](parameter);
+                    validator = (<any>JsonValidators)[requirement](parameter, exclusive);
+                  } else if (typeof (<any>JsonValidators)[requirement] === 'function') {
+                    validator = (<any>JsonValidators)[requirement](parameter);
                   }
                   return !isDefined(validator) ?
-                    null : validator(control.value[requiredField]);
+                    null : validator!(control.value[requiredField!]);
                 })
               );
               return isEmpty(requiredFieldErrors) ?
-                null : { [requiredField]: requiredFieldErrors };
+                null : { [requiredField!]: requiredFieldErrors };
             })
           );
           return isEmpty(requiringFieldErrors) ?
-            null : { [requiringField]: requiringFieldErrors };
+            null : { [requiringField!]: requiringFieldErrors };
         })
       );
       return isEmpty(allErrors) ? null : allErrors;
-    };
+    });
   }
 
   /**
@@ -606,13 +607,13 @@ export class JsonValidators {
    */
   static minItems(minimumItems: number): IValidatorFn {
     if (!hasValue(minimumItems)) { return JsonValidators.nullValidator; }
-    return (control: AbstractControl, invert = false): ValidationErrors|null => {
+    return ((control: AbstractControl, invert = false): ValidationErrors|null => {
       if (isEmpty(control.value)) { return null; }
       const currentItems = isArray(control.value) ? control.value.length : 0;
       const isValid = currentItems >= minimumItems;
       return xor(isValid, invert) ?
         null : { 'minItems': { minimumItems, currentItems } };
-    };
+    });
   }
 
   /**
@@ -625,12 +626,12 @@ export class JsonValidators {
    */
   static maxItems(maximumItems: number): IValidatorFn {
     if (!hasValue(maximumItems)) { return JsonValidators.nullValidator; }
-    return (control: AbstractControl, invert = false): ValidationErrors|null => {
+    return ((control: AbstractControl, invert = false): ValidationErrors|null => {
       const currentItems = isArray(control.value) ? control.value.length : 0;
       const isValid = currentItems <= maximumItems;
       return xor(isValid, invert) ?
         null : { 'maxItems': { maximumItems, currentItems } };
-    };
+    });
   }
 
   /**
@@ -643,7 +644,7 @@ export class JsonValidators {
    */
   static uniqueItems(unique = true): IValidatorFn {
     if (!unique) { return JsonValidators.nullValidator; }
-    return (control: AbstractControl, invert = false): ValidationErrors|null => {
+    return ((control: AbstractControl, invert = false): ValidationErrors|null => {
       if (isEmpty(control.value)) { return null; }
       const sorted: FormValue[] = control.value.slice().sort();
       const duplicateItems: FormValue[] = [];
@@ -655,7 +656,7 @@ export class JsonValidators {
       const isValid = !duplicateItems.length;
       return xor(isValid, invert) ?
         null : { 'uniqueItems': { duplicateItems } };
-    };
+    });
   }
 
   /**
@@ -670,13 +671,13 @@ export class JsonValidators {
    */
   static contains(requiredItem = true): IValidatorFn {
     if (!requiredItem) { return JsonValidators.nullValidator; }
-    return (control: AbstractControl, invert = false): ValidationErrors|null => {
+    return ((control: AbstractControl, invert = false): ValidationErrors|null => {
       if (isEmpty(control.value) || !isArray(control.value)) { return null; }
       const currentItems = control.value;
       const isValid = true;
       return xor(isValid, invert) ?
         null : { 'contains': { requiredItem, currentItems } };
-    };
+    });
   }
 
   /**
@@ -707,16 +708,16 @@ export class JsonValidators {
    * // {IValidatorFn} - single combined validator function
    */
   static composeAnyOf(validators: IValidatorFn[]): IValidatorFn {
-    if (!validators) { return null; }
+    if (!validators) { return null!; }
     const presentValidators = validators.filter(isDefined);
-    if (presentValidators.length === 0) { return null; }
-    return (control: AbstractControl, invert = false): ValidationErrors|null => {
+    if (presentValidators.length === 0) { return null!; }
+    return ((control: AbstractControl, invert = false): ValidationErrors|null => {
       const arrayOfErrors =
         _executeValidators(control, presentValidators, invert).filter(isDefined);
       const isValid = validators.length > arrayOfErrors.length;
       return xor(isValid, invert) ?
         null : _mergeObjects(...arrayOfErrors, { 'anyOf': !invert });
-    };
+    });
   }
 
   /**
@@ -731,10 +732,10 @@ export class JsonValidators {
    * // {IValidatorFn} - single combined validator function
    */
   static composeOneOf(validators: IValidatorFn[]): IValidatorFn {
-    if (!validators) { return null; }
+    if (!validators) { return null!; }
     const presentValidators = validators.filter(isDefined);
-    if (presentValidators.length === 0) { return null; }
-    return (control: AbstractControl, invert = false): ValidationErrors|null => {
+    if (presentValidators.length === 0) { return null!; }
+    return ((control: AbstractControl, invert = false): ValidationErrors|null => {
       const arrayOfErrors =
         _executeValidators(control, presentValidators);
       const validControls =
@@ -744,7 +745,7 @@ export class JsonValidators {
       const arrayOfValids =
         _executeValidators(control, presentValidators, invert);
       return _mergeObjects(...arrayOfErrors, ...arrayOfValids, { 'oneOf': !invert });
-    };
+    });
   }
 
   /**
@@ -758,17 +759,17 @@ export class JsonValidators {
    * // {IValidatorFn} - single combined validator function
    */
   static composeAllOf(validators: IValidatorFn[]): IValidatorFn {
-    if (!validators) { return null; }
+    if (!validators) { return null!; }
     const presentValidators = validators.filter(isDefined);
-    if (presentValidators.length === 0) { return null; }
-    return (control: AbstractControl, invert = false): ValidationErrors|null => {
+    if (presentValidators.length === 0) { return null!; }
+    return ((control: AbstractControl, invert = false): ValidationErrors|null => {
       const combinedErrors = _mergeErrors(
         _executeValidators(control, presentValidators, invert)
       );
       const isValid = combinedErrors === null;
       return (xor(isValid, invert)) ?
         null : _mergeObjects(combinedErrors, { 'allOf': !invert });
-    };
+    });
   }
 
   /**
@@ -785,14 +786,14 @@ export class JsonValidators {
    * // {IValidatorFn} - new validator function that returns opposite result
    */
   static composeNot(validator: IValidatorFn): IValidatorFn {
-    if (!validator) { return null; }
-    return (control: AbstractControl, invert = false): ValidationErrors|null => {
+    if (!validator) { return null!; }
+    return ((control: AbstractControl, invert = false): ValidationErrors|null => {
       if (isEmpty(control.value)) { return null; }
       const error = validator(control, !invert);
       const isValid = error === null;
       return (xor(isValid, invert)) ?
         null : _mergeObjects(error, { 'not': !invert });
-    };
+    });
   }
 
   /**
@@ -802,11 +803,11 @@ export class JsonValidators {
    * // {IValidatorFn} - single combined validator function
    */
   static compose(validators: IValidatorFn[]): IValidatorFn {
-    if (!validators) { return null; }
+    if (!validators) { return null!; }
     const presentValidators = validators.filter(isDefined);
-    if (presentValidators.length === 0) { return null; }
-    return (control: AbstractControl, invert = false): ValidationErrors|null =>
-      _mergeErrors(_executeValidators(control, presentValidators, invert));
+    if (presentValidators.length === 0) { return null!; }
+    return ((control: AbstractControl, invert = false): ValidationErrors|null =>
+      _mergeErrors(_executeValidators(control, presentValidators, invert)));
   }
 
   /**
@@ -816,13 +817,15 @@ export class JsonValidators {
    * // {AsyncIValidatorFn} - single combined async validator function
    */
   static composeAsync(validators: AsyncIValidatorFn[]): AsyncIValidatorFn {
-    if (!validators) { return null; }
+    if (!validators) { return null!; }
     const presentValidators = validators.filter(isDefined);
-    if (presentValidators.length === 0) { return null; }
+    if (presentValidators.length === 0) { return null!; }
     return (control: AbstractControl) => {
       const observables =
         _executeAsyncValidators(control, presentValidators).map(toObservable);
-      return map.call(forkJoin(observables), _mergeErrors);
+      return (map as unknown as (
+        project: (arrayOfErrors: (PlainObject|null|undefined)[]) => PlainObject|null
+      ) => Observable<PlainObject>).call(forkJoin(observables), _mergeErrors);
     };
   }
 

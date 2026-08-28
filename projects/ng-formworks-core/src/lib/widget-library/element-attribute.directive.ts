@@ -9,12 +9,12 @@ export class ElementAttributeDirective {
 
 
  
-  public readonly attributes = input<Record<string, string>>(undefined);
+  public readonly attributes = input<Record<string, string> | undefined>(undefined);
 
   public ngOnChanges(changes: SimpleChanges): void {
     if (changes.attributes) {
       for (let attributeName in this.attributes()) {
-        const attributeValue = this.attributes()[attributeName];
+        const attributeValue = this.attributes()![attributeName];
         if (attributeValue) {
           this.renderer.setAttribute(this.elementRef.nativeElement, attributeName, attributeValue);
         } else {

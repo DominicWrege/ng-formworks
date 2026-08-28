@@ -57,7 +57,7 @@ export const jsonSchemaFormatTests = {
 
   'duration':/^P(?!$)(\d+Y)?(\d+M)?(\d+D)?(T(\d+H)?(\d+M)?(\d+S)?)?$/,
 
-  'regex': function (str) {
+  'regex': function (str: string) {
     if (/[^\\]\\Z/.test(str)) { return false; }
     try {
       return true;

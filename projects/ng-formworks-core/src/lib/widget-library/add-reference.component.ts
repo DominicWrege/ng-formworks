@@ -12,25 +12,25 @@ import { StopPropagationDirective } from './stop-propagation.directive';
 export class AddReferenceComponent implements OnInit {
   private jsf = inject(JsonSchemaFormService);
 
-  options: WidgetOptions;
-  itemCount: number;
-  previousLayoutIndex: number[];
-  previousDataIndex: number[];
+  options!: WidgetOptions;
+  itemCount!: number;
+  previousLayoutIndex!: number[];
+  previousDataIndex!: number[];
   readonly layoutNode = input<LayoutNode | undefined>(undefined);
-  readonly layoutIndex = input<number[]>(undefined);
-  readonly dataIndex = input<number[]>(undefined);
+  readonly layoutIndex = input<number[] | undefined>(undefined);
+  readonly dataIndex = input<number[] | undefined>(undefined);
 
 
   ngOnInit() {
-    this.options = this.layoutNode().options || {};
+    this.options = this.layoutNode()!.options || {};
   }
 
   get showAddButton(): boolean {
-    return !this.layoutNode().arrayItem ||
-      this.layoutIndex()[this.layoutIndex().length - 1] < this.options.maxItems;
+    return !this.layoutNode()!.arrayItem ||
+      this.layoutIndex()![this.layoutIndex()!.length - 1] < this.options.maxItems!;
   }
 
-  addItem(event) {
+  addItem(event: MouseEvent) {
     event.preventDefault();
     this.jsf.addItem(this);
   }
@@ -38,8 +38,8 @@ export class AddReferenceComponent implements OnInit {
   get buttonText(): string {
     const parentNode = this.jsf.getParentNode(this);
     const parent: LegacyWidgetContext = {
-      dataIndex: this.dataIndex().slice(0, -1),
-      layoutIndex: this.layoutIndex().slice(0, -1),
+      dataIndex: this.dataIndex()!.slice(0, -1),
+      layoutIndex: this.layoutIndex()!.slice(0, -1),
       layoutNode: parentNode
     };
     return parentNode && (parentNode.add ||
